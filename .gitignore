@@ -1,0 +1,7 @@
+.claude/
+*.bak
+src/
+.staticrypt.json
+비밀번호.txt
+node_modules/
+package*.json
