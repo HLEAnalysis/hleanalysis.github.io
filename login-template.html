@@ -46,6 +46,10 @@
                 justify-content: center;
                 padding: 24px 16px;
             }
+            /* 큰 화면에서는 카드를 비율에 맞춰 확대해 여백을 줄인다 */
+            @media (min-width: 1200px) { .login-card { zoom: 1.25; } }
+            @media (min-width: 1600px) { .login-card { zoom: 1.45; } }
+            @media (min-width: 2100px) { .login-card { zoom: 1.7; } }
             .login-card {
                 width: min(400px, 100%);
                 background: var(--surface-1);
