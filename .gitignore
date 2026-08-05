@@ -5,3 +5,4 @@ src/
 비밀번호.txt
 node_modules/
 package*.json
+_to_delete/
