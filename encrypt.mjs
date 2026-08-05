@@ -36,6 +36,9 @@ if (existsSync("img-map.json")) {
     }
     for (const [prefix, local] of Object.entries(imgMap["__PREFIXES__"] || {})) {
         if (html.includes(prefix)) { html = html.split(prefix).join(local); n++; }
+        // 끝 슬래시 없는 변형도 치환 (예: DD="...img/champion")
+        const p2 = prefix.replace(/\/$/, ""), l2 = local.replace(/\/$/, "");
+        if (html.includes(p2)) { html = html.split(p2).join(l2); n++; }
     }
     console.log("이미지 URL 로컬 치환: " + n + "건");
 }
