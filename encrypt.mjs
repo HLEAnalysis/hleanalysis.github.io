@@ -24,8 +24,23 @@ if (existsSync("salt.txt")) {
     console.log("salt.txt 신규 생성");
 }
 
-const html = readFileSync("src/index.html");
-const gz = gzipSync(html, { level: 9 });
+let html = readFileSync("src/index.html", "utf8");
+
+// 외부 이미지 URL → 로컬 미러(img/) 치환 (img-map.json은 mirror-images.mjs가 생성)
+if (existsSync("img-map.json")) {
+    const imgMap = JSON.parse(readFileSync("img-map.json", "utf8"));
+    let n = 0;
+    for (const [url, local] of Object.entries(imgMap)) {
+        if (url === "__PREFIXES__") continue;
+        if (html.includes(url)) { html = html.split(url).join(local); n++; }
+    }
+    for (const [prefix, local] of Object.entries(imgMap["__PREFIXES__"] || {})) {
+        if (html.includes(prefix)) { html = html.split(prefix).join(local); n++; }
+    }
+    console.log("이미지 URL 로컬 치환: " + n + "건");
+}
+
+const gz = gzipSync(Buffer.from(html), { level: 9 });
 
 const keyMat = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
 const key = await crypto.subtle.deriveKey(
