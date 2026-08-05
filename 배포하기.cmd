@@ -38,7 +38,7 @@ if errorlevel 1 (
 )
 echo.
 echo ✅ 배포 완료! 약 1분 뒤 반영됩니다:
-echo    https://dhtjd6223kun.github.io/hle-analysis-hub/
+echo    https://hleanalysis.github.io/
 echo    (비밀번호는 비밀번호.txt 참고)
 echo.
 pause
