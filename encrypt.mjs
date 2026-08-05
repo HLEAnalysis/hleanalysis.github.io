@@ -1,9 +1,10 @@
 // HLE Hub 배포용 암호화 스크립트
-// src/index.html → gzip 압축 → AES-256-GCM 암호화 → login-template.html에 삽입 → index.html
+// src/index.html → gzip 압축 → AES-256-GCM 암호화 → payload.bin(데이터) + index.html(로그인 화면)
+// 로그인 화면(~15KB)이 즉시 뜨고, 데이터는 백그라운드로 다운로드되는 구조.
 // 사용: node encrypt.mjs   (비밀번호는 비밀번호.txt에서 읽음)
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { gzipSync } from "node:zlib";
-import { webcrypto as crypto, randomBytes } from "node:crypto";
+import { webcrypto as crypto, randomBytes, createHash } from "node:crypto";
 
 const ITER = 600_000;
 
@@ -34,16 +35,19 @@ const key = await crypto.subtle.deriveKey(
 const iv = randomBytes(12);
 const cipher = Buffer.from(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, gz));
 
+writeFileSync("payload.bin", cipher);
+const hash = createHash("sha256").update(cipher).digest("hex").slice(0, 10);
+
 const template = readFileSync("login-template.html", "utf8");
 const out = template
     .replace("__SALT_B64__", salt.toString("base64"))
     .replace("__IV_B64__", iv.toString("base64"))
     .replace("__ITER__", String(ITER))
-    .replace("__DATA_B64__", cipher.toString("base64"));
+    .replace("__PAYLOAD_URL__", "payload.bin?v=" + hash);
 
 writeFileSync("index.html", out);
 console.log(
-    "암호화 완료: 원본 " + (html.length / 1048576).toFixed(1) + "MB → gzip " +
-    (gz.length / 1048576).toFixed(1) + "MB → 최종 index.html " +
-    (out.length / 1048576).toFixed(1) + "MB"
+    "암호화 완료: 원본 " + (html.length / 1048576).toFixed(1) + "MB → payload.bin " +
+    (cipher.length / 1048576).toFixed(1) + "MB · 로그인 화면 index.html " +
+    (out.length / 1024).toFixed(0) + "KB"
 );

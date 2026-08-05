@@ -245,7 +245,8 @@
         <script>
             "use strict";
             /* ── HLE Hub 암호화 로더 ──
-               페이로드: gzip 압축 후 AES-256-GCM 암호화, base64.
+               페이로드: 별도 파일(payload.bin) — gzip 압축 후 AES-256-GCM 암호화.
+               로그인 화면은 즉시 뜨고, 페이로드는 백그라운드로 미리 다운로드.
                키 유도: PBKDF2-SHA256 (반복수 아래 ITER).
                기억하기: 유도된 키(비밀번호 아님)를 localStorage에 저장. */
             const SALT_B64 = "__SALT_B64__";
@@ -253,10 +254,31 @@
             const ITER = __ITER__;
             const REMEMBER_DAYS = 30;
             const LS_KEY = "hlehub_k", LS_EXP = "hlehub_exp";
-            const PAYLOAD_B64 = "__DATA_B64__";
+            const PAYLOAD_URL = "__PAYLOAD_URL__";
 
             const $ = (id) => document.getElementById(id);
             const b64ToBuf = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+
+            // ── 페이로드 백그라운드 다운로드 (페이지 열리자마자 시작) ──
+            let dlProgress = 0; // 0~100
+            const payloadPromise = (async () => {
+                const res = await fetch(PAYLOAD_URL);
+                if (!res.ok) throw new Error("payload fetch failed: " + res.status);
+                const total = Number(res.headers.get("content-length") || 0);
+                if (!res.body || !total) { dlProgress = 100; return new Uint8Array(await res.arrayBuffer()); }
+                const reader = res.body.getReader();
+                const buf = new Uint8Array(total);
+                let got = 0;
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buf.set(value, got);
+                    got += value.length;
+                    dlProgress = Math.min(100, Math.round((got / total) * 100));
+                }
+                dlProgress = 100;
+                return buf;
+            })();
 
             async function deriveKey(password) {
                 const mat = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
@@ -266,15 +288,25 @@
                 );
             }
 
-            async function decryptAndShow(key) {
-                const cipher = b64ToBuf(PAYLOAD_B64);
+            async function decryptAndShow(key, onWait) {
+                // 다운로드가 아직이면 진행률을 보여주며 대기
+                if (dlProgress < 100 && onWait) {
+                    const timer = setInterval(() => onWait(dlProgress), 150);
+                    try { await payloadPromise; } finally { clearInterval(timer); }
+                }
+                const cipher = await payloadPromise;
                 const plainGz = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64ToBuf(IV_B64) }, key, cipher);
                 // gzip 해제
                 const ds = new DecompressionStream("gzip");
                 const stream = new Blob([plainGz]).stream().pipeThrough(ds);
                 const html = await new Response(stream).text();
+                // 원본처럼 점진 렌더링되도록 잘라서 기록 (헤더가 먼저 그려짐)
                 document.open();
-                document.write(html);
+                const CHUNK = 262144; // 256KB
+                for (let i = 0; i < html.length; i += CHUNK) {
+                    document.write(html.slice(i, i + CHUNK));
+                    if (i + CHUNK < html.length) await new Promise((r) => setTimeout(r, 0));
+                }
                 document.close();
             }
 
@@ -308,7 +340,7 @@
                     const b64 = localStorage.getItem(LS_KEY), exp = Number(localStorage.getItem(LS_EXP) || 0);
                     if (!b64 || Date.now() > exp) return false;
                     const key = await crypto.subtle.importKey("raw", b64ToBuf(b64), { name: "AES-GCM" }, true, ["decrypt"]);
-                    await decryptAndShow(key);
+                    await decryptAndShow(key, (p) => { $("loading-label").textContent = "허브 여는 중… " + p + "%"; });
                     return true;
                 } catch (e) {
                     try { localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_EXP); } catch (_) {}
@@ -316,15 +348,20 @@
                 }
             }
 
-            // 초기화: 저장된 키가 있으면 자동 접속, 아니면 로그인 폼 표시
+            // 초기화: 저장된 키가 있으면 자동 접속, 아니면 로그인 폼 즉시 표시
             (async function init() {
                 if (!window.crypto || !window.crypto.subtle || typeof DecompressionStream === "undefined") {
                     $("loading-label").textContent = "브라우저가 오래되어 열 수 없습니다. 최신 크롬/엣지로 접속해주세요.";
                     return;
                 }
-                $("loading-label").textContent = "확인 중…";
-                const ok = await tryStoredKey();
-                if (!ok) showLogin();
+                const hasStored = !!localStorage.getItem(LS_KEY) && Date.now() <= Number(localStorage.getItem(LS_EXP) || 0);
+                if (hasStored) {
+                    $("loading-label").textContent = "허브 여는 중…";
+                    const ok = await tryStoredKey();
+                    if (!ok) showLogin();
+                } else {
+                    showLogin(); // 다운로드를 기다리지 않고 즉시 표시
+                }
             })();
 
             // 비밀번호 표시 토글
@@ -351,9 +388,11 @@
                 btn.textContent = "확인 중…";
                 try {
                     const key = await deriveKey($("password").value);
+                    // 비밀번호 검증을 다운로드 완료 전에 하기 위해 GCM 복호화 시도 순서 유지
                     if ($("remember").checked) await rememberKey(key);
-                    await decryptAndShow(key);
+                    await decryptAndShow(key, (p) => { btn.textContent = "불러오는 중… " + p + "%"; });
                 } catch (err) {
+                    try { localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_EXP); } catch (_) {}
                     btn.disabled = false;
                     btn.textContent = "접속하기";
                     showError();
