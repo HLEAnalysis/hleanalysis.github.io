@@ -250,11 +250,11 @@
                키 유도: PBKDF2-SHA256 (반복수 아래 ITER).
                기억하기: 유도된 키(비밀번호 아님)를 localStorage에 저장. */
             const SALT_B64 = "I6VXmBI+icvnDwHICLVTVQ==";
-            const IV_B64 = "jKTmuQJ1Y8BhAzXc";
+            const IV_B64 = "CKNvteEDU5MGAicO";
             const ITER = 600000;
             const REMEMBER_DAYS = 30;
             const LS_KEY = "hlehub_k", LS_EXP = "hlehub_exp";
-            const PAYLOAD_URL = "payload.bin?v=37ffa66c2d";
+            const PAYLOAD_URL = "payload.bin?v=4ef65e3897";
 
             const $ = (id) => document.getElementById(id);
             const b64ToBuf = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -264,18 +264,22 @@
             const payloadPromise = (async () => {
                 const res = await fetch(PAYLOAD_URL);
                 if (!res.ok) throw new Error("payload fetch failed: " + res.status);
+                // content-length는 전송(압축) 크기라 실제 바이트 수와 다를 수 있음 — 진행률 추정에만 사용
                 const total = Number(res.headers.get("content-length") || 0);
-                if (!res.body || !total) { dlProgress = 100; return new Uint8Array(await res.arrayBuffer()); }
+                if (!res.body) { dlProgress = 100; return new Uint8Array(await res.arrayBuffer()); }
                 const reader = res.body.getReader();
-                const buf = new Uint8Array(total);
+                const chunks = [];
                 let got = 0;
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    buf.set(value, got);
+                    chunks.push(value);
                     got += value.length;
-                    dlProgress = Math.min(100, Math.round((got / total) * 100));
+                    if (total) dlProgress = Math.min(99, Math.round((got / total) * 100));
                 }
+                const buf = new Uint8Array(got);
+                let off = 0;
+                for (const c of chunks) { buf.set(c, off); off += c.length; }
                 dlProgress = 100;
                 return buf;
             })();
