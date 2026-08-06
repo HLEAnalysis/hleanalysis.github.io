@@ -53,13 +53,15 @@ const key = await crypto.subtle.deriveKey(
 const iv = randomBytes(12);
 const cipher = Buffer.from(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, gz));
 
-writeFileSync("payload.bin", cipher);
-const hash = createHash("sha256").update(cipher).digest("hex").slice(0, 10);
+// IV를 payload 앞에 붙여 저장 — 로그인 화면(index.html)과 payload.bin의 배포 버전이
+// 어긋나도(브라우저 캐시) 항상 복호화 가능하게 한다
+const payload = Buffer.concat([iv, cipher]);
+writeFileSync("payload.bin", payload);
+const hash = createHash("sha256").update(payload).digest("hex").slice(0, 10);
 
 const template = readFileSync("login-template.html", "utf8");
 const out = template
     .replace("__SALT_B64__", salt.toString("base64"))
-    .replace("__IV_B64__", iv.toString("base64"))
     .replace("__ITER__", String(ITER))
     .replace("__PAYLOAD_URL__", "payload.bin?v=" + hash);
 

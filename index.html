@@ -250,11 +250,10 @@
                키 유도: PBKDF2-SHA256 (반복수 아래 ITER).
                기억하기: 유도된 키(비밀번호 아님)를 localStorage에 저장. */
             const SALT_B64 = "I6VXmBI+icvnDwHICLVTVQ==";
-            const IV_B64 = "pkznXdB/zCLOAkfW";
             const ITER = 600000;
             const REMEMBER_DAYS = 30;
             const LS_KEY = "hlehub_k", LS_EXP = "hlehub_exp";
-            const PAYLOAD_URL = "payload.bin?v=0c329d664e";
+            const PAYLOAD_URL = "payload.bin?v=f1781b364a";
 
             const $ = (id) => document.getElementById(id);
             const b64ToBuf = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -298,8 +297,10 @@
                     const timer = setInterval(() => onWait(dlProgress), 150);
                     try { await payloadPromise; } finally { clearInterval(timer); }
                 }
-                const cipher = await payloadPromise;
-                const plainGz = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64ToBuf(IV_B64) }, key, cipher);
+                const buf = await payloadPromise;
+                // payload 앞 12바이트가 IV (배포 버전 어긋나도 항상 복호화 가능)
+                const iv = buf.slice(0, 12), cipher = buf.slice(12);
+                const plainGz = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
                 // gzip 해제
                 const ds = new DecompressionStream("gzip");
                 const stream = new Blob([plainGz]).stream().pipeThrough(ds);
