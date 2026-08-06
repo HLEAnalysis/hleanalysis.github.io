@@ -551,5 +551,11 @@
   "https://ddragon.leagueoflegends.com/cdn/16.14.1/img/champion/": "/img/champ/",
   "https://ddragon.leagueoflegends.com/cdn/16.13.1/img/champion/": "/img/champ/"
  },
- "https://wiki.leagueoflegends.com/en-us/images/thumb/Bastionbreaker_item.png/40px-Bastionbreaker_item.png": "/img/item/i2520.png"
+ "https://wiki.leagueoflegends.com/en-us/images/thumb/Bastionbreaker_item.png/40px-Bastionbreaker_item.png": "/img/item/i2520.png",
+ "https://wiki.leagueoflegends.com/en-us/images/thumb/Guardian%27s_Blade_item.png/40px-Guardian%27s_Blade_item.png": "/img/item/i223177.png",
+ "https://wiki.leagueoflegends.com/en-us/images/thumb/Guardian%27s_Horn_item.png/40px-Guardian%27s_Horn_item.png": "/img/item/i222051.png",
+ "https://wiki.leagueoflegends.com/en-us/images/thumb/Guardian%27s_Orb_item.png/40px-Guardian%27s_Orb_item.png": "/img/item/i223112.png",
+ "https://wiki.leagueoflegends.com/en-us/images/thumb/Trailblazer_item.png/40px-Trailblazer_item.png": "/img/item/i323002.png",
+ "https://wiki.leagueoflegends.com/en-us/images/thumb/Opportunity_item.png/40px-Opportunity_item.png": "/img/item/i226701.png",
+ "https://wiki.leagueoflegends.com/en-us/images/thumb/Guardian%27s_Hammer_item.png/40px-Guardian%27s_Hammer_item.png": "/img/item/i223184.png"
 }

@@ -250,11 +250,11 @@
                키 유도: PBKDF2-SHA256 (반복수 아래 ITER).
                기억하기: 유도된 키(비밀번호 아님)를 localStorage에 저장. */
             const SALT_B64 = "I6VXmBI+icvnDwHICLVTVQ==";
-            const IV_B64 = "s9t/6gPpV4BWGWzk";
+            const IV_B64 = "8kIoodpz0keTJQm3";
             const ITER = 600000;
             const REMEMBER_DAYS = 30;
             const LS_KEY = "hlehub_k", LS_EXP = "hlehub_exp";
-            const PAYLOAD_URL = "payload.bin?v=80b4e4ad0e";
+            const PAYLOAD_URL = "payload.bin?v=891f69fa54";
 
             const $ = (id) => document.getElementById(id);
             const b64ToBuf = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
