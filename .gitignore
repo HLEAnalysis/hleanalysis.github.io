@@ -6,3 +6,5 @@ src/
 node_modules/
 package*.json
 _to_delete/
+허브백업*
+*.gz
