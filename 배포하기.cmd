@@ -16,7 +16,7 @@ if errorlevel 1 (
 )
 
 echo [2/3] 변경사항 커밋...
-git add -A
+git add index.html payload.bin img img-map.json .gitignore
 git commit -m "허브 갱신 %date% %time:~0,5%"
 if errorlevel 1 (
   echo.

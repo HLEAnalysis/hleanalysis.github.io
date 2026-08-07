@@ -8,3 +8,7 @@ package*.json
 _to_delete/
 허브백업*
 *.gz
+_p_*
+_tiny.txt
+_work/
+master.html
