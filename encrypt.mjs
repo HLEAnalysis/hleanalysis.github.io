@@ -52,6 +52,8 @@ function rewriteImages(html) {
 // 언어 전환 버튼 + 즉시 전환 스크립트 (허브 </body> 직전에 주입)
 function langSwitchSnippet(label, otherLang, otherUrl, loadingLabel) {
     return `
+<style>/* Cowork 원본의 헤더 언어 링크(master_en.html 상대경로, 배포 구조에선 404)를 숨김 — 전환은 우상단 버튼으로 통일 */
+#langtoggle{display:none!important}</style>
 <div id="hlelang" title="${otherLang === "en" ? "Switch to English" : "한국어로 전환"}" style="position:fixed;right:68px;top:14px;z-index:50;letter-spacing:.14em;font-size:10px;font-weight:700;color:#c3c2b7;background:#1a1a19;border:1px solid rgba(255,255,255,.10);border-radius:999px;padding:4px 12px;cursor:pointer;opacity:.55;transition:opacity .2s,color .2s;user-select:none" onmouseover="this.style.opacity=1;this.style.color='#f37321'" onmouseout="this.style.opacity=.55;this.style.color='#c3c2b7'">${label}</div>
 <script>
 (function(){
