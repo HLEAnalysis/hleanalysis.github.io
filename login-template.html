@@ -253,7 +253,11 @@
             const ITER = __ITER__;
             const REMEMBER_DAYS = 30;
             const LS_KEY = "hlehub_k", LS_EXP = "hlehub_exp";
-            const PAYLOAD_URL = "__PAYLOAD_URL__";
+            // 언어 선택 (허브 안의 EN/KO 버튼이 hlehub_lang을 기록)
+            const PAYLOAD_KO = "__PAYLOAD_URL__", PAYLOAD_EN = "__PAYLOAD_EN_URL__";
+            let LANG = "ko";
+            try { if (PAYLOAD_EN && localStorage.getItem("hlehub_lang") === "en") LANG = "en"; } catch (e) {}
+            const PAYLOAD_URL = LANG === "en" ? PAYLOAD_EN : PAYLOAD_KO;
 
             const $ = (id) => document.getElementById(id);
             const b64ToBuf = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -301,6 +305,11 @@
                 // payload 앞 12바이트가 IV (배포 버전 어긋나도 항상 복호화 가능)
                 const iv = buf.slice(0, 12), cipher = buf.slice(12);
                 const plainGz = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
+                // 복호화 성공 → 언어 전환 버튼이 재로그인 없이 쓸 수 있게 세션에 키 보관
+                try {
+                    const raw = await crypto.subtle.exportKey("raw", key);
+                    sessionStorage.setItem("hlehub_sk", btoa(String.fromCharCode(...new Uint8Array(raw))));
+                } catch (e) {}
                 // gzip 해제
                 const ds = new DecompressionStream("gzip");
                 const stream = new Blob([plainGz]).stream().pipeThrough(ds);
