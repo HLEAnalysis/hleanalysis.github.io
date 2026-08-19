@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-store">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RUNEGUARD — 전술 카드 배틀</title>
+<link rel="stylesheet" href="css/style.css?v=0.9.7">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══════════ 시작 화면 ══════════ -->
+  <section id="menu" class="screen">
+    <div class="menu-inner">
+      <h1 class="logo">RUNEGUARD</h1>
+      <p class="tagline">7 x 5 전장. 장군을 베거나, 아크를 점령하라.</p>
+
+      <div class="menu-block">
+        <h2>대전 방식</h2>
+        <div class="opt-row" id="modeRow">
+          <button class="opt is-on" data-mode="ai">AI 대전</button>
+          <button class="opt" data-mode="local">로컬 2인</button>
+          <button class="opt" data-mode="online">온라인 친선전</button>
+        </div>
+      </div>
+
+      <div class="menu-block" id="diffBlock">
+        <h2>AI 난이도</h2>
+        <div class="opt-row" id="diffRow">
+          <button class="opt" data-diff="easy">입문</button>
+          <button class="opt is-on" data-diff="normal">보통</button>
+          <button class="opt" data-diff="hard">지휘관</button>
+        </div>
+      </div>
+
+      <div class="menu-block">
+        <h2><span class="side-tag p1">P1</span> 진영</h2>
+        <div class="faction-row" id="p1Factions"></div>
+      </div>
+
+      <div class="menu-block" id="onlineBlock" hidden>
+        <h2>온라인 친선전 — 위에서 내 진영을 고른 뒤</h2>
+        <div class="online-row">
+          <button id="hostBtn" class="opt">방 만들기</button>
+          <input id="joinCode" class="join-input" maxlength="4" placeholder="코드 4자리" autocomplete="off">
+          <button id="joinBtn" class="opt">참가</button>
+        </div>
+        <div id="netStatus" class="net-status"></div>
+      </div>
+
+      <div class="menu-block" id="p2Block">
+        <h2><span class="side-tag p2">P2</span> 진영</h2>
+        <div class="faction-row" id="p2Factions"></div>
+      </div>
+
+      <button id="startBtn" class="start-btn">전투 개시</button>
+      <button id="codexBtnMenu" class="ghost-btn">카드 도감 보기</button>
+      <button id="builderBtnMenu" class="ghost-btn">덱 빌딩 — 내 덱 만들기</button>
+
+      <details class="rules">
+        <summary>규칙 요약</summary>
+        <div class="rules-body">
+          <p><b>승리 조건</b> — 상대 장군을 쓰러뜨리거나, 중앙 <b>아크</b>를 점거한 채
+             자기 턴 시작을 <b id="arkNeedTxt">5</b>회 맞이한다.</p>
+          <p><b>턴</b> — 마나가 매 턴 1씩 늘어난다(최대 10). 카드 1장을 뽑고,
+             카드 플레이 · 영웅 능력 · 거점 건설 · 유닛 행동을 자유 순서로 한다.</p>
+          <p><b>유닛</b> — 턴당 <b>이동 1회 + 공격 1회</b>. 공격하면 그 턴 이동이 끝난다.
+             소환된 턴에는 움직일 수 없다(<b>돌진</b> 제외).</p>
+          <p><b>소환</b> — 아군 유닛·장군·거점에 <b>인접한 빈 칸</b>에만 소환할 수 있다.</p>
+          <p><b>전투</b> — 사거리 안의 적을 그 자리에서 때린다. 방어자가 살아남고
+             공격자가 방어자 사거리 안이면 <b>반격</b>을 받는다.</p>
+          <p><b>도발</b> — 도발 유닛에 인접한 적은 이동할 수 없고, 그 도발 유닛만 공격할 수 있다.</p>
+        </div>
+      </details>
+      <div id="buildTag" class="build-tag">RUNEGUARD v0.9.7</div>
+    </div>
+  </section>
+
+  <!-- ══════════ 게임 화면 ══════════ -->
+  <section id="game" class="screen" hidden>
+
+    <div id="sceneLayer" aria-hidden="true"></div>
+    <div id="weatherLayer" aria-hidden="true"></div>
+
+    <header id="topbar">
+      <div class="player-strip" id="foeStrip"></div>
+      <div class="ark-meter" id="arkMeter"></div>
+      <div class="turn-badge" id="turnBadge"></div>
+    </header>
+
+    <div id="stage">
+      <div id="boardWrap">
+        <div id="boardShadow" aria-hidden="true"></div>
+        <div id="board"></div>
+        <div id="fxLayer"></div>
+        <div id="banner" class="banner" hidden></div>
+      </div>
+
+      <aside id="side">
+        <div class="panel" id="inspector">
+          <div class="insp-empty">유닛이나 카드에 마우스를 올리면 상세 정보가 표시됩니다.</div>
+        </div>
+        <div class="panel log-panel">
+          <h3>전투 기록</h3>
+          <div id="log"></div>
+        </div>
+      </aside>
+    </div>
+
+    <footer id="bottombar">
+      <div class="me-info" id="meStrip"></div>
+      <div class="hand-wrap"><div id="hand"></div></div>
+      <div class="controls">
+        <button id="powerBtn" class="ctrl-btn power"></button>
+        <button id="buildBtn" class="ctrl-btn build">거점 건설<small>3 마나</small></button>
+        <button id="mullBtn" class="ctrl-btn build">카드 교환<small>턴당 1회 · 무료</small></button>
+        <button id="endBtn" class="ctrl-btn end">턴 종료</button>
+        <button id="codexBtn" class="ctrl-btn codexbtn">도감</button>
+        <button id="sndBtn" class="ctrl-btn snd" title="효과음 켜기/끄기"></button>
+        <button id="bgmBtn" class="ctrl-btn snd" title="배경음악 켜기/끄기"></button>
+        <button id="quitBtn" class="ctrl-btn quit">메뉴</button>
+      </div>
+    </footer>
+
+    <div id="cardTip" class="card-tip" hidden></div>
+    <div id="cardReveal" hidden><div class="cr-inner" id="crInner"></div></div>
+    <div id="buildPicker" class="picker" hidden></div>
+    <div id="prompt" class="prompt" hidden></div>
+  </section>
+
+  <!-- ══════════ 결과 화면 ══════════ -->
+  <div id="overlay" class="overlay" hidden>
+    <div class="overlay-card">
+      <h2 id="resultTitle"></h2>
+      <p id="resultText"></p>
+      <div class="overlay-actions">
+        <button id="againBtn" class="start-btn">다시 하기</button>
+        <button id="menuBtn" class="ctrl-btn quit">메뉴로</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 덱 빌더 ══════════ -->
+  <div id="builder" class="codex" hidden>
+    <div class="codex-head">
+      <h2>덱 빌딩</h2>
+      <div class="codex-filters">
+        <div class="filter-row" id="bFactions"></div>
+      </div>
+      <div class="codex-count" id="bCount"></div>
+      <button id="bSave" class="codex-close b-save">저장</button>
+      <button id="bReset" class="codex-close">기본 덱으로</button>
+      <button id="builderClose" class="codex-close">닫기 ✕</button>
+    </div>
+    <div id="bStatus" class="net-status b-status"></div>
+    <div class="builder-body">
+      <div class="b-pool" id="bPool"></div>
+      <aside class="b-deck-wrap">
+        <h3>내 덱</h3>
+        <div class="b-deck" id="bDeck"></div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ══════════ 카드 도감 ══════════ -->
+  <div id="codex" class="codex" hidden>
+    <div class="codex-head">
+      <h2>카드 도감</h2>
+      <div class="codex-filters">
+        <div class="filter-row" id="codexFaction"></div>
+        <div class="filter-row" id="codexType"></div>
+      </div>
+      <div class="codex-count" id="codexCount"></div>
+      <button id="codexClose" class="codex-close">닫기 ✕</button>
+    </div>
+    <div class="codex-body" id="codexBody"></div>
+  </div>
+
+</div>
+
+<script src="js/data.js?v=0.9.7"></script>
+<script src="js/art.js?v=0.9.7"></script>
+<script src="js/scene.js?v=0.9.7"></script>
+<script src="js/audio.js?v=0.9.7"></script>
+<script src="js/bgm.js?v=0.9.7"></script>
+<script src="js/engine.js?v=0.9.7"></script>
+<script src="js/ai.js?v=0.9.7"></script>
+<script src="js/net.js?v=0.9.7"></script>
+<script src="js/builder.js?v=0.9.7"></script>
+<script src="js/ui.js?v=0.9.7"></script>
+<script src="js/main.js?v=0.9.7"></script>
+</body>
+</html>
