@@ -128,6 +128,9 @@
   var STRUCTURE_IDS = ['st_spire', 'st_barracks', 'st_shrine'];
 
   /* ── 토큰 ── */
+  card({ id: 'tk_elemental', name: '원소 정령', faction: 'arcane', type: 'token',
+         cost: 0, atk: 2, hp: 2, mv: 2, rng: 1, keywords: [KW.FLYING], art: '❋',
+         text: '공허에서 소환된 정령.' });
   card({ id: 'tk_soldier', name: '병사', faction: 'neutral', type: 'token',
          cost: 0, atk: 1, hp: 1, mv: 2, rng: 1, keywords: [], art: '▪',
          text: '병영이 생산한 병사.' });
@@ -171,7 +174,7 @@
 
   /* ═══════════════ 밴가드 (12종) ═══════════════ */
   card({ id: 'v_rifleman', name: '소총병', faction: 'vanguard', type: 'unit',
-         cost: 2, atk: 2, hp: 2, mv: 2, rng: 2, keywords: [], art: '⌐',
+         cost: 2, atk: 2, hp: 1, mv: 2, rng: 2, keywords: [], art: '⌐',
          text: '사거리 2. 멀리서 쏘면 반격을 받지 않는다.' });
   card({ id: 'v_sapper', name: '공병', faction: 'vanguard', type: 'unit',
          cost: 2, atk: 1, hp: 3, mv: 2, rng: 1, keywords: [], art: '⚙',
@@ -188,7 +191,7 @@
          spell: { k: 'damage', amount: 4, scope: 'target' },
          text: '적 1체에 4 피해를 준다. (장군 가능)' });
   card({ id: 'v_mgnest', name: '기관총 진지', faction: 'vanguard', type: 'unit',
-         cost: 4, atk: 3, hp: 5, mv: 1, rng: 2, keywords: [KW.PROVOKE], art: '⊟',
+         cost: 4, atk: 2, hp: 5, mv: 1, rng: 2, keywords: [KW.PROVOKE], art: '⊟',
          text: '도발. 사거리 2.' });
   card({ id: 'v_barrage', name: '포격 요청', faction: 'vanguard', type: 'spell',
          cost: 4, art: '✺', target: 'enemyUnit',
@@ -281,7 +284,7 @@
 
   /* ═══════════════ 아케인 (12종) ═══════════════ */
   card({ id: 'a_apprentice', name: '견습 마법사', faction: 'arcane', type: 'unit',
-         cost: 1, atk: 1, hp: 3, mv: 2, rng: 2, keywords: [], art: '✧',
+         cost: 1, atk: 1, hp: 2, mv: 2, rng: 2, keywords: [], art: '✧',
          growOnSpell: { atk: 1, hp: 1 },
          text: '사거리 2. 내가 주문을 시전할 때마다 +1/+1.' });
   card({ id: 'a_bolt', name: '마력탄', faction: 'arcane', type: 'spell',
@@ -345,7 +348,7 @@
          spell: { k: 'buff', atk: 3, hp: 0, scope: 'target' },
          text: '아군 유닛 1체에 +3/+0 을 부여한다.' });
   card({ id: 'd_hound', name: '지옥견', faction: 'demon', type: 'unit',
-         cost: 2, atk: 3, hp: 1, mv: 3, rng: 1, keywords: [KW.FIRST], art: '⨂',
+         cost: 2, atk: 3, hp: 2, mv: 3, rng: 1, keywords: [KW.FIRST], art: '⨂',
          text: '선제공격. 기동력 3.' });
   card({ id: 'd_sacrifice', name: '제물', faction: 'demon', type: 'spell',
          cost: 2, art: '⌁', target: 'allyUnit',
@@ -372,7 +375,7 @@
          spell: { k: 'damage', amount: 3, scope: 'allUnits' },
          text: '아군을 포함한 모든 유닛에 3 피해를 준다. (장군 제외)' });
   card({ id: 'd_abyss', name: '심연의 수호자', faction: 'demon', type: 'unit',
-         cost: 5, atk: 3, hp: 7, mv: 2, rng: 1, keywords: [KW.PROVOKE], art: '⬣',
+         cost: 5, atk: 4, hp: 7, mv: 2, rng: 1, keywords: [KW.PROVOKE], art: '⬣',
          text: '도발.' });
   card({ id: 'd_riftlord', name: '균열의 군주', faction: 'demon', type: 'unit',
          cost: 6, atk: 4, hp: 6, mv: 2, rng: 1, keywords: [], art: '⏥',
@@ -380,7 +383,7 @@
          onSummon: { k: 'damage', amount: 4, scope: 'target' },
          text: '개시: 적 1체에 4 피해를 준다. (장군 가능)' });
   card({ id: 'd_valgar', name: '대공 발가르', faction: 'demon', type: 'unit',
-         cost: 8, atk: 7, hp: 7, mv: 3, rng: 1, keywords: [KW.CHARGE], art: '⛥',
+         cost: 7, atk: 7, hp: 7, mv: 3, rng: 1, keywords: [KW.CHARGE], art: '⛥',
          text: '돌진. 전장에 강림하는 순간 모든 것이 무너진다.' });
 
   /* ── 신규 (v0.6): 데몬 ── */
@@ -466,6 +469,64 @@
          cost: 5, atk: 5, hp: 3, mv: 2, rng: 1, keywords: [KW.CHARGE], art: '⟫',
          text: '돌진.' });
 
+
+  /* ═══════ 영웅 유닛 (v0.11) — 덱에 1장만 ═══════ */
+  card({ id: 'v_hero', name: '강철 대령', faction: 'vanguard', type: 'unit',
+         cost: 7, atk: 4, hp: 6, mv: 2, rng: 2, keywords: [], art: '✪', hero: true,
+         onSummon: { k: 'multiDamage', amount: 2, count: 2 },
+         text: '영웅. 사거리 2. 개시: 무작위 적 유닛 2체에 각각 2 피해. [포격 덱의 축]' });
+  card({ id: 'e_hero', name: '성창의 수호자', faction: 'exile', type: 'unit',
+         cost: 7, atk: 6, hp: 7, mv: 2, rng: 1, keywords: [KW.PROVOKE, KW.BULWARK], art: '✠', hero: true,
+         onSummon: { k: 'heal', amount: 5, scope: 'myGeneral' },
+         text: '영웅. 도발, 방벽. 개시: 아군 장군의 HP를 5 회복시킨다. [수호 덱의 축]' });
+  card({ id: 'a_hero', name: '대마도사', faction: 'arcane', type: 'unit',
+         cost: 7, atk: 4, hp: 5, mv: 2, rng: 2, keywords: [], art: '✵', hero: true,
+         growOnSpell: { atk: 1, hp: 0 },
+         onSummon: { k: 'draw', amount: 1 },
+         text: '영웅. 사거리 2. 개시: 카드를 1장 뽑는다. 내가 주문을 시전할 때마다 +1/+0. [주문 덱의 축]' });
+  card({ id: 'd_hero', name: '심연 군주', faction: 'demon', type: 'unit',
+         cost: 7, atk: 7, hp: 6, mv: 2, rng: 1, keywords: [KW.CHARGE, KW.LIFESTEAL], art: '♆', hero: true,
+         text: '영웅. 돌진, 흡혈. [돌격 덱의 축]' });
+
+
+  card({ id: 'v_fortress', name: '축성 원수', faction: 'vanguard', type: 'unit',
+         cost: 7, atk: 4, hp: 8, mv: 1, rng: 1, keywords: [KW.PROVOKE], art: '⛭', hero: true,
+         onSummon: { k: 'summonToken', token: 'v_mgnest', count: 2, where: 'adjacentSelf' },
+         text: '영웅. 도발. 개시: 인접 빈 칸에 기관총 진지 2개를 설치한다. [진지구축 덱의 축]' });
+  card({ id: 'v_blitz', name: '기갑 선봉장', faction: 'vanguard', type: 'unit',
+         cost: 7, atk: 6, hp: 5, mv: 3, rng: 1, keywords: [KW.CHARGE], art: '⌦', hero: true,
+         aura: { atk: 1 },
+         text: '영웅. 돌진. 오라: 인접한 아군의 공격력 +1. [기동전 덱의 축]' });
+
+  card({ id: 'e_archon', name: '천군 대주교', faction: 'exile', type: 'unit',
+         cost: 7, atk: 4, hp: 6, mv: 2, rng: 1, keywords: [], art: '♕', hero: true,
+         onSummon: { k: 'summonToken', token: 'e_squire', count: 3, where: 'adjacentSelf' },
+         text: '영웅. 개시: 인접 빈 칸에 견습 기사 3체를 소환한다. [전개 덱의 축]' });
+  card({ id: 'e_avenger', name: '응보의 집행자', faction: 'exile', type: 'unit',
+         cost: 7, atk: 5, hp: 5, mv: 2, rng: 1, keywords: [KW.FIRST, KW.CHARGE], art: '⚖', hero: true,
+         target: 'enemyUnit',
+         onSummon: { k: 'damage', amount: 3, scope: 'target' },
+         text: '영웅. 선제공격, 돌진. 개시: 적 유닛 1체에 3 피해. [공세 덱의 축]' });
+
+  card({ id: 'a_chronarch', name: '시공 대현자', faction: 'arcane', type: 'unit',
+         cost: 7, atk: 3, hp: 7, mv: 2, rng: 2, keywords: [], art: '⏣', hero: true,
+         onSummon: { k: 'gainMana', amount: 2 },
+         text: '영웅. 사거리 2. 개시: 마나를 2 얻는다. [램프 덱의 축]' });
+  card({ id: 'a_voidcaller', name: '공허 소환사', faction: 'arcane', type: 'unit',
+         cost: 7, atk: 3, hp: 6, mv: 2, rng: 1, keywords: [], art: '❂', hero: true,
+         onSummon: { k: 'summonToken', token: 'tk_elemental', count: 2, where: 'adjacentSelf' },
+         text: '영웅. 개시: 인접 빈 칸에 원소 정령 2체를 소환한다. [소환수 덱의 축]' });
+
+  card({ id: 'd_legion', name: '군단 지휘관', faction: 'demon', type: 'unit',
+         cost: 7, atk: 4, hp: 6, mv: 2, rng: 1, keywords: [], art: '♄', hero: true,
+         aura: { atk: 1 },
+         onSummon: { k: 'summonToken', token: 'd_imp', count: 3, where: 'adjacentSelf' },
+         text: '영웅. 개시: 인접 빈 칸에 임프 3체. 오라: 인접 아군 공격력 +1. [군단 덱의 축]' });
+  card({ id: 'd_ritualist', name: '피의 대사제', faction: 'demon', type: 'unit',
+         cost: 7, atk: 4, hp: 5, mv: 2, rng: 1, keywords: [KW.LIFESTEAL], art: '♁', hero: true,
+         onSummon: { k: 'seq', list: [ { k: 'selfDamage', amount: 2 }, { k: 'draw', amount: 3 } ] },
+         text: '영웅. 흡혈. 개시: 내 장군에게 2 피해, 카드를 3장 뽑는다. [희생 덱의 축]' });
+
   /* ═══════════════ 기본 덱 (진영 12종 x2 + 중립 3종 x2 = 30장) ═══════════════ */
   var NEUTRAL_PICKS = {
     vanguard: ['n_merc', 'n_medic', 'n_regroup'],
@@ -489,14 +550,19 @@
                'e_warhorn', 'e_lancer', 'e_gale', 'e_paladin', 'e_marshal', 'e_grandmaster'],
     arcane:   ['a_apprentice', 'a_bolt', 'a_floatstone', 'a_rift', 'a_elementalist', 'a_skiff',
                'a_chrono', 'a_chain', 'a_guard', 'a_cataclysm', 'a_sage', 'a_galleon'],
-    demon:    ['d_imp', 'd_pact', 'd_hound', 'd_sacrifice', 'd_tormentor', 'd_bones',
+    demon:    ['d_imp', 'd_pact', 'd_hound', 'd_sacrifice', 'd_tormentor', 'd_charger',
                'd_ravager', 'd_soul', 'd_hellfire', 'd_abyss', 'd_riftlord', 'd_valgar']
   };
 
+  var FACTION_HERO = { vanguard: 'v_hero', exile: 'e_hero', arcane: 'a_hero', demon: 'd_legion' };
+
+  /* 영웅 1장 + 진영 12종 x2 + 중립 2종 x2 + 중립 1종 x1 = 30장 */
   function buildDeck(factionId) {
-    var deck = [];
+    var deck = [FACTION_HERO[factionId]];
     DEFAULT_UNIQUES[factionId].forEach(function (id) { deck.push(id, id); });
-    NEUTRAL_PICKS[factionId].forEach(function (id) { deck.push(id, id); });
+    var np = NEUTRAL_PICKS[factionId];
+    np.slice(0, 2).forEach(function (id) { deck.push(id, id); });
+    deck.push(np[2]);
     return deck;
   }
 
@@ -512,7 +578,10 @@
       if (c.faction !== factionId && c.faction !== 'neutral') return { ok: false, error: '타 진영 카드: ' + c.name };
       if (c.id === 'n_coin') return { ok: false, error: '선제 보급은 덱에 넣을 수 없습니다' };
       counts[list[i]] = (counts[list[i]] || 0) + 1;
-      if (counts[list[i]] > 2) return { ok: false, error: '2장 초과: ' + c.name };
+      var lim = c.hero ? 1 : 2;
+      if (counts[list[i]] > lim) {
+        return { ok: false, error: c.hero ? '영웅 유닛은 1장만: ' + c.name : '2장 초과: ' + c.name };
+      }
     }
     return { ok: true };
   }

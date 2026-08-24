@@ -281,7 +281,7 @@
   function codexCard(id) {
     var c = CARDS[id];
     var fac = D.FACTIONS[c.faction];
-    var node = el('div', 'cx-card cx-' + c.type);
+    var node = el('div', 'cx-card cx-' + c.type + (c.hero ? ' is-hero' : ''));
     node.style.setProperty('--accent', fac ? fac.color : '#8e97b3');
 
     var head = el('div', 'cx-head');
@@ -854,7 +854,7 @@
 
     p.hand.forEach(function (cardId, hi) {
       var c = CARDS[cardId];
-      var node = el('div', 'card' + (c.type === 'spell' ? ' spell' : ''));
+      var node = el('div', 'card' + (c.type === 'spell' ? ' spell' : '') + (c.hero ? ' is-hero' : ''));
       var playable = isHumanTurn() && st.current === me && E.canPlayCard(st, me, hi);
       if (!playable) node.classList.add('unplayable');
       if (G.sel && G.sel.t === 'card' && G.sel.handIndex === hi) node.classList.add('is-sel');
@@ -1014,7 +1014,7 @@
     tip.innerHTML =
       '<div class="tip-head"><span class="tip-cost">' + c.cost + '</span>' +
       '<span class="tip-name" style="color:' + (fac ? fac.color : '#cfd6e8') + '">' + c.name + '</span>' +
-      '<span class="tip-type">' + (c.type === 'spell' ? '주문' : '유닛') + '</span></div>' +
+      '<span class="tip-type">' + (c.hero ? '영웅 유닛' : (c.type === 'spell' ? '주문' : '유닛')) + '</span></div>' +
       (c.type === 'unit'
         ? '<div class="tip-stats">공격 <b>' + c.atk + '</b> · 체력 <b>' + c.hp +
           '</b> · 기동 <b>' + c.mv + '</b> · 사거리 <b>' + c.rng + '</b></div>'

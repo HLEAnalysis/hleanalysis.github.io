@@ -64,7 +64,12 @@
   function addCard(id) {
     var c = D.CARDS[id];
     if (!c) return;
-    if ((cur.counts[id] || 0) >= 2) { sfx('error'); return; }
+    var lim = c.hero ? 1 : 2;
+    if ((cur.counts[id] || 0) >= lim) {
+      sfx('error');
+      if (c.hero) status('영웅 유닛은 덱에 1장만 넣을 수 있습니다.', true);
+      return;
+    }
     if (total() >= D.DECK_SIZE) { sfx('error'); status(D.DECK_SIZE + '장이 가득 찼습니다 — 먼저 빼세요.', true); return; }
     cur.counts[id] = (cur.counts[id] || 0) + 1;
     sfx('click');
@@ -160,7 +165,8 @@
       var c = D.CARDS[id];
       var fac = D.FACTIONS[c.faction];
       var have = cur.counts[id] || 0;
-      var node = el('div', 'bp-card' + (have >= 2 ? ' is-max' : ''));
+      var lim = c.hero ? 1 : 2;
+      var node = el('div', 'bp-card' + (have >= lim ? ' is-max' : '') + (c.hero ? ' is-hero' : ''));
       node.style.setProperty('--accent', fac ? fac.color : '#8e97b3');
       node.innerHTML =
         '<div class="bp-cost">' + c.cost + '</div>' +

@@ -1690,3 +1690,22 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 }
 
 .tip-status { margin-top: 6px; font-size: 11px; color: var(--ok); }
+
+
+/* ════════════════ 영웅 유닛 표시 (v0.11) ════════════════ */
+.card.is-hero, .bp-card.is-hero {
+  border-color: #f0c86a;
+  box-shadow: 0 0 10px #f0c86a55, inset 0 0 12px #f0c86a22;
+}
+.card.is-hero::after, .bp-card.is-hero::after {
+  content: '★'; position: absolute; top: 3px; right: 5px;
+  font-size: 11px; color: #f0c86a; text-shadow: 0 0 6px #f0c86a;
+  pointer-events: none;
+}
+
+.cx-card.is-hero { border-color: #f0c86a; box-shadow: 0 0 10px #f0c86a44; position: relative; }
+.cx-card.is-hero::after {
+  content: '★ 영웅'; position: absolute; top: 4px; right: 6px;
+  font-size: 10px; color: #f0c86a; text-shadow: 0 0 6px #f0c86a88;
+  pointer-events: none;
+}
