@@ -612,6 +612,7 @@
       if (targetKind === 'enemyUnit' && e.owner !== owner && e.kind !== 'general') out.push(i);
       else if (targetKind === 'enemyAny' && e.owner !== owner) out.push(i);
       else if (targetKind === 'allyUnit' && e.owner === owner && e.kind !== 'general') out.push(i);
+      else if (targetKind === 'allyAny' && e.owner === owner && e.kind !== 'structure') out.push(i);
       else if (targetKind === 'anyUnit' && e.kind !== 'general') out.push(i);
     }
     if (opts.range != null && opts.from != null) {
@@ -939,7 +940,7 @@
         return effectiveAtk(state, b) - effectiveAtk(state, a);
       })[0];
     }
-    if (tk === 'allyUnit') {
+    if (tk === 'allyUnit' || tk === 'allyAny') {
       if (eff.k === 'heal' || (eff.list && eff.list[0] && eff.list[0].k === 'heal')) {
         return cands.sort(function (a, b) {
           return (state.board[b].maxHp - state.board[b].hp) - (state.board[a].maxHp - state.board[a].hp);

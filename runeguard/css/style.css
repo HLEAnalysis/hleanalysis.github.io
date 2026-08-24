@@ -1642,7 +1642,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
    저해상도 씬 조각을 그대로 늘리면 흐릿한 확대가 어색하다.
    블러 + 채도 보정 + 상하 비네트로 '회화적 백드롭'으로 의도화한다. */
 #sceneLayer.has-img > .art-img {
-  filter: blur(5px) brightness(.92) saturate(1.18);
+  filter: blur(2px) brightness(.94) saturate(1.15);
   transform: scale(1.07);            /* 블러 가장자리 숨김 */
 }
 #sceneLayer.has-img::after {

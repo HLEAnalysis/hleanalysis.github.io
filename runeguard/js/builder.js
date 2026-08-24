@@ -119,9 +119,20 @@
     });
   }
 
+  function tipOn(node, id) {
+    node.addEventListener('mouseenter', function () {
+      if (RG.UI && RG.UI.showCardTip) RG.UI.showCardTip(id, node);
+    });
+    node.addEventListener('mouseleave', hideTip);
+  }
+  function hideTip() {
+    if (RG.UI && RG.UI.hideCardTip) RG.UI.hideCardTip();
+  }
+
   function render() {
     var doc = global.document;
     if (!doc || $('builder').hidden) return;
+    hideTip();
 
     /* 진영 탭 */
     var fh = $('bFactions');
@@ -159,8 +170,8 @@
           ? '<div class="bp-stats">' + c.atk + ' / ' + c.hp + '</div>'
           : '<div class="bp-stats bp-spell">주문</div>') +
         '<div class="bp-have">' + (have ? '×' + have : '') + '</div>';
-      node.title = c.text || '';
       if (Art.attachImg) Art.attachImg(node.querySelector('.bp-art'), id);
+      tipOn(node, id);
       node.addEventListener('click', function () { addCard(id); });
       node.addEventListener('contextmenu', function (ev) { ev.preventDefault(); removeCard(id); });
       pool.appendChild(node);
@@ -180,8 +191,8 @@
         '<span class="bd-cost">' + c.cost + '</span>' +
         '<span class="bd-name">' + c.name + '</span>' +
         '<span class="bd-n">×' + cur.counts[id] + '</span>';
-      row.title = '클릭하면 1장 뺍니다';
       row.addEventListener('click', function () { removeCard(id); });
+      tipOn(row, id);
       dk.appendChild(row);
     });
   }
@@ -195,6 +206,7 @@
     render();
   }
   function close() {
+    hideTip();
     $('builder').hidden = true;
     sfx('cancel');
   }

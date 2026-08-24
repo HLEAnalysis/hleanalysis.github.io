@@ -144,9 +144,9 @@
          text: '군더더기 없는 전열 병력.' });
   card({ id: 'n_medic', name: '야전 의무병', faction: 'neutral', type: 'unit',
          cost: 3, atk: 2, hp: 2, mv: 2, rng: 1, keywords: [], art: '✜',
-         target: 'allyUnit',
+         target: 'allyAny',
          onSummon: { k: 'heal', amount: 3, scope: 'target' },
-         text: '개시: 아군 유닛 1체의 HP를 3 회복시킨다.' });
+         text: '개시: 아군 1체의 HP를 3 회복시킨다. (장군 가능)' });
   card({ id: 'n_looter', name: '노획꾼', faction: 'neutral', type: 'unit',
          cost: 4, atk: 3, hp: 4, mv: 2, rng: 1, keywords: [], art: '⚒',
          onDeath: { k: 'draw', amount: 1 },
@@ -259,7 +259,7 @@
          cost: 4, atk: 4, hp: 5, mv: 1, rng: 1, keywords: [KW.LEAP], art: '♞',
          text: '도약: 체스 나이트처럼 L자로 뛴다.' });
   card({ id: 'e_paladin', name: '수호 성기사', faction: 'exile', type: 'unit',
-         cost: 5, atk: 4, hp: 6, mv: 3, rng: 1, keywords: [KW.PROVOKE, KW.BULWARK], art: '⛊',
+         cost: 5, atk: 4, hp: 7, mv: 3, rng: 1, keywords: [KW.PROVOKE, KW.BULWARK], art: '⛊',
          text: '도발, 방벽.' });
   card({ id: 'e_marshal', name: '대장군', faction: 'exile', type: 'unit',
          cost: 6, atk: 4, hp: 7, mv: 2, rng: 1, keywords: [], art: '★',
@@ -296,7 +296,7 @@
          spell: { k: 'teleport', range: 99 },
          text: '아군 유닛 1체를 보드의 빈 칸 아무 곳으로나 옮긴다.' });
   card({ id: 'a_elementalist', name: '원소술사', faction: 'arcane', type: 'unit',
-         cost: 3, atk: 3, hp: 3, mv: 2, rng: 1, keywords: [], art: '❉',
+         cost: 3, atk: 3, hp: 2, mv: 2, rng: 1, keywords: [], art: '❉',
          target: 'enemyAny',
          onSummon: { k: 'damage', amount: 2, scope: 'target' },
          text: '개시: 적 1체에 2 피해를 준다. (장군 가능)' });
@@ -304,7 +304,7 @@
          cost: 4, atk: 4, hp: 4, mv: 3, rng: 1, keywords: [KW.FLYING], art: '⛵',
          text: '비행. 기동력 3.' });
   card({ id: 'a_chrono', name: '시간 술사', faction: 'arcane', type: 'unit',
-         cost: 4, atk: 2, hp: 4, mv: 2, rng: 1, keywords: [], art: '⧗',
+         cost: 4, atk: 2, hp: 3, mv: 2, rng: 1, keywords: [], art: '⧗',
          onSummon: { k: 'draw', amount: 2 },
          text: '개시: 카드를 2장 뽑는다.' });
   card({ id: 'a_chain', name: '연쇄 번개', faction: 'arcane', type: 'spell',
@@ -399,6 +399,73 @@
          cost: 4, atk: 3, hp: 3, mv: 2, rng: 1, keywords: [KW.FLYING], art: '≫',
          text: '비행.' });
 
+
+  /* ═══════ 추가 유닛 (v0.10) ═══════ */
+  card({ id: 'n_falcon', name: '매사냥꾼', faction: 'neutral', type: 'unit',
+         cost: 3, atk: 2, hp: 2, mv: 2, rng: 2, keywords: [], art: '≻',
+         text: '사거리 2.' });
+  card({ id: 'n_apoth', name: '약제사', faction: 'neutral', type: 'unit',
+         cost: 2, atk: 1, hp: 3, mv: 2, rng: 1, keywords: [], art: '✚',
+         target: 'allyAny',
+         onSummon: { k: 'heal', amount: 2, scope: 'target' },
+         text: '개시: 아군 1체의 HP를 2 회복시킨다. (장군 가능)' });
+  card({ id: 'n_jugger', name: '파성추', faction: 'neutral', type: 'unit',
+         cost: 6, atk: 5, hp: 7, mv: 1, rng: 1, keywords: [KW.PROVOKE], art: '⊠',
+         text: '도발. 육중한 공성 병기.' });
+  card({ id: 'n_pathfinder', name: '길잡이', faction: 'neutral', type: 'unit',
+         cost: 2, atk: 1, hp: 2, mv: 3, rng: 1, keywords: [], art: '➳',
+         onSummon: { k: 'draw', amount: 1 },
+         text: '기동력 3. 개시: 카드를 1장 뽑는다.' });
+
+  card({ id: 'v_drone', name: '정찰 드론', faction: 'vanguard', type: 'unit',
+         cost: 2, atk: 1, hp: 1, mv: 3, rng: 1, keywords: [KW.FLYING], art: '✈',
+         onSummon: { k: 'draw', amount: 1 },
+         text: '비행. 개시: 카드를 1장 뽑는다.' });
+  card({ id: 'v_flamer', name: '화염방사병', faction: 'vanguard', type: 'unit',
+         cost: 4, atk: 3, hp: 3, mv: 2, rng: 1, keywords: [], art: '♨',
+         target: 'enemyUnit',
+         onSummon: { k: 'damage', amount: 2, scope: 'target' },
+         text: '개시: 적 유닛 1체에 2 피해를 준다.' });
+  card({ id: 'v_marksman', name: '명사수', faction: 'vanguard', type: 'unit',
+         cost: 5, atk: 4, hp: 2, mv: 2, rng: 3, keywords: [], art: '⊕',
+         text: '사거리 3.' });
+
+  card({ id: 'e_chaplain', name: '종군 사제', faction: 'exile', type: 'unit',
+         cost: 3, atk: 2, hp: 4, mv: 2, rng: 1, keywords: [], art: '✝',
+         target: 'allyAny',
+         onSummon: { k: 'heal', amount: 3, scope: 'target' },
+         text: '개시: 아군 1체의 HP를 3 회복시킨다. (장군 가능)' });
+  card({ id: 'e_crusader', name: '십자군', faction: 'exile', type: 'unit',
+         cost: 4, atk: 4, hp: 3, mv: 2, rng: 1, keywords: [KW.CHARGE], art: '⚔',
+         text: '돌진.' });
+  card({ id: 'e_seraph', name: '세라핌', faction: 'exile', type: 'unit',
+         cost: 6, atk: 5, hp: 5, mv: 2, rng: 1, keywords: [KW.FLYING, KW.LIFESTEAL], art: '✶',
+         text: '비행. 흡혈.' });
+
+  card({ id: 'a_adept', name: '마나 수습생', faction: 'arcane', type: 'unit',
+         cost: 2, atk: 1, hp: 2, mv: 2, rng: 1, keywords: [], art: '◇',
+         onSummon: { k: 'gainMana', amount: 1 },
+         text: '개시: 마나를 1 얻는다.' });
+  card({ id: 'a_phase', name: '차원 보행자', faction: 'arcane', type: 'unit',
+         cost: 3, atk: 3, hp: 2, mv: 2, rng: 1, keywords: [KW.FLYING], art: '❖',
+         text: '비행. 차원을 넘나든다.' });
+  card({ id: 'a_storm', name: '폭풍 소환사', faction: 'arcane', type: 'unit',
+         cost: 5, atk: 3, hp: 4, mv: 2, rng: 2, keywords: [], art: '≈',
+         target: 'enemyAny',
+         onSummon: { k: 'damage', amount: 2, scope: 'target' },
+         text: '사거리 2. 개시: 적 1체에 2 피해. (장군 가능)' });
+
+  card({ id: 'd_leech', name: '흡혈 박쥐', faction: 'demon', type: 'unit',
+         cost: 2, atk: 2, hp: 1, mv: 2, rng: 1, keywords: [KW.FLYING, KW.LIFESTEAL], art: '⌘',
+         text: '비행. 흡혈.' });
+  card({ id: 'd_gate', name: '지옥 문지기', faction: 'demon', type: 'unit',
+         cost: 4, atk: 3, hp: 5, mv: 2, rng: 1, keywords: [KW.PROVOKE], art: '⍟',
+         onSummon: { k: 'selfDamage', amount: 1 },
+         text: '도발. 개시: 내 장군에게 1 피해.' });
+  card({ id: 'd_charger', name: '돌격 마수', faction: 'demon', type: 'unit',
+         cost: 5, atk: 5, hp: 3, mv: 2, rng: 1, keywords: [KW.CHARGE], art: '⟫',
+         text: '돌진.' });
+
   /* ═══════════════ 기본 덱 (진영 12종 x2 + 중립 3종 x2 = 30장) ═══════════════ */
   var NEUTRAL_PICKS = {
     vanguard: ['n_merc', 'n_medic', 'n_regroup'],
@@ -418,7 +485,7 @@
   var DEFAULT_UNIQUES = {
     vanguard: ['v_rifleman', 'v_sapper', 'v_sniper', 'v_shock', 'v_precision', 'v_mgnest',
                'v_barrage', 'v_flare', 'v_trench', 'v_mortar', 'v_apc', 'v_tank'],
-    exile:    ['e_squire', 'e_shield', 'e_retainer', 'e_sanctuary', 'e_templar', 'e_judgment',
+    exile:    ['e_squire', 'e_shield', 'e_chaplain', 'e_sanctuary', 'e_templar', 'e_judgment',
                'e_warhorn', 'e_lancer', 'e_gale', 'e_paladin', 'e_marshal', 'e_grandmaster'],
     arcane:   ['a_apprentice', 'a_bolt', 'a_floatstone', 'a_rift', 'a_elementalist', 'a_skiff',
                'a_chrono', 'a_chain', 'a_guard', 'a_cataclysm', 'a_sage', 'a_galleon'],

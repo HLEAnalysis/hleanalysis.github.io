@@ -382,6 +382,18 @@
     n_merc:    mix(KNIGHT, { weapon: 'sword', off: 'shield' }),
     n_medic:   mix(SOLDIER,{ head: 'headCap', off: 'medkit' }),
     n_looter:  mix(LIGHT,  { head: 'headHood', weapon: 'axe', off: 'sack' }),
+    n_falcon:  mix(LIGHT,  { head: 'headCap', weapon: 'bow' }),
+    n_apoth:   mix(LIGHT,  { head: 'headHood', off: 'medkit' }),
+    n_pathfinder: mix(LIGHT, { head: 'headCap', weapon: 'sword', back: 'cloak' }),
+    v_flamer:  mix(SOLDIER, { head: 'headModern', weapon: 'rifle' }),
+    v_marksman: mix(SOLDIER, { head: 'headCap', weapon: 'rifle' }),
+    e_chaplain: mix(MAGE,   { head: 'headHood', off: 'shield' }),
+    e_crusader: mix(KNIGHT, { weapon: 'sword', off: 'shield', back: 'cloak' }),
+    e_seraph:  mix(KNIGHT,  { head: 'headBare', weapon: 'sword' }),
+    a_adept:   mix(MAGE,    { head: 'headBare', weapon: 'staff' }),
+    a_phase:   mix(MAGE,    { head: 'headHood', back: 'cloak' }),
+    a_storm:   mix(MAGE,    { weapon: 'staff' }),
+    d_gate:    mix(FIEND,   { head: 'headHorned', weapon: 'axe' }),
     n_golem:   mix(FIEND,  { body: 'bodyHulk', head: 'headGem', arms: 'armsHulk' }),
     n_warlord: mix(KNIGHT, { head: 'headCrown', weapon: 'banner', back: 'cloak' }),
 
@@ -664,7 +676,8 @@
   var NONFIG = {
     v_tank: 'tank', v_apc: 'apc', v_mgnest: 'turret', v_mortar: 'mortar',
     a_skiff: 'airship', a_galleon: 'galleon', a_floatstone: 'floatstone',
-    d_hound: 'hound',
+    d_hound: 'hound', d_leech: 'hound', d_charger: 'hound',
+    v_drone: 'airship', n_jugger: 'apc',
     st_spire: 'st_spire', st_barracks: 'st_barracks', st_shrine: 'st_shrine',
     /* 주문 */
     n_regroup: 'sp_draw', n_coin: 'sp_coin',

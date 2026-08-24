@@ -244,19 +244,37 @@
 
     /* 흐름 */
     turn: function () {
-      tone({ freq: 196, type: 'sine', dur: 0.7, gain: 0.13, attack: 0.02 });
-      tone({ freq: 294, type: 'sine', dur: 0.55, gain: 0.07, delay: 0.04 });
+      /* 따뜻한 2음 차임 + 옥타브 배음 */
+      tone({ freq: 196, type: 'sine', dur: 0.6, gain: 0.12, attack: 0.02 });
+      tone({ freq: 392, type: 'sine', dur: 0.5, gain: 0.05, delay: 0.02 });
+      tone({ freq: 294, type: 'triangle', dur: 0.5, gain: 0.08, delay: 0.09 });
     },
     ark: function () {
-      chord([523, 659, 784, 1047], { dur: 1.1, gain: 0.1, stagger: 0.07, type: 'sine' });
+      /* 고동치는 상승 펄스 — 점령이 진행되는 긴장감 */
+      tone({ freq: 220, slideTo: 440, type: 'sine', dur: 0.5, gain: 0.14 });
+      chord([523, 659, 784], { dur: 0.7, gain: 0.09, stagger: 0.06, type: 'sine', delay: 0.18 });
+      tone({ freq: 1047, type: 'sine', dur: 0.8, gain: 0.08, delay: 0.42, attack: 0.01 });
+      noise({ freq: 2400, sweepTo: 5200, dur: 0.5, gain: 0.04, type: 'highpass', q: 0.6 });
     },
     win: function () {
-      chord([392, 494, 587], { dur: 0.5, gain: 0.15, stagger: 0.08 });
-      chord([523, 659, 784, 1047], { dur: 1.2, gain: 0.15, stagger: 0.07, delay: 0.26 });
+      /* 3단 팡파르: 상승 아르페지오 -> 대화음 -> 종 */
+      [392, 494, 587, 784].forEach(function (f, i) {
+        tone({ freq: f, type: 'triangle', dur: 0.32, gain: 0.15, delay: i * 0.09, attack: 0.01 });
+      });
+      chord([523, 659, 784, 1047], { dur: 1.5, gain: 0.16, stagger: 0.05, delay: 0.42 });
+      tone({ freq: 2093, type: 'sine', dur: 1.2, gain: 0.07, delay: 0.55 });
+      tone({ freq: 1568, type: 'sine', dur: 1.0, gain: 0.05, delay: 0.72 });
+      noise({ freq: 3000, sweepTo: 7000, dur: 0.7, gain: 0.05, type: 'highpass', q: 0.5, delay: 0.4 });
+      tone({ freq: 98, type: 'sine', dur: 1.4, gain: 0.15, delay: 0.42 });
     },
     lose: function () {
-      chord([392, 466, 554], { dur: 0.6, gain: 0.14, stagger: 0.09 });
-      chord([294, 349, 415], { dur: 1.3, gain: 0.14, stagger: 0.09, delay: 0.32 });
+      /* 하강 단조 + 낮은 드론 — 무겁게 가라앉는다 */
+      [466, 415, 349].forEach(function (f, i) {
+        tone({ freq: f, type: 'triangle', dur: 0.5, gain: 0.13, delay: i * 0.22, attack: 0.02 });
+      });
+      chord([233, 277, 349], { dur: 1.6, gain: 0.12, stagger: 0.08, delay: 0.66 });
+      tone({ freq: 58, type: 'sine', dur: 2.0, gain: 0.16, delay: 0.6 });
+      noise({ freq: 400, sweepTo: 90, dur: 1.4, gain: 0.06, q: 0.6, delay: 0.6 });
     }
   };
 

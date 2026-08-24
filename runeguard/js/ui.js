@@ -1194,8 +1194,10 @@
         var card = CARDS[s.cardId];
         if (s.stage === 'cell' && s.cells.indexOf(idx) >= 0) {
           if (card.target) {
+            var tg = E.validTargets(st, me, card.target);
+            if (!tg.length) { doPlay({ cell: idx }); return; }   /* 대상 없음 — 효과 불발, 소환은 진행 */
             s.cell = idx; s.stage = 'target';
-            s.targets = E.validTargets(st, me, card.target);
+            s.targets = tg;
             render(); return;
           }
           doPlay({ cell: idx }); return;
@@ -1261,6 +1263,16 @@
           afterAction(); return;
         }
       }
+    }
+
+    /* 카드/대상 지정 중의 잘못된 클릭은 선택을 유지한다 — 취소는 취소 버튼/ESC/카드 재클릭 */
+    if (s && s.t === 'card' && s.stage === 'cell') {
+      sfx('error');
+      return;
+    }
+    if (s && (s.stage === 'target' || s.stage === 'target2')) {
+      sfx('error');
+      return;
     }
 
     var e = st.board[idx];
@@ -1437,5 +1449,6 @@
     sfx(G.config.mode === 'ai' ? (w === 'P1' ? 'win' : 'lose') : 'win');
   }
 
-  RG.UI = { init: function () { buildMenu(); }, _G: G };
+  RG.UI = { init: function () { buildMenu(); }, _G: G,
+    showCardTip: showCardTip, hideCardTip: hideCardTip };
 })(window);
