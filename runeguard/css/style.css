@@ -1709,3 +1709,13 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
   font-size: 10px; color: #f0c86a; text-shadow: 0 0 6px #f0c86a88;
   pointer-events: none;
 }
+
+
+/* ════════════════ 덱 선택 줄 (v0.12) ════════════════ */
+.deck-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  margin: 8px 0 2px;
+}
+.deck-lbl { font-size: 11px; color: var(--dim, #8e97b3); letter-spacing: .12em; margin-right: 2px; }
+.deck-chip { font-size: 12px; padding: 5px 11px; }
+.deck-chip.is-on { border-color: #f0c86a; color: #f0c86a; box-shadow: 0 0 8px #f0c86a44; }

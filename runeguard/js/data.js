@@ -554,6 +554,95 @@
                'd_ravager', 'd_soul', 'd_hellfire', 'd_abyss', 'd_riftlord', 'd_valgar']
   };
 
+
+  /* ═══════════════ 영웅 기반 추천덱 (v0.12) ═══════════════
+     구성 = 영웅 1 + 진영 12종 x2 + 중립 2종 x2 + 중립 1종 x1 = 30장 */
+  var RECOMMENDED_DECKS = {
+    vanguard: [
+      { id: 'barrage', hero: 'v_hero', name: '포격덱',
+        desc: '사거리로 압박하고 강철 대령의 일제사격으로 마무리한다.',
+        uniques: ['v_rifleman', 'v_sniper', 'v_marksman', 'v_precision', 'v_barrage', 'v_flare',
+                  'v_mortar', 'v_railgun', 'v_mgnest', 'v_trench', 'v_apc', 'v_tank'],
+        neutrals: ['n_merc', 'n_medic', 'n_regroup'] },
+      { id: 'fortress', hero: 'v_fortress', name: '진지덱',
+        desc: '참호와 포대로 요새를 쌓고 축성 원수로 방어선을 완성한다.',
+        uniques: ['v_sapper', 'v_trench', 'v_mgnest', 'v_mortar', 'v_railgun', 'v_barrage',
+                  'v_rifleman', 'v_sniper', 'v_precision', 'v_grenadier', 'v_apc', 'v_tank'],
+        neutrals: ['n_bulwark', 'n_jugger', 'n_medic'] },
+      { id: 'blitz', hero: 'v_blitz', name: '기동덱',
+        desc: '빠른 병력으로 몰아치고 기갑 선봉장이 돌파구를 연다.',
+        uniques: ['v_shock', 'v_drone', 'v_apc', 'v_flamer', 'v_rifleman', 'v_grenadier',
+                  'v_sapper', 'v_trench', 'v_precision', 'v_flare', 'v_marksman', 'v_tank'],
+        neutrals: ['n_scout', 'n_pathfinder', 'n_merc'] }
+    ],
+    exile: [
+      { id: 'guard', hero: 'e_hero', name: '수호덱',
+        desc: '회복과 도발로 버티고 성창의 수호자가 전선을 지킨다.',
+        uniques: ['e_shield', 'e_chaplain', 'e_sanctuary', 'e_templar', 'e_judgment', 'e_warhorn',
+                  'e_lancer', 'e_gale', 'e_paladin', 'e_marshal', 'e_grandmaster', 'e_vindicator'],
+        neutrals: ['n_bulwark', 'n_apoth', 'n_medic'] },
+      { id: 'host', hero: 'e_archon', name: '전개덱',
+        desc: '기사단을 넓게 펼치고 천군 대주교가 병력을 불린다.',
+        uniques: ['e_squire', 'e_retainer', 'e_grandmaster', 'e_warhorn', 'e_marshal', 'e_sanctuary',
+                  'e_shield', 'e_templar', 'e_lancer', 'e_chaplain', 'e_judgment', 'e_paladin'],
+        neutrals: ['n_merc', 'n_pathfinder', 'n_regroup'] },
+      { id: 'wrath', hero: 'e_avenger', name: '공세덱',
+        desc: '돌진 기사로 먼저 때리고 응보의 집행자가 심판한다.',
+        uniques: ['e_crusader', 'e_seraph', 'e_gale', 'e_lancer', 'e_judgment', 'e_sanctuary',
+                  'e_templar', 'e_shield', 'e_chaplain', 'e_warhorn', 'e_paladin', 'e_marshal'],
+        neutrals: ['n_duelist', 'n_windrider', 'n_merc'] }
+    ],
+    arcane: [
+      { id: 'spell', hero: 'a_hero', name: '주문덱',
+        desc: '주문을 퍼부어 성장 유닛과 대마도사를 키운다.',
+        uniques: ['a_apprentice', 'a_bolt', 'a_rift', 'a_chain', 'a_stormcall', 'a_cataclysm',
+                  'a_sage', 'a_archivist', 'a_elementalist', 'a_guard', 'a_chrono', 'a_floatstone'],
+        neutrals: ['n_merc', 'n_medic', 'n_regroup'] },
+      { id: 'ramp', hero: 'a_chronarch', name: '램프덱',
+        desc: '마나를 가속해 대형 유닛을 남들보다 빨리 꺼낸다.',
+        uniques: ['a_adept', 'a_apprentice', 'a_chrono', 'a_guard', 'a_elementalist', 'a_skiff',
+                  'a_galleon', 'a_cataclysm', 'a_sage', 'a_bolt', 'a_rift', 'a_floatstone'],
+        neutrals: ['n_golem', 'n_jugger', 'n_merc'] },
+      { id: 'summon', hero: 'a_voidcaller', name: '소환덱',
+        desc: '비행 소환수로 하늘을 장악하고 공허 소환사가 정령을 부른다.',
+        uniques: ['a_elementalist', 'a_phase', 'a_skiff', 'a_galleon', 'a_floatstone', 'a_guard',
+                  'a_apprentice', 'a_bolt', 'a_chrono', 'a_rift', 'a_chain', 'a_sage'],
+        neutrals: ['n_windrider', 'n_merc', 'n_medic'] }
+    ],
+    demon: [
+      { id: 'rush', hero: 'd_hero', name: '돌격덱',
+        desc: '돌진과 흡혈로 몰아붙이고 심연 군주가 끝을 낸다.',
+        uniques: ['d_imp', 'd_hound', 'd_pact', 'd_charger', 'd_ravager', 'd_soul',
+                  'd_leech', 'd_riftlord', 'd_tormentor', 'd_sacrifice', 'd_abyss', 'd_valgar'],
+        neutrals: ['n_scout', 'n_duelist', 'n_merc'] },
+      { id: 'legion', hero: 'd_legion', name: '군단덱',
+        desc: '임프 물량으로 뒤덮고 군단 지휘관이 군세를 강화한다.',
+        uniques: ['d_imp', 'd_bones', 'd_pact', 'd_hound', 'd_leech', 'd_tormentor',
+                  'd_soul', 'd_sacrifice', 'd_hellfire', 'd_abyss', 'd_riftlord', 'd_valgar'],
+        neutrals: ['n_scout', 'n_merc', 'n_golem'] },
+      { id: 'blood', hero: 'd_ritualist', name: '희생덱',
+        desc: '아군과 체력을 제물로 이득을 뽑고 피의 대사제가 자원을 회수한다.',
+        uniques: ['d_sacrifice', 'd_tormentor', 'd_soul', 'd_bones', 'd_imp', 'd_pact',
+                  'd_glutton', 'd_hellfire', 'd_abyss', 'd_riftlord', 'd_warfiend', 'd_valgar'],
+        neutrals: ['n_merc', 'n_medic', 'n_golem'] }
+    ]
+  };
+
+  /* 추천덱 id -> 30장 리스트 */
+  function buildRecDeck(factionId, recId) {
+    var recs = RECOMMENDED_DECKS[factionId] || [];
+    for (var i = 0; i < recs.length; i++) {
+      if (recs[i].id !== recId) continue;
+      var r = recs[i];
+      var deck = [r.hero];
+      r.uniques.forEach(function (id) { deck.push(id, id); });
+      r.neutrals.slice(0, 2).forEach(function (id) { deck.push(id, id); });
+      deck.push(r.neutrals[2]);
+      return deck;
+    }
+    return null;
+  }
+
   var FACTION_HERO = { vanguard: 'v_hero', exile: 'e_hero', arcane: 'a_hero', demon: 'd_legion' };
 
   /* 영웅 1장 + 진영 12종 x2 + 중립 2종 x2 + 중립 1종 x1 = 30장 */
@@ -603,6 +692,8 @@
     THEMES: THEMES,
     CARDS: CARDS,
     NEUTRAL_PICKS: NEUTRAL_PICKS,
+    RECOMMENDED_DECKS: RECOMMENDED_DECKS,
+    buildRecDeck: buildRecDeck,
     factionCardIds: factionCardIds,
     buildDeck: buildDeck,
     DEFAULT_UNIQUES: DEFAULT_UNIQUES,

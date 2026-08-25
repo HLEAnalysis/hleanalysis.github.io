@@ -12,7 +12,7 @@
 
   var G = {
     state: null,
-    config: { mode: 'ai', difficulty: 'normal', p1: 'exile', p2: 'demon' },
+    config: { mode: 'ai', difficulty: 'normal', p1: 'exile', p2: 'demon' , deck: { p1: 'default', p2: 'default' } },
     sel: null,
     aiTimer: null
   };
@@ -44,6 +44,42 @@
   function clearSel() { G.sel = null; }
 
   /* ═════════ 시작 화면 ═════════ */
+  /* ── 덱 선택 (기본 / 영웅 추천 / 커스텀) ── */
+  function buildDeckRow(side) {
+    var host = $(side + 'DeckRow');
+    if (!host) return;
+    var fid = G.config[side];
+    var cur = G.config.deck[side] || 'default';
+    host.innerHTML = '';
+    host.appendChild(el('span', 'deck-lbl', '덱'));
+    var opts = [{ key: 'default', label: '기본 덱', tip: '표준 구성. 처음이라면 이걸로.' }];
+    (D.RECOMMENDED_DECKS[fid] || []).forEach(function (r) {
+      opts.push({ key: 'rec:' + r.id, label: '★ ' + r.name,
+                  tip: CARDS[r.hero].name + ' 중심 — ' + r.desc });
+    });
+    if (RG.Builder && RG.Builder.getDeckFor(fid)) {
+      opts.push({ key: 'custom', label: '내 커스텀 덱', tip: '덱 편집에서 저장한 나만의 덱.' });
+    }
+    opts.forEach(function (o) {
+      var b = el('button', 'chip deck-chip' + (cur === o.key ? ' is-on' : ''), o.label);
+      b.title = o.tip;
+      b.addEventListener('click', function () {
+        G.config.deck[side] = o.key;
+        buildDeckRow(side);
+        sfx('click');
+      });
+      host.appendChild(b);
+    });
+  }
+
+  /* 선택된 덱 -> 30장 리스트 (null = 엔진 기본 덱) */
+  function resolveDeck(side, fid) {
+    var ch = (G.config.deck && G.config.deck[side]) || 'default';
+    if (ch === 'custom') return RG.Builder ? RG.Builder.getDeckFor(fid) : null;
+    if (ch.indexOf('rec:') === 0) return D.buildRecDeck(fid, ch.slice(4));
+    return null;
+  }
+
   function buildMenu() {
     $('arkNeedTxt').textContent = D.ARK_TURNS_TO_WIN;
 
@@ -66,10 +102,13 @@
           G.config[side] = fid;
           host.querySelectorAll('.fac').forEach(function (x) { x.classList.remove('is-on'); });
           b.classList.add('is-on');
+          G.config.deck[side] = 'default';   /* 진영이 바뀌면 덱 선택 초기화 */
+          buildDeckRow(side);
           sfx('select');
         });
         host.appendChild(b);
       });
+      buildDeckRow(side);
     });
 
     $('modeRow').addEventListener('click', function (ev) {
@@ -131,7 +170,7 @@
       el2.textContent = txt || '';
       el2.classList.toggle('is-err', !!isErr);
     }
-    var myDeck = function () { return RG.Builder ? RG.Builder.getDeckFor(G.config.p1) : null; };
+    var myDeck = function () { return resolveDeck('p1', G.config.p1); };
     $('hostBtn').addEventListener('click', function () {
       netStatus('방을 만드는 중...');
       RG.Net.hostGame(G.config.p1, myDeck(), function (e) { netStatus(e, true); });
@@ -384,12 +423,11 @@
     G.fxBefore = null; G.fxAttacker = null;
     if ($('fxLayer')) $('fxLayer').innerHTML = '';
     var vsAI = G.config.mode === 'ai';
-    var deckOf = function (f) { return RG.Builder ? RG.Builder.getDeckFor(f) : null; };
     G.state = E.createGame({
       p1Faction: G.config.p1,
       p2Faction: G.config.p2,
-      p1Deck: deckOf(G.config.p1),
-      p2Deck: vsAI ? null : deckOf(G.config.p2),   /* AI 는 기본 덱 (평가 기준 유지) */
+      p1Deck: resolveDeck('p1', G.config.p1),
+      p2Deck: vsAI ? null : resolveDeck('p2', G.config.p2),   /* AI 는 기본 덱 (평가 기준 유지) */
       p1Name: D.FACTIONS[G.config.p1].name + (vsAI ? '' : ' (P1)'),
       p2Name: D.FACTIONS[G.config.p2].name + (vsAI ? ' AI' : ' (P2)'),
       p1AI: false,
