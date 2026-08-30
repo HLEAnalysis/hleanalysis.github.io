@@ -254,7 +254,7 @@
             const REMEMBER_DAYS = 30;
             const LS_KEY = "hlehub_k", LS_EXP = "hlehub_exp";
             // 언어 선택 (허브 안의 EN/KO 버튼이 hlehub_lang을 기록)
-            const PAYLOAD_KO = "payload.bin?v=ff55a5d80c", PAYLOAD_EN = "payload_en.bin?v=b409f5d0b9";
+            const PAYLOAD_KO = "payload.bin?v=fa162e73d2", PAYLOAD_EN = "payload_en.bin?v=325967f268";
             let LANG = "ko";
             try { if (PAYLOAD_EN && localStorage.getItem("hlehub_lang") === "en") LANG = "en"; } catch (e) {}
             const PAYLOAD_URL = LANG === "en" ? PAYLOAD_EN : PAYLOAD_KO;
