@@ -12,3 +12,17 @@ _p_*
 _tiny.txt
 _work/
 master.html
+
+# Cowork 산출물·원본 HTML 유출 방지 (2026-09-04 추가)
+# 아래 경로/이름은 암호화 전 원본이 저장소 루트에 떨어질 때 실수로 커밋되는 것을 막는다.
+Claude outputs/
+claude outputs/
+Claude Outputs/
+outputs/
+kr.html
+en.html
+kr_*.html
+en_*.html
+index_en.html
+*_오프라인_*.html
+*_offline_*.html
