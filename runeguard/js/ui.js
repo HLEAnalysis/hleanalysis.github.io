@@ -119,7 +119,8 @@
       b.classList.add('is-on');
       $('diffBlock').hidden = (G.config.mode !== 'ai');
       $('onlineBlock').hidden = (G.config.mode !== 'online');
-      $('p2Block').hidden = (G.config.mode === 'online');   /* 상대 진영은 상대가 고른다 */
+      /* P2 선택은 로컬 2인전 전용 — AI 상대는 무작위, 온라인은 상대가 고른다 */
+      $('p2Block').hidden = (G.config.mode !== 'local');
       $('startBtn').hidden = (G.config.mode === 'online');
     });
 
@@ -162,6 +163,7 @@
       if (G.state && $('game') && !$('game').hidden) render();
     });
 
+    $('p2Block').hidden = (G.config.mode !== 'local');
     $('startBtn').addEventListener('click', startGame);
 
     /* ── 온라인 친선전 ── */
@@ -423,11 +425,21 @@
     G.fxBefore = null; G.fxAttacker = null;
     if ($('fxLayer')) $('fxLayer').innerHTML = '';
     var vsAI = G.config.mode === 'ai';
+    if (vsAI) {
+      /* 상대를 모르고 시작한다 — 진영 무작위 + 덱도 기본/추천 중 무작위 */
+      G.config.p2 = D.FACTION_ORDER[Math.floor(Math.random() * D.FACTION_ORDER.length)];
+    }
+    var aiDeck = null;
+    if (vsAI) {
+      var recs = D.RECOMMENDED_DECKS[G.config.p2] || [];
+      var pick = Math.floor(Math.random() * (recs.length + 1));   /* 0 = 기본 덱 */
+      if (pick > 0) aiDeck = D.buildRecDeck(G.config.p2, recs[pick - 1].id);
+    }
     G.state = E.createGame({
       p1Faction: G.config.p1,
       p2Faction: G.config.p2,
       p1Deck: resolveDeck('p1', G.config.p1),
-      p2Deck: vsAI ? null : resolveDeck('p2', G.config.p2),   /* AI 는 기본 덱 (평가 기준 유지) */
+      p2Deck: vsAI ? aiDeck : resolveDeck('p2', G.config.p2),
       p1Name: D.FACTIONS[G.config.p1].name + (vsAI ? '' : ' (P1)'),
       p2Name: D.FACTIONS[G.config.p2].name + (vsAI ? ' AI' : ' (P2)'),
       p1AI: false,
