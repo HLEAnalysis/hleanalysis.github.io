@@ -50,7 +50,7 @@
     useHeroPower:   function (st, a) { return E.useHeroPower(st, a[0], a[1]); },
     buildStructure: function (st, a) { return E.buildStructure(st, a[0], a[1], a[2]); },
     mulliganCard:   function (st, a) { return E.mulliganCard(st, a[0], a[1]); },
-    endTurn:        function (st, a) { E.endTurn(st); return true; }
+    endTurn:        function (st, _a) { E.endTurn(st); return true; }
   };
 
   /* ═════════════ 순수 프로토콜 피어 ═════════════
@@ -93,7 +93,7 @@
       opts.send({ t: 'act', fn: fn, args: args, h: hashState(opts.getState()) });
     };
 
-    P.leave = function () { try { opts.send({ t: 'bye' }); } catch (e) {} };
+    P.leave = function () { try { opts.send({ t: 'bye' }); } catch { /* 이미 끊긴 연결이면 무시 */ } };
 
     /* 호스트가 주기적으로 호출 — 상태 해시를 흘려보낸다 */
     P.ping = function () {
@@ -252,7 +252,7 @@
     leave: function () {
       if (S.pingTimer) { clearInterval(S.pingTimer); S.pingTimer = null; }
       if (S.peer) S.peer.leave();
-      if (S.channel) { try { S.channel.unsubscribe(); } catch (e) {} }
+      if (S.channel) { try { S.channel.unsubscribe(); } catch { /* 이미 해제된 채널이면 무시 */ } }
       S.peer = null; S.channel = null; S.code = null;
     },
 

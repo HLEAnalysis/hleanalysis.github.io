@@ -28,7 +28,7 @@
       if (!raw) return null;
       var list = JSON.parse(raw);
       return D.validateDeck(faction, list).ok ? list : null;
-    } catch (e) { return null; }
+    } catch { return null; }
   }
 
   /* 게임 시작 시 호출 — 저장된 유효한 덱이 있으면 그걸, 없으면 null(기본 덱) */
@@ -88,7 +88,7 @@
     var list = countsToList(cur.counts);
     var v = D.validateDeck(cur.faction, list);
     if (!v.ok) { status('저장 불가: ' + v.error, true); sfx('error'); return; }
-    try { global.localStorage.setItem(KEY + cur.faction, JSON.stringify(list)); } catch (e) {}
+    try { global.localStorage.setItem(KEY + cur.faction, JSON.stringify(list)); } catch { /* 저장 실패는 무시 — 덱은 메모리에 그대로 유지된다 */ }
     status('저장 완료 — 이제 ' + D.FACTIONS[cur.faction].name + ' 로 시작하면 이 덱을 씁니다.');
     sfx('power');
     render();
@@ -96,7 +96,7 @@
 
   function resetDefault() {
     cur.counts = listToCounts(D.buildDeck(cur.faction));
-    try { global.localStorage.removeItem(KEY + cur.faction); } catch (e) {}
+    try { global.localStorage.removeItem(KEY + cur.faction); } catch { /* 삭제 실패는 무시 */ }
     status('기본 덱으로 되돌렸습니다.');
     sfx('draw');
     render();

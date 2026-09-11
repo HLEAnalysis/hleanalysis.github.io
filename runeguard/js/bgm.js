@@ -195,7 +195,7 @@
 
   function setEnabled(v) {
     enabled = !!v;
-    try { localStorage.setItem(STORE_KEY, enabled ? '1' : '0'); } catch (e) {}
+    try { localStorage.setItem(STORE_KEY, enabled ? '1' : '0'); } catch { /* 저장 실패(사생활 모드 등)는 무시 */ }
     if (enabled) start(); else stop();
   }
   function toggle() { setEnabled(!enabled); return enabled; }
@@ -204,7 +204,7 @@
   try {
     var saved = localStorage.getItem(STORE_KEY);
     if (saved !== null) enabled = (saved === '1');
-  } catch (e) {}
+  } catch { /* 저장값을 못 읽으면 기본값 유지 */ }
 
   /* 오디오는 사용자 제스처 이후에만 시작 가능 */
   if (global.document) {

@@ -26,7 +26,7 @@
       var line = document.createElement('div');
       line.textContent = '⚠ ' + msg;
       bar.appendChild(line);
-    } catch (e) { /* 리포터 자체는 절대 죽지 않는다 */ }
+    } catch { /* 리포터 자체는 절대 죽지 않는다 */ }
   }
 
   window.addEventListener('error', function (ev) {
