@@ -185,7 +185,7 @@ ${S}>
     /* 탭 클릭을 캡처 단계에서 가로챈다 — 셸의 기존 핸들러(버블)보다 먼저 돈다.
        셸은 그룹 탭을 누르면 「그 그룹에서 마지막으로 보던 문서」를 연다. 어떤 문서가
        열릴지 미리 알아야 그 조각만 받으므로 같은 규칙을 여기서도 따라 둔다. */
-    var GROUPS = { scout: ["scout"], data: ["db", "planner"], vault: ["lab", "old", "tierv"] };
+    var GROUPS = { scout: ["scout"], data: ["db", "planner"], vault: ["lab", "old", "wz"] };
     var OWNER = {}, LAST = {};
     Object.keys(GROUPS).forEach(function(g){
         GROUPS[g].forEach(function(d){ OWNER[d] = g; });
