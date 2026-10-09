@@ -254,9 +254,9 @@
             const REMEMBER_DAYS = 30;
             const LS_KEY = "hlehub_k", LS_EXP = "hlehub_exp";
             // 언어 선택 (허브 안의 EN/KO 버튼이 hlehub_lang을 기록)
-            const PAYLOAD_KO = "payload.bin?v=33e4dc5aee", PAYLOAD_EN = "payload_en.bin?v=1888b463f1";
+            const PAYLOAD_KO = "payload.bin?v=ed393ee974", PAYLOAD_EN = "payload_en.bin?v=4171ee5844";
             // 내장문서 조각 목록 — payload.bin 은 이제 셸(0.5MB)만 담고 문서는 따로 받는다
-            const PARTS_KO = {"scout":"p/ko-scout-870bf4e512.bin","db":"p/ko-db-b27d566209.bin","planner":"p/ko-planner-31466fb82f.bin","lab":"p/ko-lab-1a4b2e2a5b.bin","wscout":"p/ko-wscout-dc7e408157.bin","wz":"p/ko-wz-4caa85e1eb.bin","old":"p/ko-old-13a0ace3d1.bin"}, PARTS_EN = {"scout":"p/en-scout-db9e4bfe13.bin","db":"p/en-db-d5a5ff625e.bin","planner":"p/en-planner-a783423edf.bin","lab":"p/en-lab-1964ce3574.bin","wscout":"p/en-wscout-f2a2b4401c.bin","wz":"p/en-wz-22e0da4c45.bin","old":"p/en-old-e642997722.bin"};
+            const PARTS_KO = {"scout":"p/ko-scout-24e686b895.bin","db":"p/ko-db-9b1f3f1b4b.bin","planner":"p/ko-planner-31466fb82f.bin","lab":"p/ko-lab-1a4b2e2a5b.bin","wscout":"p/ko-wscout-dc7e408157.bin","wz":"p/ko-wz-9bd02bdd19.bin","old":"p/ko-old-13a0ace3d1.bin"}, PARTS_EN = {"scout":"p/en-scout-983be254e9.bin","db":"p/en-db-605bafd6c9.bin","planner":"p/en-planner-a783423edf.bin","lab":"p/en-lab-1964ce3574.bin","wscout":"p/en-wscout-f2a2b4401c.bin","wz":"p/en-wz-4866b73ffe.bin","old":"p/en-old-e642997722.bin"};
             let LANG = "ko";
             try { if (PAYLOAD_EN && localStorage.getItem("hlehub_lang") === "en") LANG = "en"; } catch (e) {}
             const PAYLOAD_URL = LANG === "en" ? PAYLOAD_EN : PAYLOAD_KO;
