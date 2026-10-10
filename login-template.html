@@ -261,9 +261,11 @@
             try { if (PAYLOAD_EN && localStorage.getItem("hlehub_lang") === "en") LANG = "en"; } catch (e) {}
             const PAYLOAD_URL = LANG === "en" ? PAYLOAD_EN : PAYLOAD_KO;
             const PARTS = (LANG === "en" ? PARTS_EN : PARTS_KO) || {};
-            // 첫 화면에 필요한 문서 하나만 셸과 함께 받는다 (지난번에 보던 탭)
-            let START_DOC = null;
-            try { const v = localStorage.getItem("hle-hub-tab"); if (v && PARTS[v]) START_DOC = v; } catch (e) {}
+            // 첫 화면에 필요한 문서 하나만 셸과 함께 받는다.
+            // 셸이 시작 문서를 고정하면(빌드 때 감지) 그 문서를, 아니면 지난번에 보던 탭을 받는다.
+            const FIXED_START = (LANG === "en" ? __START_EN__ : __START_KO__);
+            let START_DOC = (FIXED_START && PARTS[FIXED_START]) ? FIXED_START : null;
+            if (!START_DOC) { try { const v = localStorage.getItem("hle-hub-tab"); if (v && PARTS[v]) START_DOC = v; } catch (e) {} }
             if (!START_DOC) START_DOC = PARTS.scout ? "scout" : (Object.keys(PARTS)[0] || null);
 
             const $ = (id) => document.getElementById(id);

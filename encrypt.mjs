@@ -272,6 +272,13 @@ async function buildLang(srcPath, shellOut, lang, otherLang, label, title) {
     const html = rewriteImages(readFileSync(srcPath, "utf8"));
     const { shell, parts } = splitDocs(html);
 
+    // 셸이 시작 문서를 고정하는지 감지한다 (Cowork 125차~: 항상 분석 개요로 시작).
+    // 저장된 탭(hle-hub-tab)을 읽지 않고 `var start = '<id>'`만 있으면 고정, 읽으면 기억형.
+    const fixedM = shell.match(/var start = '([a-z0-9-]+)';/);
+    const readsLast = /getItem\(\s*['"]hle-hub-tab['"]\s*\)/.test(shell);
+    const fixedStart = (fixedM && !readsLast) ? fixedM[1] : null;
+    console.log("  시작 문서: " + (fixedStart ? fixedStart + " (셸 고정)" : "마지막으로 본 탭"));
+
     const manifest = { lang, parts: {} };
     let partBytes = 0;
     for (const p of parts) {
@@ -293,7 +300,7 @@ async function buildLang(srcPath, shellOut, lang, otherLang, label, title) {
     writeFileSync(shellOut, payload);
     console.log("  " + shellOut + " (셸): " + (payload.length / 1048576).toFixed(2) + "MB"
         + "  · 문서 " + parts.length + "개 합계 " + (partBytes / 1048576).toFixed(1) + "MB");
-    return { url: shellOut + "?v=" + hash, manifest };
+    return { url: shellOut + "?v=" + hash, manifest, fixedStart };
 }
 
 // ── 빌드 ──
@@ -320,7 +327,9 @@ const out = template
     .replace("__PAYLOAD_URL__", ko.url)
     .replace("__PAYLOAD_EN_URL__", en ? en.url : "")
     .replace("__PARTS_KO__", JSON.stringify(ko.manifest.parts))
-    .replace("__PARTS_EN__", JSON.stringify(en ? en.manifest.parts : {}));
+    .replace("__PARTS_EN__", JSON.stringify(en ? en.manifest.parts : {}))
+    .replace("__START_KO__", JSON.stringify(ko.fixedStart))
+    .replace("__START_EN__", JSON.stringify(en ? en.fixedStart : null));
 
 writeFileSync("index.html", out);
 console.log("완료: index.html " + (out.length / 1024).toFixed(0) + "KB · 한국어" + (en ? " + 영어" : " 단독"));
