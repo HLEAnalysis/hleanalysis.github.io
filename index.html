@@ -201,10 +201,23 @@
             }
             .spinner-label { font-size: 12.5px; color: var(--ink-muted); letter-spacing: 0.06em; }
             @keyframes spinner-border { 100% { transform: rotate(360deg); } }
+            /* 130차 — 로딩을 오프닝으로 덮는다. 셸 #hubIntro 와 같은 모양이라 넘어갈 때 이음새가 없다 */
+            #hubIntro{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 46%,#26160b 0%,#120d0a 38%,#0d0d0d 70%)}
+            #hubIntro.hidden{display:none}
+            #hubIntro .core{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+            #hubIntro img{width:84px;height:84px;object-fit:contain;filter:drop-shadow(0 0 22px rgba(243,115,33,.45));animation:hiLogo 1.25s cubic-bezier(.16,.84,.24,1) both}
+            #hubIntro .tt{font-size:26px;font-weight:800;letter-spacing:.02em;color:#fff;animation:hiText 1s .4s cubic-bezier(.16,.84,.24,1) both}
+            #hubIntro .tt span{color:#f37321}
+            #hubIntro .ln{width:220px;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,#f37321 20%,#f37321 80%,transparent);transform-origin:center;animation:hiLine 1s .7s cubic-bezier(.6,0,.2,1) both}
+            #hubIntro .sb{font-size:12px;letter-spacing:.32em;color:#9a978f;text-transform:uppercase;animation:hiText .9s .95s ease both}
+            @keyframes hiLogo{from{opacity:0;transform:scale(.72) rotate(-8deg)}to{opacity:1;transform:none}}
+            @keyframes hiText{from{opacity:0;transform:translateY(10px);letter-spacing:.3em}to{opacity:1;transform:none}}
+            @keyframes hiLine{from{transform:scaleX(0);opacity:.2}to{transform:scaleX(1);opacity:1}}
         </style>
     </head>
 
     <body>
+        <div id="hubIntro" class="hidden" aria-hidden="true"><div class="core"><img src="/img/misc/m0_latest_scale-to-width-down.png" alt="" onerror="this.style.display='none'"><div class="tt"><span>HLE</span> 통합 분석 허브</div><div class="ln"></div><div class="sb">Worlds 2026 · 분석 개요</div></div></div>
         <div id="loading" class="spinner-container">
             <div class="spinner"></div>
             <div class="spinner-label" id="loading-label">불러오는 중…</div>
@@ -254,9 +267,9 @@
             const REMEMBER_DAYS = 30;
             const LS_KEY = "hlehub_k", LS_EXP = "hlehub_exp";
             // 언어 선택 (허브 안의 EN/KO 버튼이 hlehub_lang을 기록)
-            const PAYLOAD_KO = "payload.bin?v=a84177bfb8", PAYLOAD_EN = "payload_en.bin?v=e7a5614339";
+            const PAYLOAD_KO = "payload.bin?v=2b16cbb945", PAYLOAD_EN = "payload_en.bin?v=e7a5614339";
             // 내장문서 조각 목록 — payload.bin 은 이제 셸(0.5MB)만 담고 문서는 따로 받는다
-            const PARTS_KO = {"scout":"p/ko-scout-3799581505.bin","db":"p/ko-db-dcd4a64976.bin","planner":"p/ko-planner-757e287278.bin","lab":"p/ko-lab-c0833f57fa.bin","wscout":"p/ko-wscout-dc7e408157.bin","wz":"p/ko-wz-73cf0fb892.bin","old":"p/ko-old-13a0ace3d1.bin"}, PARTS_EN = {"scout":"p/en-scout-983be254e9.bin","db":"p/en-db-605bafd6c9.bin","planner":"p/en-planner-a783423edf.bin","lab":"p/en-lab-1964ce3574.bin","wscout":"p/en-wscout-f2a2b4401c.bin","wz":"p/en-wz-4866b73ffe.bin","old":"p/en-old-e642997722.bin"};
+            const PARTS_KO = {"scout":"p/ko-scout-3799581505.bin","db":"p/ko-db-86ad7c9e6e.bin","planner":"p/ko-planner-757e287278.bin","lab":"p/ko-lab-c0833f57fa.bin","wscout":"p/ko-wscout-dc7e408157.bin","wz":"p/ko-wz-73cf0fb892.bin","old":"p/ko-old-13a0ace3d1.bin"}, PARTS_EN = {"scout":"p/en-scout-983be254e9.bin","db":"p/en-db-605bafd6c9.bin","planner":"p/en-planner-a783423edf.bin","lab":"p/en-lab-1964ce3574.bin","wscout":"p/en-wscout-f2a2b4401c.bin","wz":"p/en-wz-4866b73ffe.bin","old":"p/en-old-e642997722.bin"};
             let LANG = "ko";
             try { if (PAYLOAD_EN && localStorage.getItem("hlehub_lang") === "en") LANG = "en"; } catch (e) {}
             const PAYLOAD_URL = LANG === "en" ? PAYLOAD_EN : PAYLOAD_KO;
@@ -357,6 +370,7 @@
                 // payload 앞 12바이트가 IV (배포 버전 어긋나도 항상 복호화 가능)
                 const iv = buf.slice(0, 12), cipher = buf.slice(12);
                 const plainGz = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
+                showIntro();   // 130차: 비밀번호가 맞은 게 확인된 뒤에만 오프닝을 켠다
                 // 복호화 성공 → 언어 전환 버튼이 재로그인 없이 쓸 수 있게 세션에 키 보관
                 try {
                     const raw = await crypto.subtle.exportKey("raw", key);
@@ -369,6 +383,8 @@
                 // 셸에는 문서 본문이 비어 있다 — 시작 문서만 여기서 채우고,
                 // 나머지는 허브 안 지연 로더가 탭을 누를 때 받는다.
                 const full = await spliceStartDoc(html, key);
+                // 130차: 셸 오프닝이 「다 모인 모습」으로 이어받도록 오프닝이 처음 보인 시각을 넘긴다
+                try { if (introT0) sessionStorage.setItem("hle-intro-t0", String(introT0)); } catch (e) {}
                 document.open();
                 await writeChunked(full);
                 document.close();
@@ -391,6 +407,20 @@
                     return shellHtml; // 조각을 못 받아도 셸은 연다
                 }
             }
+
+            /* 130차 — 「허브 여는 중… N%」 대신 오프닝으로 로딩 시간을 덮는다 */
+            let introT0 = 0;
+            // 셸이 이어받기 신호(hle-intro-t0)를 읽는 언어에서만 오프닝을 쓴다(빌드 때 감지).
+            // 동결 영어판처럼 예전 셸이면 예전처럼 스피너 + 진행률을 보여 준다.
+            const INTRO_OK = (LANG === "en" ? false : true);
+            function showIntro() {
+                if (!INTRO_OK) { $("loading-label").textContent = "허브 여는 중…"; return; }
+                if (introT0) return;
+                introT0 = Date.now();
+                $("hubIntro").classList.remove("hidden");
+                $("loading").classList.add("hidden");   // 스피너 · 진행률 글자를 가린다
+            }
+            function hideIntro() { introT0 = 0; $("hubIntro").classList.add("hidden"); }
 
             function showLogin() {
                 $("loading").classList.add("hidden");
@@ -434,7 +464,8 @@
                 if (!saved) return false;
                 try {
                     const key = await crypto.subtle.importKey("raw", b64ToBuf(saved.b64), { name: "AES-GCM" }, true, ["decrypt"]);
-                    await decryptAndShow(key, (p) => { $("loading-label").textContent = "허브 여는 중… " + p + "%"; });
+                    // 130차: 오프닝이 덮으므로 진행률 글자를 쓰지 않는다(예전 셸이면 예전처럼 표시)
+                    await decryptAndShow(key, (p) => { if (!INTRO_OK) $("loading-label").textContent = "허브 여는 중… " + p + "%"; });
                     return true;
                 } catch (e) {
                     if (saved.session) { try { sessionStorage.removeItem("hlehub_sk"); } catch (_) {} }
@@ -451,9 +482,9 @@
                 }
                 const hasStored = !!savedKeyB64();
                 if (hasStored) {
-                    $("loading-label").textContent = "허브 여는 중…";
+                    showIntro();   // 130차: 저장된 키로 자동 접속 — 바로 오프닝
                     const ok = await tryStoredKey();
-                    if (!ok) showLogin();
+                    if (!ok) { hideIntro(); showLogin(); }
                 } else {
                     showLogin(); // 다운로드를 기다리지 않고 즉시 표시
                 }

@@ -341,7 +341,10 @@ async function buildLang(srcPath, shellOut, lang, otherLang, label, title) {
     writeFileSync(shellOut, payload);
     console.log("  " + shellOut + " (셸): " + (payload.length / 1048576).toFixed(2) + "MB"
         + "  · 문서 " + parts.length + "개 합계 " + (partBytes / 1048576).toFixed(1) + "MB");
-    return { url: shellOut + "?v=" + hash, manifest, fixedStart };
+    // 130차~: 셸 오프닝이 로그인 화면 오프닝을 이어받는지(hle-intro-t0 신호를 읽는지)
+    const introOk = shell.includes("hle-intro-t0");
+    console.log("  로딩 오프닝: " + (introOk ? "로그인 화면이 오프닝으로 덮음" : "스피너(예전 방식)"));
+    return { url: shellOut + "?v=" + hash, manifest, fixedStart, introOk };
 }
 
 // ── 빌드 ──
@@ -370,7 +373,9 @@ const out = template
     .replace("__PARTS_KO__", JSON.stringify(ko.manifest.parts))
     .replace("__PARTS_EN__", JSON.stringify(en ? en.manifest.parts : {}))
     .replace("__START_KO__", JSON.stringify(ko.fixedStart))
-    .replace("__START_EN__", JSON.stringify(en ? en.fixedStart : null));
+    .replace("__START_EN__", JSON.stringify(en ? en.fixedStart : null))
+    .replace("__INTRO_KO__", JSON.stringify(!!ko.introOk))
+    .replace("__INTRO_EN__", JSON.stringify(!!(en && en.introOk)));
 
 writeFileSync("index.html", out);
 console.log("완료: index.html " + (out.length / 1024).toFixed(0) + "KB · 한국어" + (en ? " + 영어" : " 단독"));
