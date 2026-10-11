@@ -334,8 +334,17 @@ async function buildLang(srcPath, shellOut, lang, otherLang, label, title) {
     const keep = keepM ? [...keepM[1].matchAll(/([a-z0-9-]+)\s*:/g)].map(m => m[1]) : [];
     console.log("  탭 규칙: " + (firstDoc ? "그룹 첫 문서" : "마지막 문서") + (keep.length ? " · 보관 문서 " + keep.join(",") : ""));
     const runtime = hubRuntime(manifest, otherLang, label, title, { firstDoc, keep });
-    const i = shell.lastIndexOf("</body>");
-    const shellFinal = i === -1 ? shell + runtime : shell.slice(0, i) + runtime + shell.slice(i);
+    // 132차 보정: 로그인 화면에서 이어받은 오프닝(.pre)은 `#hubIntro.pre.in .bg` 규칙이 더 강해서
+    // `#hubIntro.out .bg` 소거가 안 먹고 주황 빛이 열린 뒤에도 남는다 → 원본이 .pre 열림을 직접 다룰 때까지 덧붙인다
+    let shellIn = shell;
+    if (shell.includes("#hubIntro.pre.in .bg") && !/#hubIntro\.pre(\.in)?\.out/.test(shell)) {
+        const fix = '<style id="hle-intro-prefix">#hubIntro.pre.in.out .bg,#hubIntro.pre.in.out .lg::before{animation:hiFadeOut .25s ease forwards}</style>';
+        const s0 = shell.indexOf('<style id="hle-intro125">'), s1 = s0 === -1 ? -1 : shell.indexOf("</style>", s0);
+        shellIn = s1 === -1 ? shell.replace("</head>", fix + "</head>") : shell.slice(0, s1 + 8) + fix + shell.slice(s1 + 8);
+        console.log("  오프닝 보정: 이어받은 오프닝도 열릴 때 주황 빛 소거");
+    }
+    const i = shellIn.lastIndexOf("</body>");
+    const shellFinal = i === -1 ? shellIn + runtime : shellIn.slice(0, i) + runtime + shellIn.slice(i);
 
     const { payload, hash } = await seal(shellFinal, lang + "-shell");
     writeFileSync(shellOut, payload);
