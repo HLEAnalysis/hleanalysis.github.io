@@ -202,17 +202,15 @@
             .spinner-label { font-size: 12.5px; color: var(--ink-muted); letter-spacing: 0.06em; }
             @keyframes spinner-border { 100% { transform: rotate(360deg); } }
             /* 131차 — 입장 오프닝: 보일 때 모이고(.in) · 머무는 동안 은은히 움직이고 · 위아래로 갈라져 열린다(.out). 로그인 화면 이어받기 = .pre */
+            /* 132차 — 반쪽 단색 · 주황 기운은 #hubIntro::after · 경계 주황 줄 삭제 (셸 hle-intro125와 같은 값) */
             #hubIntro{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;cursor:pointer;overflow:hidden}
-            #hubIntro .pt,#hubIntro .pb{position:absolute;left:0;right:0;height:50.5%;background:radial-gradient(ellipse at 50% 46%,#26160b 0%,#120d0a 38%,#0d0d0d 70%);background-size:100vw 100vh;
+            #hubIntro .pt,#hubIntro .pb{position:absolute;left:0;right:0;height:50.5%;background:#0d0d0d;
               transition:transform .9s cubic-bezier(.65,0,.25,1) .16s}
-            #hubIntro .pt::after,#hubIntro .pb::after{content:"";position:absolute;left:0;right:0;height:2px;opacity:0;transition:opacity .25s ease;
-              background:linear-gradient(90deg,transparent,rgba(243,115,33,.9) 30%,#ffd2ad 50%,rgba(243,115,33,.9) 70%,transparent);box-shadow:0 0 18px rgba(243,115,33,.55)}
-            #hubIntro .pt::after{bottom:0}#hubIntro .pb::after{top:0}
-            #hubIntro.out .pt::after,#hubIntro.out .pb::after{opacity:1}
             #hubIntro .pt{top:0;background-position:center top}#hubIntro .pb{bottom:0;background-position:center bottom}
-            #hubIntro .bg{position:absolute;left:50%;top:46%;width:72vmax;height:72vmax;margin:-36vmax 0 0 -36vmax;border-radius:50%;pointer-events:none;opacity:0;
+            #hubIntro .bg{position:absolute;z-index:1;left:50%;top:46%;width:72vmax;height:72vmax;margin:-36vmax 0 0 -36vmax;border-radius:50%;pointer-events:none;opacity:0;
               background:radial-gradient(circle,rgba(243,115,33,.16) 0%,rgba(243,115,33,.05) 38%,transparent 66%)}
-            #hubIntro .core{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+            #hubIntro::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 46%,#26160b 0%,#120d0a 38%,rgba(13,13,13,0) 70%)}
+            #hubIntro .core{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
             #hubIntro .lg{position:relative;width:84px;height:84px}
             #hubIntro .lg::before{content:"";position:absolute;left:50%;top:50%;width:190px;height:190px;margin:-95px 0 0 -95px;border-radius:50%;opacity:0;
               background:radial-gradient(circle,rgba(243,115,33,.34) 0%,rgba(243,115,33,.10) 42%,transparent 70%)}
@@ -239,7 +237,8 @@
             #hubIntro.out .ln{opacity:1;animation:hiLineOut .55s cubic-bezier(.5,0,.2,1) forwards}
             #hubIntro.out .lg{opacity:1;animation:hiLogoOut .55s cubic-bezier(.5,0,.2,1) forwards}
             #hubIntro.out .tt,#hubIntro.out .sb{opacity:1;animation:hiTextOut .45s ease forwards}
-            #hubIntro.out .bg,#hubIntro.out .lg::before{animation:hiFadeOut .5s ease forwards}
+            #hubIntro.out::after{animation:hiFadeOut .25s ease forwards}
+            #hubIntro.out .bg,#hubIntro.out .lg::before{animation:hiFadeOut .25s ease forwards}
             @keyframes hiLogo{0%{opacity:0;transform:scale(.62) rotate(-10deg);filter:blur(6px)}60%{opacity:1;filter:blur(0)}100%{opacity:1;transform:none;filter:none}}
             @keyframes hiText{from{opacity:0;transform:translateY(12px);letter-spacing:.34em}to{opacity:1;transform:none;letter-spacing:.02em}}
             @keyframes hiSub{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -308,9 +307,9 @@
             const REMEMBER_DAYS = 30;
             const LS_KEY = "hlehub_k", LS_EXP = "hlehub_exp";
             // 언어 선택 (허브 안의 EN/KO 버튼이 hlehub_lang을 기록)
-            const PAYLOAD_KO = "payload.bin?v=1cbecc226f", PAYLOAD_EN = "payload_en.bin?v=e7a5614339";
+            const PAYLOAD_KO = "payload.bin?v=11d4350a13", PAYLOAD_EN = "payload_en.bin?v=e7a5614339";
             // 내장문서 조각 목록 — payload.bin 은 이제 셸(0.5MB)만 담고 문서는 따로 받는다
-            const PARTS_KO = {"scout":"p/ko-scout-3799581505.bin","db":"p/ko-db-86ad7c9e6e.bin","planner":"p/ko-planner-757e287278.bin","lab":"p/ko-lab-c0833f57fa.bin","wscout":"p/ko-wscout-dc7e408157.bin","wz":"p/ko-wz-73cf0fb892.bin","old":"p/ko-old-13a0ace3d1.bin"}, PARTS_EN = {"scout":"p/en-scout-983be254e9.bin","db":"p/en-db-605bafd6c9.bin","planner":"p/en-planner-a783423edf.bin","lab":"p/en-lab-1964ce3574.bin","wscout":"p/en-wscout-f2a2b4401c.bin","wz":"p/en-wz-4866b73ffe.bin","old":"p/en-old-e642997722.bin"};
+            const PARTS_KO = {"scout":"p/ko-scout-ac7c5ba266.bin","db":"p/ko-db-277f89c4fd.bin","planner":"p/ko-planner-757e287278.bin","lab":"p/ko-lab-c0833f57fa.bin","wscout":"p/ko-wscout-dc7e408157.bin","wz":"p/ko-wz-82bd9fbe0a.bin","old":"p/ko-old-39aafcc7d6.bin"}, PARTS_EN = {"scout":"p/en-scout-983be254e9.bin","db":"p/en-db-605bafd6c9.bin","planner":"p/en-planner-a783423edf.bin","lab":"p/en-lab-1964ce3574.bin","wscout":"p/en-wscout-f2a2b4401c.bin","wz":"p/en-wz-4866b73ffe.bin","old":"p/en-old-e642997722.bin"};
             let LANG = "ko";
             try { if (PAYLOAD_EN && localStorage.getItem("hlehub_lang") === "en") LANG = "en"; } catch (e) {}
             const PAYLOAD_URL = LANG === "en" ? PAYLOAD_EN : PAYLOAD_KO;
