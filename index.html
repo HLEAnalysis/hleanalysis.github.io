@@ -201,23 +201,64 @@
             }
             .spinner-label { font-size: 12.5px; color: var(--ink-muted); letter-spacing: 0.06em; }
             @keyframes spinner-border { 100% { transform: rotate(360deg); } }
-            /* 130차 — 로딩을 오프닝으로 덮는다. 셸 #hubIntro 와 같은 모양이라 넘어갈 때 이음새가 없다 */
-            #hubIntro{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 46%,#26160b 0%,#120d0a 38%,#0d0d0d 70%)}
-            #hubIntro.hidden{display:none}
-            #hubIntro .core{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
-            #hubIntro img{width:84px;height:84px;object-fit:contain;filter:drop-shadow(0 0 22px rgba(243,115,33,.45));animation:hiLogo 1.25s cubic-bezier(.16,.84,.24,1) both}
-            #hubIntro .tt{font-size:26px;font-weight:800;letter-spacing:.02em;color:#fff;animation:hiText 1s .4s cubic-bezier(.16,.84,.24,1) both}
+            /* 131차 — 입장 오프닝: 보일 때 모이고(.in) · 머무는 동안 은은히 움직이고 · 위아래로 갈라져 열린다(.out). 로그인 화면 이어받기 = .pre */
+            #hubIntro{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;cursor:pointer;overflow:hidden}
+            #hubIntro .pt,#hubIntro .pb{position:absolute;left:0;right:0;height:50.5%;background:radial-gradient(ellipse at 50% 46%,#26160b 0%,#120d0a 38%,#0d0d0d 70%);background-size:100vw 100vh;
+              transition:transform .9s cubic-bezier(.65,0,.25,1) .16s}
+            #hubIntro .pt::after,#hubIntro .pb::after{content:"";position:absolute;left:0;right:0;height:2px;opacity:0;transition:opacity .25s ease;
+              background:linear-gradient(90deg,transparent,rgba(243,115,33,.9) 30%,#ffd2ad 50%,rgba(243,115,33,.9) 70%,transparent);box-shadow:0 0 18px rgba(243,115,33,.55)}
+            #hubIntro .pt::after{bottom:0}#hubIntro .pb::after{top:0}
+            #hubIntro.out .pt::after,#hubIntro.out .pb::after{opacity:1}
+            #hubIntro .pt{top:0;background-position:center top}#hubIntro .pb{bottom:0;background-position:center bottom}
+            #hubIntro .bg{position:absolute;left:50%;top:46%;width:72vmax;height:72vmax;margin:-36vmax 0 0 -36vmax;border-radius:50%;pointer-events:none;opacity:0;
+              background:radial-gradient(circle,rgba(243,115,33,.16) 0%,rgba(243,115,33,.05) 38%,transparent 66%)}
+            #hubIntro .core{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+            #hubIntro .lg{position:relative;width:84px;height:84px}
+            #hubIntro .lg::before{content:"";position:absolute;left:50%;top:50%;width:190px;height:190px;margin:-95px 0 0 -95px;border-radius:50%;opacity:0;
+              background:radial-gradient(circle,rgba(243,115,33,.34) 0%,rgba(243,115,33,.10) 42%,transparent 70%)}
+            #hubIntro img{position:relative;width:84px;height:84px;object-fit:contain;filter:drop-shadow(0 0 22px rgba(243,115,33,.45))}
+            #hubIntro .tt{font-size:26px;font-weight:800;letter-spacing:.02em;color:#fff}
             #hubIntro .tt span{color:#f37321}
-            #hubIntro .ln{width:220px;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,#f37321 20%,#f37321 80%,transparent);transform-origin:center;animation:hiLine 1s .7s cubic-bezier(.6,0,.2,1) both}
-            #hubIntro .sb{font-size:12px;letter-spacing:.32em;color:#9a978f;text-transform:uppercase;animation:hiText .9s .95s ease both}
-            @keyframes hiLogo{from{opacity:0;transform:scale(.72) rotate(-8deg)}to{opacity:1;transform:none}}
-            @keyframes hiText{from{opacity:0;transform:translateY(10px);letter-spacing:.3em}to{opacity:1;transform:none}}
+            #hubIntro .ln{position:relative;width:220px;height:3px;border-radius:2px;overflow:hidden;background:linear-gradient(90deg,transparent,#f37321 20%,#f37321 80%,transparent);transform-origin:center}
+            #hubIntro .ln::after{content:"";position:absolute;top:0;bottom:0;left:0;width:34%;transform:translateX(-120%);background:linear-gradient(90deg,transparent,rgba(255,236,214,.95),transparent)}
+            #hubIntro .sb{font-size:12px;letter-spacing:.32em;color:#9a978f;text-transform:uppercase}
+            #hubIntro .lg,#hubIntro .tt,#hubIntro .ln,#hubIntro .sb{opacity:0}
+            #hubIntro.in .lg{animation:hiLogo 1.15s cubic-bezier(.16,.84,.24,1) both}
+            #hubIntro.in .tt{animation:hiText 1s .35s cubic-bezier(.16,.84,.24,1) both}
+            #hubIntro.in .ln{animation:hiLine .95s .65s cubic-bezier(.6,0,.2,1) both}
+            #hubIntro.in .sb{animation:hiSub .85s .95s ease both}
+            #hubIntro.in .bg{animation:hiFade 1.2s ease both,hiDrift 7s 1.2s ease-in-out infinite alternate}
+            #hubIntro.in .lg::before{animation:hiFade .9s .7s ease both,hiPulse 2.8s 1.6s ease-in-out infinite}
+            #hubIntro.in .ln::after{animation:hiSheen 2.6s 1.7s ease-in-out infinite}
+            #hubIntro.pre .lg,#hubIntro.pre .tt,#hubIntro.pre .ln,#hubIntro.pre .sb,#hubIntro.pre .bg,#hubIntro.pre .lg::before{opacity:1;animation:none}
+            #hubIntro.pre.in .bg{animation:hiDrift 7s ease-in-out infinite alternate}
+            #hubIntro.pre.in .lg::before{animation:hiPulse 2.8s ease-in-out infinite}
+            #hubIntro.pre.in .ln::after{animation:hiSheen 2.6s .2s ease-in-out infinite}
+            #hubIntro.out{pointer-events:none}
+            #hubIntro.out .pt{transform:translateY(-101%)}#hubIntro.out .pb{transform:translateY(101%)}
+            #hubIntro.out .ln{opacity:1;animation:hiLineOut .55s cubic-bezier(.5,0,.2,1) forwards}
+            #hubIntro.out .lg{opacity:1;animation:hiLogoOut .55s cubic-bezier(.5,0,.2,1) forwards}
+            #hubIntro.out .tt,#hubIntro.out .sb{opacity:1;animation:hiTextOut .45s ease forwards}
+            #hubIntro.out .bg,#hubIntro.out .lg::before{animation:hiFadeOut .5s ease forwards}
+            @keyframes hiLogo{0%{opacity:0;transform:scale(.62) rotate(-10deg);filter:blur(6px)}60%{opacity:1;filter:blur(0)}100%{opacity:1;transform:none;filter:none}}
+            @keyframes hiText{from{opacity:0;transform:translateY(12px);letter-spacing:.34em}to{opacity:1;transform:none;letter-spacing:.02em}}
+            @keyframes hiSub{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
             @keyframes hiLine{from{transform:scaleX(0);opacity:.2}to{transform:scaleX(1);opacity:1}}
+            @keyframes hiSheen{0%{transform:translateX(-120%)}60%,100%{transform:translateX(330%)}}
+            @keyframes hiPulse{0%,100%{transform:scale(.92)}50%{transform:scale(1.14)}}
+            @keyframes hiDrift{from{transform:translate(-2.5%,-1.5%) scale(1)}to{transform:translate(2.5%,2%) scale(1.08)}}
+            @keyframes hiLineOut{from{transform:scaleX(1);opacity:1}55%{opacity:1}to{transform:scaleX(9);opacity:0}}
+            @keyframes hiLogoOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(1.22)}}
+            @keyframes hiTextOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-8px)}}
+            @keyframes hiFadeOut{to{opacity:0}}
+            @keyframes hiFade{from{opacity:0}to{opacity:1}}
+            #hubIntro.hidden{display:none}
+            @media (prefers-reduced-motion:reduce){#hubIntro .lg,#hubIntro .tt,#hubIntro .ln,#hubIntro .sb{opacity:1!important;animation:none!important}}
         </style>
     </head>
 
     <body>
-        <div id="hubIntro" class="hidden" aria-hidden="true"><div class="core"><img src="/img/misc/m0_latest_scale-to-width-down.png" alt="" onerror="this.style.display='none'"><div class="tt"><span>HLE</span> 통합 분석 허브</div><div class="ln"></div><div class="sb">Worlds 2026 · 분석 개요</div></div></div>
+        <div id="hubIntro" class="hidden" aria-hidden="true"><div class="pt"></div><div class="pb"></div><div class="bg"></div><div class="core"><div class="lg"><img src="/img/misc/m0_latest_scale-to-width-down.png" alt="" onerror="this.style.display='none'"></div><div class="tt"><span>HLE</span> 통합 분석 허브</div><div class="ln"></div><div class="sb">Worlds 2026 · 분석 개요</div></div></div>
         <div id="loading" class="spinner-container">
             <div class="spinner"></div>
             <div class="spinner-label" id="loading-label">불러오는 중…</div>
@@ -267,7 +308,7 @@
             const REMEMBER_DAYS = 30;
             const LS_KEY = "hlehub_k", LS_EXP = "hlehub_exp";
             // 언어 선택 (허브 안의 EN/KO 버튼이 hlehub_lang을 기록)
-            const PAYLOAD_KO = "payload.bin?v=2b16cbb945", PAYLOAD_EN = "payload_en.bin?v=e7a5614339";
+            const PAYLOAD_KO = "payload.bin?v=1cbecc226f", PAYLOAD_EN = "payload_en.bin?v=e7a5614339";
             // 내장문서 조각 목록 — payload.bin 은 이제 셸(0.5MB)만 담고 문서는 따로 받는다
             const PARTS_KO = {"scout":"p/ko-scout-3799581505.bin","db":"p/ko-db-86ad7c9e6e.bin","planner":"p/ko-planner-757e287278.bin","lab":"p/ko-lab-c0833f57fa.bin","wscout":"p/ko-wscout-dc7e408157.bin","wz":"p/ko-wz-73cf0fb892.bin","old":"p/ko-old-13a0ace3d1.bin"}, PARTS_EN = {"scout":"p/en-scout-983be254e9.bin","db":"p/en-db-605bafd6c9.bin","planner":"p/en-planner-a783423edf.bin","lab":"p/en-lab-1964ce3574.bin","wscout":"p/en-wscout-f2a2b4401c.bin","wz":"p/en-wz-4866b73ffe.bin","old":"p/en-old-e642997722.bin"};
             let LANG = "ko";
@@ -417,10 +458,12 @@
                 if (!INTRO_OK) { $("loading-label").textContent = "허브 여는 중…"; return; }
                 if (introT0) return;
                 introT0 = Date.now();
-                $("hubIntro").classList.remove("hidden");
+                const o = $("hubIntro");
+                o.classList.remove("hidden");
+                requestAnimationFrame(() => requestAnimationFrame(() => o.classList.add("in")));   // 보일 때 모이기 시작
                 $("loading").classList.add("hidden");   // 스피너 · 진행률 글자를 가린다
             }
-            function hideIntro() { introT0 = 0; $("hubIntro").classList.add("hidden"); }
+            function hideIntro() { introT0 = 0; const o = $("hubIntro"); o.classList.add("hidden"); o.classList.remove("in"); }
 
             function showLogin() {
                 $("loading").classList.add("hidden");
