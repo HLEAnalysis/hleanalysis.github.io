@@ -95,7 +95,7 @@ function splitDocs(html) {
 }
 
 // ── 허브 안에 주입할 스크립트 (지연 로딩 + 언어 전환) ──
-function hubRuntime(manifest, otherLang, label, title) {
+function hubRuntime(manifest, otherLang, label, title, opts) {
     const S = "<" + "script", E = "</" + "script>";
     return `
 ${S} type="application/json" id="hle-parts">${JSON.stringify(manifest)}${E}
@@ -136,6 +136,22 @@ ${S}>
         if (el) { el.textContent = msg; el.style.display = "grid"; }
     }
 
+    /* 셸(129차~)은 문서마다 iframe 을 만들고(f.__id) 데이터 문서는 미리 읽어 보관한다.
+       본문이 오기 전에 만들어진 빈 iframe 이 남아 있으면 지금 채운 본문으로 다시 읽힌다.
+       __ready 를 내려 두면 셸의 show() 가 load 를 기다렸다가 보여 준다. */
+    function repairFrames(id){
+        var el = document.getElementById("src-" + id);
+        if (!el) return;
+        var src = null;
+        Array.prototype.forEach.call(document.querySelectorAll("iframe"), function(f){
+            if (f.__id !== id || !f.__src) return;
+            if ((f.srcdoc || "").length > 64) return;          // 이미 제대로 읽힌 프레임
+            if (src === null) src = el.textContent.split("%%ENDSCRIPT%%").join("</scr" + "ipt");
+            f.__ready = 0;
+            f.srcdoc = src;
+        });
+    }
+
     function fetchPart(id, onProgress){
         if (loaded[id]) return Promise.resolve();
         if (inflight[id]) return inflight[id];
@@ -167,6 +183,7 @@ ${S}>
             if (!el) throw new Error("no slot " + id);
             el.textContent = text;
             loaded[id] = true;
+            repairFrames(id);
         })();
         inflight[id].catch(function(){ delete inflight[id]; });
         return inflight[id];
@@ -186,6 +203,7 @@ ${S}>
        셸은 그룹 탭을 누르면 「그 그룹에서 마지막으로 보던 문서」를 연다. 어떤 문서가
        열릴지 미리 알아야 그 조각만 받으므로 같은 규칙을 여기서도 따라 둔다. */
     var GROUPS = { scout: ["scout"], data: ["db", "planner"], vault: ["lab", "old", "wz"] };
+    var OPT = ${JSON.stringify(opts || {})};   /* 빌드 때 셸에서 감지: firstDoc · keep */
     var OWNER = {}, LAST = {};
     Object.keys(GROUPS).forEach(function(g){
         GROUPS[g].forEach(function(d){ OWNER[d] = g; });
@@ -202,7 +220,8 @@ ${S}>
         if (!id) {
             var b = t.closest("button.tab");
             if (!b) return;
-            id = LAST[b.dataset.tab];
+            /* 129차~ 셸: 상단 탭은 언제나 그 그룹의 첫 문서. 그 전 셸: 마지막으로 보던 문서 */
+            id = OPT.firstDoc ? (GROUPS[b.dataset.tab] || [])[0] : LAST[b.dataset.tab];
             if (!id) return;
         }
         if (OWNER[id]) LAST[OWNER[id]] = id;       // 셸과 같은 상태를 유지한다
@@ -231,6 +250,23 @@ ${S}>
             note("문서를 불러오지 못했습니다. 새로고침 해주세요.");
         }).then(function(){ recovering = false; });
     });
+
+    /* 안전망 2 — 셸(129차~)이 직접 만든 iframe(f.__id)이 빈 채로 읽혔으면 그 문서를 받아 채운다.
+       iframe 의 load 는 거품이 일지 않지만 캡처 단계에서는 document 까지 올라온다. */
+    document.addEventListener("load", function(e){
+        var f = e.target;
+        if (!f || f.tagName !== "IFRAME" || !f.__id) return;
+        var id = f.__id;
+        if (loaded[id] || !PARTS[id]) return;
+        fetchPart(id).catch(function(){});   // 채워지면 repairFrames 가 그 프레임을 다시 읽힌다
+    }, true);
+
+    /* 셸이 보관해 두는 문서(KEEP — 데이터 문서)는 오프닝이 도는 동안 미리 받아 둔다.
+       그래야 셸의 「미리 읽기」가 빈 칸이 아니라 실제 본문을 읽는다. */
+    if (OPT.keep && OPT.keep.length) setTimeout(function(){
+        try { if (navigator.connection && navigator.connection.saveData) return; } catch(e) {}
+        OPT.keep.forEach(function(id){ if (PARTS[id] && !loaded[id]) fetchPart(id).catch(function(){}); });
+    }, 1200);
 
     /* LOG 드로어 등에서 쓰는 전역 진입점에도 같은 보호를 씌운다 */
     var shellShow = window.hubShow;
@@ -292,7 +328,12 @@ async function buildLang(srcPath, shellOut, lang, otherLang, label, title) {
         console.log("    " + file + "  " + (payload.length / 1048576).toFixed(2) + "MB");
     }
 
-    const runtime = hubRuntime(manifest, otherLang, label, title);
+    // 셸 동작 감지 (129차~): 상단 탭 = 그룹 첫 문서 / 보관 문서(KEEP)
+    const firstDoc = /show\(\s*GROUPS\[\s*b\.dataset\.tab\s*\]\[0\]\[0\]\s*\)/.test(shell);
+    const keepM = shell.match(/var KEEP = \{([^}]*)\}/);
+    const keep = keepM ? [...keepM[1].matchAll(/([a-z0-9-]+)\s*:/g)].map(m => m[1]) : [];
+    console.log("  탭 규칙: " + (firstDoc ? "그룹 첫 문서" : "마지막 문서") + (keep.length ? " · 보관 문서 " + keep.join(",") : ""));
+    const runtime = hubRuntime(manifest, otherLang, label, title, { firstDoc, keep });
     const i = shell.lastIndexOf("</body>");
     const shellFinal = i === -1 ? shell + runtime : shell.slice(0, i) + runtime + shell.slice(i);
 
