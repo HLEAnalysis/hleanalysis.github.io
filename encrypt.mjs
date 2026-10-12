@@ -332,6 +332,8 @@ async function buildLang(srcPath, shellOut, lang, otherLang, label, title) {
     const firstDoc = /show\(\s*GROUPS\[\s*b\.dataset\.tab\s*\]\[0\]\[0\]\s*\)/.test(shell);
     const keepM = shell.match(/var KEEP = \{([^}]*)\}/);
     const keep = keepM ? [...keepM[1].matchAll(/([a-z0-9-]+)\s*:/g)].map(m => m[1]) : [];
+    // 139차~: 선언 뒤에 덧붙이는 형태(KEEP.lab = 1;)도 보관 문서로 친다
+    for (const m of shell.matchAll(/\bKEEP\.([a-z0-9]+)\s*=\s*1\b/g)) if (!keep.includes(m[1])) keep.push(m[1]);
     console.log("  탭 규칙: " + (firstDoc ? "그룹 첫 문서" : "마지막 문서") + (keep.length ? " · 보관 문서 " + keep.join(",") : ""));
     const runtime = hubRuntime(manifest, otherLang, label, title, { firstDoc, keep });
     // 132차 보정: 로그인 화면에서 이어받은 오프닝(.pre)은 `#hubIntro.pre.in .bg` 규칙이 더 강해서
