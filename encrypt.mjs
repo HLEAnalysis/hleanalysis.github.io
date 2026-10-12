@@ -100,7 +100,10 @@ function hubRuntime(manifest, otherLang, label, title, opts) {
     return `
 ${S} type="application/json" id="hle-parts">${JSON.stringify(manifest)}${E}
 <style>/* Cowork 원본의 헤더 언어 링크(master_en.html 상대경로, 배포 구조에선 404)를 숨김 */
-#langtoggle{display:none!important}</style>
+#langtoggle{display:none!important}
+/* 2026-10-12 사용자 요청: LOG 창 머리의 「팀 전력분석 열기」 바로가기 버튼 숨김 (팀 전력분석은 분석 개요 서브탭으로 그대로 열림) */
+#ulogpanel .uhead .uopen{display:none!important}
+#ulogpanel .uhead .uclose{margin-left:auto}</style>
 <div id="hlelang" title="${title}" style="position:fixed;right:68px;top:14px;z-index:50;letter-spacing:.14em;font-size:10px;font-weight:700;color:#c3c2b7;background:#1a1a19;border:1px solid rgba(255,255,255,.10);border-radius:999px;padding:4px 12px;cursor:pointer;opacity:.55;transition:opacity .2s,color .2s;user-select:none" onmouseover="this.style.opacity=1;this.style.color='#f37321'" onmouseout="this.style.opacity=.55;this.style.color='#c3c2b7'">${label}</div>
 ${S}>
 /* ══ 내장문서 지연 로딩 ══
