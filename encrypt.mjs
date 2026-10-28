@@ -205,8 +205,9 @@ ${S}>
     /* 탭 클릭을 캡처 단계에서 가로챈다 — 셸의 기존 핸들러(버블)보다 먼저 돈다.
        셸은 그룹 탭을 누르면 「그 그룹에서 마지막으로 보던 문서」를 연다. 어떤 문서가
        열릴지 미리 알아야 그 조각만 받으므로 같은 규칙을 여기서도 따라 둔다. */
-    var GROUPS = { scout: ["scout"], data: ["db", "planner"], vault: ["lab", "old", "wz"] };
-    var OPT = ${JSON.stringify(opts || {})};   /* 빌드 때 셸에서 감지: firstDoc · keep */
+    var OPT = ${JSON.stringify(opts || {})};   /* 빌드 때 셸에서 감지: firstDoc · keep · groups */
+    /* 258차~: 셸 GROUPS 를 빌드 때 읽어 온다(상대 분석 탭 등 새 탭). 못 읽으면 예전 고정값 */
+    var GROUPS = OPT.groups || { scout: ["scout"], data: ["db", "planner"], vault: ["lab", "old", "wz"] };
     var OWNER = {}, LAST = {};
     Object.keys(GROUPS).forEach(function(g){
         GROUPS[g].forEach(function(d){ OWNER[d] = g; });
@@ -337,8 +338,18 @@ async function buildLang(srcPath, shellOut, lang, otherLang, label, title) {
     const keep = keepM ? [...keepM[1].matchAll(/([a-z0-9-]+)\s*:/g)].map(m => m[1]) : [];
     // 139차~: 선언 뒤에 덧붙이는 형태(KEEP.lab = 1;)도 보관 문서로 친다
     for (const m of shell.matchAll(/\bKEEP\.([a-z0-9]+)\s*=\s*1\b/g)) if (!keep.includes(m[1])) keep.push(m[1]);
-    console.log("  탭 규칙: " + (firstDoc ? "그룹 첫 문서" : "마지막 문서") + (keep.length ? " · 보관 문서 " + keep.join(",") : ""));
-    const runtime = hubRuntime(manifest, otherLang, label, title, { firstDoc, keep });
+    // 258차~: 상단 탭 → 문서 목록(var GROUPS = { tab: [['id', …], …], … })
+    let groups = null;
+    const gM = shell.match(/var GROUPS = \{([\s\S]*?)\};/);
+    if (gM && firstDoc) {   /* 동결된 영어판(예전 셸)은 고정값 그대로 둔다 */
+        groups = {};
+        for (const m of gM[1].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([a-z0-9]+)\s*:\s*\[((?:\s*\[[^\]]*\]\s*,?)*)\s*\]/g))
+            groups[m[1]] = [...m[2].matchAll(/\[\s*'([a-z0-9-]+)'/g)].map(x => x[1]);
+        if (!Object.keys(groups).length) groups = null;
+    }
+    console.log("  탭 규칙: " + (firstDoc ? "그룹 첫 문서" : "마지막 문서") + (keep.length ? " · 보관 문서 " + keep.join(",") : "")
+        + (groups ? " · 탭 " + Object.entries(groups).map(([g, d]) => g + "[" + d.join(",") + "]").join(" ") : " · 탭 목록 감지 못 함(고정값)"));
+    const runtime = hubRuntime(manifest, otherLang, label, title, { firstDoc, keep, groups });
     // 132차 보정: 로그인 화면에서 이어받은 오프닝(.pre)은 `#hubIntro.pre.in .bg` 규칙이 더 강해서
     // `#hubIntro.out .bg` 소거가 안 먹고 주황 빛이 열린 뒤에도 남는다 → 원본이 .pre 열림을 직접 다룰 때까지 덧붙인다
     let shellIn = shell;
