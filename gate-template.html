@@ -14,7 +14,7 @@
 
         <!-- 휴대폰 앱(PWA): 홈 화면에 추가 → 아이콘 · 전체 화면 실행 -->
         <link rel="manifest" href="/manifest.webmanifest" />
-        <meta name="theme-color" content="#0d0d0d" />
+        <meta name="theme-color" content="#0a0a0b" />
         <link rel="icon" type="image/png" href="/icons/favicon-32.png" />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -54,6 +54,8 @@
                 background: var(--page);
                 color: var(--ink-1);
                 line-height: 1.55;
+                word-break: keep-all;   /* 한글이 낱자 단위로 줄바꿈되지 않게(「열립니 / 다」) */
+                overflow-wrap: break-word;
                 -webkit-font-smoothing: antialiased;
             }
             /* 배경: 주황 빛 세 덩이가 아주 천천히 흐른다(그림 없이 그라데이션만 · transform 만 움직임) + 옅은 격자 */
@@ -349,6 +351,38 @@
             .gbar i { position: relative; display: block; height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, #c4500d, var(--brand), var(--brand-hi)); transition: width .2s; }
             .gbar i::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent); animation: gSheen 1.4s ease-in-out infinite; }
             @keyframes gSheen { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+            /* 관리: 접속 기록 거르기 줄 · 날짜 묶음 · 올릴 파일 끌어다 놓기 · 판 기록 카드 */
+            .lbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+            .lbar select, .lbar input { height: 32px; background: var(--field); color: #fff; border: 1px solid var(--border); border-radius: 9px; padding: 0 10px; font: inherit; font-size: 12.5px; outline: 0; }
+            .lbar select:focus, .lbar input:focus { border-color: var(--brand); }
+            .lsearch { width: 220px; max-width: 100%; }
+            .lsearch input { width: 100%; padding-left: 32px; }
+            .lsearch .ic { left: 10px; width: 15px; height: 15px; }
+            .tw tr.day td { position: sticky; left: 0; background: rgba(243, 115, 33, 0.06); color: var(--brand-hi); font-weight: 700; font-size: 12px; letter-spacing: 0.02em; padding: 6px 11px; }
+            .pill.n { background: rgba(255, 255, 255, 0.07); color: var(--ink-2); }
+            .acard > .drop, .drop { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 12px; padding: 22px 16px; border: 1.5px dashed rgba(255, 255, 255, 0.18); border-radius: 14px; background: rgba(0, 0, 0, 0.22); color: var(--ink-muted); text-align: center; cursor: pointer; transition: all 0.15s; }
+            .drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+            .drop b { color: var(--ink-2); font-size: 13.5px; }
+            .drop span { font-size: 12px; }
+            .drop:hover, .drop.over { border-color: var(--brand); background: rgba(243, 115, 33, 0.08); color: var(--brand-hi); }
+            .drop.has { border-style: solid; border-color: rgba(95, 209, 139, 0.45); background: rgba(95, 209, 139, 0.06); color: var(--ok); }
+            .drop.has b { color: #fff; }
+            .vlist { display: grid; gap: 8px; }
+            .vcard { padding: 12px 14px; border-radius: 12px; background: var(--surface-1); border: 1px solid var(--border); }
+            .vcard.cur { border-color: rgba(95, 209, 139, 0.4); box-shadow: 0 0 0 3px rgba(95, 209, 139, 0.06); }
+            .vcard .vt { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+            .vcard .vt b { font-size: 14px; }
+            .vcard .vm { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 5px; font-size: 12px; color: var(--ink-muted); }
+            /* 오프닝 아래 진행 줄(받는 중 · 여는 중) — 오프닝 위에 겹쳐 뜬다 */
+            #gate-prog { position: fixed; left: 50%; bottom: calc(44px + env(safe-area-inset-bottom, 0px)); z-index: 10000; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 9px; pointer-events: none;
+                font-size: 12px; letter-spacing: 0.04em; color: #9a978f; opacity: 0; transition: opacity 0.35s; white-space: nowrap; }
+            #gate-prog.on { opacity: 1; }
+            #gate-prog i { position: relative; display: block; width: 180px; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+            #gate-prog b { display: block; height: 100%; width: 0; border-radius: 2px; background: linear-gradient(90deg, #c4500d, #f37321, #ff9a4d); transition: width 0.2s; }
+            #gate-prog.busy b { width: 34% !important; animation: gBusy 1.2s ease-in-out infinite; }
+            @keyframes gBusy { from { transform: translateX(-110%); } to { transform: translateX(310%); } }
+            #gate-prog.lite { color: #6f6b64; }
+            #gate-prog.lite i { background: rgba(0, 0, 0, 0.1); }
             /* 관리 화면 — 로그인 카드보다 넓게, 확대 없이 */
             .admin { position: relative; z-index: 1; width: min(1160px, 100%); margin: 0 auto; padding: 18px 16px 48px; font-size: 13.5px; }
             .ahead { position: sticky; top: 10px; z-index: 5; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 16px;
@@ -405,6 +439,7 @@
 
     <body>
         <div id="hubIntro" class="hidden" aria-hidden="true"><div class="pt"></div><div class="pb"></div><div class="bg"></div><div class="core"><div class="lg"><img src="/img/misc/m0_latest_scale-to-width-down.png" alt="" onerror="this.style.display='none'"></div><div class="tt"><span>HLE</span> 통합 분석 허브</div><div class="ln"></div></div></div>
+        <div id="gate-prog" class="hidden" role="status" aria-live="polite"><span id="gp-t"></span><i><b id="gp-b"></b></i></div>
         <div class="aurora" aria-hidden="true"><i class="a1"></i><i class="a2"></i><i class="a3"></i></div>
         <div id="loading" class="spinner-container">
             <div class="spinner"></div>
@@ -494,10 +529,11 @@
                     <div class="linkrow"><button class="lk" id="b-mypw">비밀번호 바꾸기</button><span>·</span><button class="lk" data-out>로그아웃</button></div>
                 </section>
 
-                <!-- 2·3군 허브 받는 중 -->
+                <!-- 2·3군 허브를 열지 못함(받는 동안은 오프닝 + 아래 진행 줄) -->
                 <section class="view hidden" id="v-load">
+                    <div class="state err" id="l-ic" aria-hidden="true"></div>
                     <p class="instructions" id="l-title" style="margin-bottom:0">허브를 불러오는 중…</p>
-                    <div class="gbar"><i id="l-bar"></i></div>
+                    <div class="gbar hidden" id="l-gbar"><i id="l-bar"></i></div>
                     <div class="hint" id="l-note" style="text-align:center;margin-bottom:12px"></div>
                     <div class="gmsg" id="m-load" role="alert"></div>
                     <div id="l-retry" class="hidden"><button class="decrypt-button" id="b-retry">다시 시도</button><button class="ghost-button" id="b-choose2" hidden>허브 선택</button><div class="linkrow"><button class="lk" data-out>로그아웃</button></div></div>
@@ -543,7 +579,13 @@
             </div>
 
             <div id="t-log" class="hidden">
-                <div class="arow" style="justify-content:flex-start;margin-bottom:8px"><button class="abtn sm ghost" id="b-log">새로 고침</button><span class="anote" style="margin:0">최근 300건 · 한국 시간</span></div>
+                <div class="lbar">
+                    <button class="abtn sm ghost" id="b-log">새로 고침</button>
+                    <select id="lf-who" aria-label="사람으로 거르기"><option value="">모든 사람</option></select>
+                    <select id="lf-act" aria-label="동작으로 거르기"><option value="">모든 동작</option></select>
+                    <div class="inp lsearch"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="lf-q" type="text" placeholder="내용 검색" aria-label="내용 검색" /></div>
+                    <span class="anote" id="l-cnt" style="margin:0">최근 300건 · 한국 시간</span>
+                </div>
                 <div class="tw"><table><thead><tr><th>시각</th><th>아이디</th><th>동작</th><th>내용</th><th>브라우저</th></tr></thead><tbody id="log-tb"></tbody></table></div>
                 <div class="anote">로그인 실패 · 잠금 같은 인증 기록은 Supabase 화면 → Authentication → Logs 에 남습니다.</div>
             </div>
@@ -552,14 +594,16 @@
                 <div class="acard">
                     <b>2·3군 허브 파일 올리기</b>
                     <div class="anote">PC의 <span class="mono">분석관 백업파일\2군허브\academy.html</span>(또는 .gz)을 고르면 이 브라우저에서 압축해 비공개 저장소에 올립니다. 1군 허브는 여기가 아니라 배포(GitHub Pages)로 올라갑니다.</div>
-                    <div class="field" style="margin-top:10px"><input type="file" id="up-f" accept=".html,.gz,text/html,application/gzip"></div>
-                    <div class="field"><input type="text" id="up-n" maxlength="200" placeholder="메모(판 설명) — 예: 2·3군 24차"></div>
+                    <label class="drop" id="up-drop"><input type="file" id="up-f" accept=".html,.gz,text/html,application/gzip" />
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+                        <b id="up-fn">academy.html 을 여기로 끌어다 놓거나 눌러서 고르기</b><span id="up-fs">.html 또는 .gz</span></label>
+                    <div class="field" style="margin-top:10px"><input type="text" id="up-n" maxlength="200" placeholder="메모(판 설명) — 예: 2·3군 24차"></div>
                     <button class="abtn" id="b-up">올리기</button>
                     <div class="gbar"><i id="up-bar"></i></div>
                     <div class="gmsg" id="m-up" role="status"></div>
                 </div>
-                <h3 style="margin:18px 0 8px;font-size:15px">판 기록</h3>
-                <div class="tw"><table><thead><tr><th>올린 시각</th><th>지문(SHA-256)</th><th>크기(압축 / 원본)</th><th>올린 사람</th><th>메모</th></tr></thead><tbody id="ver-tb"></tbody></table></div>
+                <h3 style="margin:18px 0 8px;font-size:15px">판 기록 <small class="anote">최근 20개 · 맨 위가 지금 열리는 판</small></h3>
+                <div class="vlist" id="ver-tb"></div>
             </div>
         </div>
 
@@ -739,6 +783,9 @@
                     stop("사용이 중지된 계정입니다. 관리자에게 문의하세요.", false, { kind: "no" }); return;
                 }
                 if (ST.must_change) { clearHubCache(); openPw(false); return; }
+                // 허브 계정 메뉴의 「비밀번호 바꾸기」로 돌아온 경우(한 번만)
+                let next = null; try { next = sessionStorage.getItem("hle-gate-next"); sessionStorage.removeItem("hle-gate-next"); } catch (e) {}
+                if (next === "pw") { openPw(true); return; }
                 if (!ST.tier || (ST.tier !== "team1" && !MULTI(ST.tier))) { try { sessionStorage.removeItem("hlehub_sk"); } catch (e) {} }
                 S.tier = ST.tier; save();
                 if (ST.tier === "team1") return openTeam1();
@@ -887,31 +934,46 @@
 
             /* ── 1군 허브: 서버에서 열쇠 → 이 저장소의 암호화 조각을 풀어 그리기 ── */
             let payloadPromise = null, startPartPromise = null, dlProgress = 0;
-            function prefetchTeam1() {
-                if (payloadPromise) return;
-                payloadPromise = (async () => {
-                    const res = await fetch(PAYLOAD_URL);
-                    if (!res.ok) throw new Error("payload fetch failed: " + res.status);
-                    const total = Number(res.headers.get("content-length") || 0);
-                    if (!res.body) { dlProgress = 100; return new Uint8Array(await res.arrayBuffer()); }
+            const DL = { got: 0, total: 0, open: 0 };   // 1군 셸 + 첫 문서 받기 진행(오프닝 아래 진행 줄)
+            async function fetchBytes(url) {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error("fetch " + res.status + " " + url);
+                const total = Number(res.headers.get("content-length") || 0);
+                DL.total += total; DL.open++;
+                try {
+                    if (!res.body) { const b = new Uint8Array(await res.arrayBuffer()); DL.got += b.length; return b; }
                     const reader = res.body.getReader(), chunks = []; let got = 0;
                     for (;;) {
                         const { done, value } = await reader.read();
                         if (done) break;
-                        chunks.push(value); got += value.length;
-                        if (total) dlProgress = Math.min(99, Math.round((got / total) * 100));
+                        chunks.push(value); got += value.length; DL.got += value.length;
                     }
                     const buf = new Uint8Array(got); let off = 0;
                     for (const c of chunks) { buf.set(c, off); off += c.length; }
-                    dlProgress = 100;
                     return buf;
-                })();
+                } finally { DL.open--; }
+            }
+            function prefetchTeam1() {
+                if (payloadPromise) return;
+                payloadPromise = fetchBytes(PAYLOAD_URL).then((b) => { dlProgress = 100; return b; });
                 payloadPromise.catch(() => {});
-                startPartPromise = START_DOC
-                    ? fetch(PARTS[START_DOC]).then((r) => { if (!r.ok) throw new Error("part " + r.status); return r.arrayBuffer(); }).then((b) => new Uint8Array(b))
-                    : Promise.resolve(null);
+                startPartPromise = START_DOC ? fetchBytes(PARTS[START_DOC]) : Promise.resolve(null);
                 startPartPromise.catch(() => {});
             }
+            // 오프닝 아래 진행 줄 — 0.6초 넘게 걸릴 때만(빠르면 깜박이지 않게) · 허브를 그리기 직전에 끈다
+            const mb = (n) => (n / 1048576).toFixed(1);
+            let progTimer = 0;
+            function progStart(lite, read) {
+                progStop();
+                const p = $("gate-prog"), t0 = Date.now(); p.classList.toggle("lite", !!lite);
+                progTimer = setInterval(() => {
+                    const r = read(); if (!r || Date.now() - t0 < 600) return;
+                    $("gp-t").textContent = r[0]; $("gp-b").style.width = r[1] == null ? "100%" : Math.round(Math.min(1, r[1]) * 100) + "%";
+                    p.classList.toggle("busy", r[1] == null);
+                    if (p.classList.contains("hidden")) { p.classList.remove("hidden"); requestAnimationFrame(() => p.classList.add("on")); }
+                }, 150);
+            }
+            function progStop() { clearInterval(progTimer); progTimer = 0; const p = $("gate-prog"); if (p) { p.classList.remove("on"); p.classList.add("hidden"); } }
 
             const yieldToBrowser = (() => {
                 try {
@@ -966,44 +1028,68 @@
             }
             function hideIntro() { introT0 = 0; const o = $("hubIntro"); o.classList.add("hidden"); o.classList.remove("in"); }
 
-            // 허브 위에 열람 계정 표시 + 로그아웃(화면 유출 억제 · 공용 PC 대비)
-            // PC = 왼쪽 아래 알약 그대로 · 좁은 화면(휴대폰) = 오른쪽 아래 둥근 단추 → 눌러 펼침
+            // 허브 위에 열람 계정 단추(화면 유출 억제 · 공용 PC 대비) — 눌러 펼치는 메뉴: 계정 · 권한 · 허브 선택 · 비밀번호 바꾸기 · 로그아웃
+            // PC = 왼쪽 아래 알약 · 좁은 화면(휴대폰) = 오른쪽 아래 둥근 단추
             //   (휴대폰에서 허브 셸은 왼쪽 아래에 LOG, 오른쪽 아래 12px 에 「맨 위로」를 둔다 → 둘 다 피해 맨 위로 단추 위에 놓는다)
-            const GATE_CSS = "#hle-gate-badge{position:fixed;left:8px;bottom:8px;z-index:2147483646;background:rgba(13,13,13,.82);color:#c3c2b7;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:3px 4px 3px 10px;font:11.5px/1.4 system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;display:flex;gap:6px;align-items:center;max-width:calc(100vw - 16px)}"
-                + "#hle-gate-badge .m{display:contents}#hle-gate-badge .k{display:none}"
-                + "#hle-gate-badge .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
-                + "#hle-gate-badge button{font:inherit;cursor:pointer;flex:none;border-radius:999px}"
-                + "#hle-gate-badge .c{background:transparent;color:#c3c2b7;border:1px solid rgba(255,255,255,.25);padding:1px 8px}"
-                + "#hle-gate-badge .x{background:#f37321;color:#fff;border:0;padding:2px 9px;font-weight:700}"
-                + "@media (max-width:760px){#hle-gate-badge{left:auto;right:12px;bottom:calc(58px + env(safe-area-inset-bottom,0px));padding:0;background:none;border:0;flex-direction:column-reverse;align-items:flex-end;gap:8px;font-size:14px}"
-                + "#hle-gate-badge .k{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;padding:0;background:rgba(26,26,25,.94);border:1px solid rgba(255,255,255,.18);color:#c3c2b7;box-shadow:0 6px 18px rgba(0,0,0,.45)}"
-                + "#hle-gate-badge .m{display:none;flex-direction:column;align-items:stretch;gap:8px;min-width:190px;background:rgba(13,13,13,.96);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.6)}"
-                + "#hle-gate-badge.open .m{display:flex}#hle-gate-badge.open .k{color:#f37321;border-color:#f37321}"
-                + "#hle-gate-badge .t{padding:0 2px 4px}#hle-gate-badge .m button{min-height:42px;padding:0 14px;border-radius:10px}#hle-gate-badge .c{color:#fff}}"
-                + "#hle-gate-new{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:2147483647;display:flex;gap:8px;align-items:center;background:#1a1a19;color:#fff;border:1px solid #f37321;border-radius:12px;padding:8px 8px 8px 14px;font:14px/1.4 system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.6);width:max-content;max-width:calc(100vw - 24px)}"
-                + "#hle-gate-new button{font:inherit;cursor:pointer;border-radius:9px;min-height:36px;flex:none}#hle-gate-new .r{background:#f37321;color:#fff;border:0;padding:0 14px;font-weight:700}#hle-gate-new .q{background:none;color:#898781;border:0;padding:0 8px}";
-            function badge(label) {
+            // 1군(어두운 화면) · 2·3군(밝은 화면) 어디에 떠도 보이게 어두운 유리 한 가지로 둔다
+            const GF = "font-family:Pretendard,system-ui,-apple-system,'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;";
+            const GATE_CSS = "#hle-gate-badge{position:fixed;left:10px;bottom:10px;z-index:2147483646;" + GF + "font-size:12.5px;line-height:1.4;color:#e9e6de;-webkit-font-smoothing:antialiased}"
+                + "#hle-gate-badge *{box-sizing:border-box}"
+                + "#hle-gate-badge .k{display:flex;align-items:center;gap:7px;max-width:calc(100vw - 20px);padding:4px 10px 4px 4px;border-radius:999px;cursor:pointer;font:inherit;color:inherit;background:rgba(18,18,19,.74);-webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%);border:1px solid rgba(255,255,255,.14);box-shadow:0 8px 24px rgba(0,0,0,.35);transition:border-color .15s,background .15s}"
+                + "#hle-gate-badge .k:hover,#hle-gate-badge.open .k{border-color:rgba(243,115,33,.6);background:rgba(24,22,20,.86)}"
+                + "#hle-gate-badge .av{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:11.5px;color:#fff;background:linear-gradient(135deg,#ff9a4d,#c4500d)}"
+                + "#hle-gate-badge .k .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}"
+                + "#hle-gate-badge .k svg{flex:none;opacity:.6;transition:transform .2s}#hle-gate-badge.open .k svg{transform:rotate(180deg)}"
+                + "#hle-gate-badge .m{position:absolute;left:0;bottom:calc(100% + 8px);min-width:236px;padding:8px;border-radius:16px;background:rgba(18,18,19,.9);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 50px rgba(0,0,0,.55);opacity:0;visibility:hidden;transform:translateY(6px) scale(.98);transform-origin:bottom left;transition:opacity .18s,transform .18s,visibility 0s .18s}"
+                + "#hle-gate-badge.open .m{opacity:1;visibility:visible;transform:none;transition:opacity .18s,transform .18s}"
+                + "#hle-gate-badge .hd{display:flex;align-items:center;gap:10px;padding:6px 8px 10px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08)}"
+                + "#hle-gate-badge .hd .av{width:34px;height:34px;font-size:14px}#hle-gate-badge .hd b{display:block;font-size:13.5px;color:#fff}"
+                + "#hle-gate-badge .hd i{display:inline-block;margin-top:2px;font-style:normal;font-size:11px;font-weight:700;color:#ffb27a;background:rgba(243,115,33,.14);border:1px solid rgba(243,115,33,.3);border-radius:999px;padding:0 7px}"
+                + "#hle-gate-badge .it{display:flex;align-items:center;gap:10px;width:100%;min-height:38px;padding:0 10px;border:0;border-radius:10px;background:transparent;color:#e9e6de;font:inherit;font-size:13px;text-align:left;cursor:pointer}"
+                + "#hle-gate-badge .it:hover{background:rgba(255,255,255,.07);color:#fff}#hle-gate-badge .it svg{flex:none;opacity:.75}"
+                + "#hle-gate-badge .it.x{color:#ff9a4d;font-weight:700}#hle-gate-badge .it.x:hover{background:rgba(243,115,33,.14)}"
+                + "@media (max-width:760px){#hle-gate-badge{left:auto;right:12px;bottom:calc(58px + env(safe-area-inset-bottom,0px));font-size:14px}"
+                + "#hle-gate-badge .k{padding:3px}#hle-gate-badge .k .t,#hle-gate-badge .k svg{display:none}#hle-gate-badge .k .av{width:34px;height:34px;font-size:14px}"
+                + "#hle-gate-badge .m{left:auto;right:0;transform-origin:bottom right;min-width:min(260px,calc(100vw - 24px))}#hle-gate-badge .it{min-height:46px;font-size:15px}}"
+                + "#hle-gate-new{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:2147483647;display:flex;gap:12px;align-items:center;" + GF + "font-size:14px;line-height:1.4;color:#fff;-webkit-font-smoothing:antialiased;"
+                + "background:rgba(18,18,19,.88);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(243,115,33,.45);border-radius:16px;padding:10px 10px 10px 12px;box-shadow:0 18px 50px rgba(0,0,0,.5);width:max-content;max-width:calc(100vw - 24px);animation:hleGateDrop .45s cubic-bezier(.2,.8,.2,1) both}"
+                + "@keyframes hleGateDrop{from{opacity:0;transform:translate(-50%,-14px)}to{opacity:1;transform:translate(-50%,0)}}"
+                + "#hle-gate-new .ic{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#ffb27a;background:rgba(243,115,33,.15);border:1px solid rgba(243,115,33,.35)}"
+                + "#hle-gate-new .tx b{display:block;font-size:14px}#hle-gate-new .tx span{display:block;font-size:12px;color:#a9a59c}"
+                + "#hle-gate-new button{font:inherit;cursor:pointer;border-radius:10px;min-height:36px;flex:none}#hle-gate-new .r{background:linear-gradient(180deg,#ff8a3d,#ee6413);color:#fff;border:0;padding:0 15px;font-weight:700;box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}#hle-gate-new .q{background:none;color:#8d8a83;border:0;padding:0 8px;font-size:16px}#hle-gate-new .q:hover{color:#fff}"
+                + "@media (prefers-reduced-motion:reduce){#hle-gate-new{animation:none}#hle-gate-badge .m{transition:none}}";
+            const GI = {
+                hub: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+                key: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+                out: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5M5 12h11"/></svg>',
+                up: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>',
+                new: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg>',
+            };
+            // 허브 안에서 「비밀번호 바꾸기」 — 출입문을 다시 띄우고 route() 가 바로 비밀번호 화면을 연다
+            function pwFromHub() { try { sessionStorage.setItem("hle-gate-next", "pw"); sessionStorage.removeItem("hle-gate-open"); } catch (e) {} location.replace(location.pathname); }
+            function badge(id) {
                 const put = () => {
                     if (!document.body || document.getElementById("hle-gate-badge")) return;
                     if (!document.getElementById("hle-gate-style")) { const st = document.createElement("style"); st.id = "hle-gate-style"; st.textContent = GATE_CSS; (document.head || document.body).appendChild(st); }
-                    const b = document.createElement("div"); b.id = "hle-gate-badge";
-                    const k = document.createElement("button"); k.className = "k"; k.setAttribute("aria-label", "계정");
-                    k.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>';
-                    k.addEventListener("click", () => b.classList.toggle("open"));
-                    const m = document.createElement("div"); m.className = "m";
-                    const t = document.createElement("span"); t.className = "t"; t.textContent = label;
-                    const x = document.createElement("button"); x.className = "x"; x.textContent = "로그아웃";
-                    x.addEventListener("click", logout);
-                    m.appendChild(t);
-                    if (ST && MULTI(ST.tier)) {
-                        const c = document.createElement("button"); c.className = "c"; c.textContent = "허브 선택";
-                        c.addEventListener("click", backToChoose);
-                        m.appendChild(c);
-                    }
-                    m.appendChild(x); b.appendChild(k); b.appendChild(m); document.body.appendChild(b);
-                    // 펼친 메뉴는 바깥(허브 문서 iframe 포함)을 누르면 닫는다
-                    document.addEventListener("click", (e) => { if (!b.contains(e.target)) b.classList.remove("open"); }, true);
-                    window.addEventListener("blur", () => b.classList.remove("open"));
+                    const nm = (ST && ST.name) || id, ini = Array.from(String(nm).trim())[0] || "·";
+                    const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+                    const b = el("div"); b.id = "hle-gate-badge";
+                    const k = el("button", "k"); k.setAttribute("aria-label", "계정 메뉴 — " + id); k.setAttribute("aria-expanded", "false");
+                    k.appendChild(el("span", "av", ini)); k.appendChild(el("span", "t", "열람 " + id)); k.insertAdjacentHTML("beforeend", GI.up);
+                    const toggle = (on) => { b.classList.toggle("open", on); k.setAttribute("aria-expanded", on ? "true" : "false"); };
+                    k.addEventListener("click", () => toggle(!b.classList.contains("open")));
+                    const m = el("div", "m"); m.setAttribute("role", "menu");
+                    const hd = el("div", "hd"), who = el("div");
+                    hd.appendChild(el("span", "av", ini)); who.appendChild(el("b", "", nm)); who.appendChild(el("i", "", (ST && TIER[ST.tier] ? TIER[ST.tier] + " · " : "") + id)); hd.appendChild(who); m.appendChild(hd);
+                    const item = (cls, ic, txt, fn) => { const i = el("button", "it" + (cls ? " " + cls : "")); i.setAttribute("role", "menuitem"); i.innerHTML = GI[ic]; i.appendChild(el("span", "", txt)); i.addEventListener("click", fn); m.appendChild(i); };
+                    if (ST && MULTI(ST.tier)) item("", "hub", "허브 선택", () => { toggle(false); backToChoose(); });
+                    item("", "key", "비밀번호 바꾸기", pwFromHub);
+                    item("x", "out", "로그아웃", logout);
+                    b.appendChild(m); b.appendChild(k); document.body.appendChild(b);
+                    // 펼친 메뉴는 바깥(허브 문서 iframe 포함)을 누르거나 Esc 로 닫는다
+                    document.addEventListener("click", (e) => { if (!b.contains(e.target)) toggle(false); }, true);
+                    document.addEventListener("keydown", (e) => { if (e.key === "Escape") toggle(false); });
+                    window.addEventListener("blur", () => toggle(false));
                 };
                 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", put); else put();
                 window.addEventListener("load", put);
@@ -1172,11 +1258,16 @@
             }
             function newVersionToast() {
                 if (!document.body || document.getElementById("hle-gate-new")) return;
+                if (!document.getElementById("hle-gate-style")) { const st = document.createElement("style"); st.id = "hle-gate-style"; st.textContent = GATE_CSS; (document.head || document.body).appendChild(st); }
                 const d = document.createElement("div"); d.id = "hle-gate-new"; d.setAttribute("role", "status");
-                const s = document.createElement("span"); s.textContent = "새 판이 올라왔습니다";
+                const ic = document.createElement("span"); ic.className = "ic"; ic.innerHTML = GI.new;
+                const s = document.createElement("span"); s.className = "tx";
+                const s1 = document.createElement("b"); s1.textContent = "새 판이 올라왔습니다";
+                const s2 = document.createElement("span"); s2.textContent = "새로 고침하면 최신 내용으로 바뀝니다";
+                s.appendChild(s1); s.appendChild(s2);
                 const r = document.createElement("button"); r.className = "r"; r.textContent = "새로 고침"; r.addEventListener("click", () => location.reload());
                 const q = document.createElement("button"); q.className = "q"; q.textContent = "✕"; q.setAttribute("aria-label", "닫기"); q.addEventListener("click", () => d.remove());
-                d.appendChild(s); d.appendChild(r); d.appendChild(q); document.body.appendChild(d);
+                d.appendChild(ic); d.appendChild(s); d.appendChild(r); d.appendChild(q); document.body.appendChild(d);
             }
 
             async function openTeam1(retried) {
@@ -1193,9 +1284,10 @@
                     key = await crypto.subtle.importKey("raw", b64ToBuf(k.k), { name: "AES-GCM" }, true, ["decrypt"]);
                 }
                 showIntro();
+                progStart(false, () => DL.open && DL.total ? ["허브 받는 중 · " + mb(DL.got) + " / " + mb(DL.total) + "MB", DL.got / DL.total] : ["허브 여는 중…", null]);
                 try {
                     if (dlProgress < 100 && !INTRO_OK) {
-                        const timer = setInterval(() => { $("loading-label").textContent = "허브 여는 중… " + dlProgress + "%"; }, 150);
+                        const timer = setInterval(() => { $("loading-label").textContent = "허브 여는 중… " + (DL.total ? Math.min(99, Math.round(DL.got / DL.total * 100)) : 0) + "%"; }, 150);
                         try { await payloadPromise; } finally { clearInterval(timer); }
                     }
                     const buf = await payloadPromise;
@@ -1206,11 +1298,13 @@
                     introSignal(); try { sessionStorage.setItem("hle-gate-open", "team1"); } catch (e) {}
                     const who = idOf(S.email);
                     OPENED = { kind: "team1" };
+                    progStop();
                     document.open();
                     await writeChunked(full);
                     document.close();
-                    badge("열람 " + who);
+                    badge(who);
                 } catch (e) {
+                    progStop();
                     try { sessionStorage.removeItem("hlehub_sk"); } catch (_) {}
                     if (cached && !retried) { hideIntro(); return openTeam1(true); }   // 이 탭에 남은 열쇠가 예전 것(열쇠 교체 뒤) → 서버에서 새로 받아 한 번 더
                     hideIntro(); $("content").classList.remove("hidden");
@@ -1228,6 +1322,8 @@
                 // (예전: 어두운 「불러오는 중 · 압축을 푸는 중」 카드 → 25MB 한 번에 쓰며 멈춤 → 허브 오프닝이 처음부터 다시)
                 msg("m-load", ""); $("l-retry").classList.add("hidden"); $("b-choose2").hidden = !(ST && MULTI(ST.tier)); $("l-bar").style.width = "0"; $("l-title").textContent = "2·3군 허브를 불러오는 중…";
                 showIntro(true);
+                const P = { got: 0, total: 0, step: "확인 중…" };
+                progStart(true, () => P.total ? ["2·3군 허브 받는 중 · " + mb(P.got) + " / " + mb(P.total) + "MB", P.got / P.total] : [P.step, null]);
                 try {
                     let v = await rest("hub_versions?select=sha256,bytes,raw_bytes,at,note&order=at.desc&limit=1");
                     if (!v || !v.length) throw new Error("아직 올라간 2·3군 허브 파일이 없습니다. 관리자에게 문의하세요.");
@@ -1237,7 +1333,9 @@
                     if (r.status === 400 || r.status === 403 || r.status === 404) throw new Error("허브 파일을 받을 권한이 없거나 파일이 없습니다. (" + r.status + ")");
                     if (!r.ok) throw new Error("허브 파일을 받지 못했습니다. (" + r.status + ")");
                     const total = +r.headers.get("content-length") || v.bytes || 0, parts = [], rd = r.body.getReader(); let got = 0;
-                    for (;;) { const x = await rd.read(); if (x.done) break; parts.push(x.value); got += x.value.length; if (total) $("l-bar").style.width = Math.min(100, got / total * 100).toFixed(0) + "%"; }
+                    P.total = total;
+                    for (;;) { const x = await rd.read(); if (x.done) break; parts.push(x.value); got += x.value.length; P.got = got; if (total) $("l-bar").style.width = Math.min(100, got / total * 100).toFixed(0) + "%"; }
+                    P.total = 0; P.step = "허브 여는 중…";
                     let u8 = new Uint8Array(got), o = 0; parts.forEach((p) => { u8.set(p, o); o += p.length; });
                     let raw = (u8[0] === 0x1f && u8[1] === 0x8b) ? await gunzip(u8) : u8;
                     if (await sha256hex(raw) !== v.sha256) throw new Error("받은 파일이 판 기록과 다릅니다(지문 불일치). 방금 새 판이 올라갔을 수 있습니다. 다시 시도하세요.");
@@ -1247,14 +1345,16 @@
                     introSignal(); try { sessionStorage.setItem("hle-gate-open", "academy"); } catch (e) {}
                     window.HLE2GATE = { email: who, rest: (path, opt) => rest(path, opt), rpc: (name, args) => rpc(name, args) };
                     OPENED = { kind: "academy", sha: v.sha256 };
+                    progStop();
                     document.open();
                     await writeChunked(html);   // 나눠 쓰며 쉬어 오프닝이 멈추지 않게
                     document.close();
-                    badge("열람 " + idOf(who));
+                    badge(idOf(who));
                 } catch (e) {
-                    hideIntro();
+                    progStop(); hideIntro();
                     if (isAuthErr(e)) { show("v-login"); msg("m-login", "로그인이 만료됐습니다. 다시 로그인하세요."); return; }
-                    show("v-load"); $("l-title").textContent = "허브를 열지 못했습니다"; msg("m-load", e.message); $("l-retry").classList.remove("hidden");
+                    $("l-ic").innerHTML = STATE_IC.err;
+                    show("v-load"); $("l-title").textContent = "2·3군 허브를 열지 못했습니다"; msg("m-load", e.message); $("l-retry").classList.remove("hidden");
                 }
             }
 
@@ -1336,25 +1436,53 @@
                     catch (e) { msg("m-mem", "빼지 못했습니다. (" + e.message + ")"); b.disabled = false; }
                 }
             });
+            // 접속 기록: 사람 · 동작 · 내용으로 거르기 · 날짜별 묶음 · 「3분 전」 식 시각(마우스를 올리면 정확한 시각)
+            let LOGS = [];
+            const rel = (t) => { const s = (Date.now() - new Date(t).getTime()) / 1000; if (!(s >= 0)) return kst(t); if (s < 60) return "방금"; if (s < 3600) return Math.floor(s / 60) + "분 전"; if (s < 86400) return Math.floor(s / 3600) + "시간 전"; if (s < 86400 * 7) return Math.floor(s / 86400) + "일 전"; return kst(t); };
+            const dayOf = (t) => new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", month: "long", day: "numeric", weekday: "short" }).format(new Date(t));
+            const hm = (t) => new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(t));
+            const ACT_PILL = { "열람": "on", "허브 올림": "warn", "명단 변경": "n" };
+            function fillSel(id, vals) { const s = $(id), cur = s.value; s.innerHTML = s.options[0].outerHTML + vals.map((v) => '<option value="' + esc(v) + '">' + esc(v) + "</option>").join(""); s.value = vals.indexOf(cur) >= 0 ? cur : ""; }
+            function renderLogs() {
+                const w = $("lf-who").value, a = $("lf-act").value, q = $("lf-q").value.trim().toLowerCase();
+                const L = LOGS.filter((x) => (!w || idOf(x.email) === w) && (!a || x.action === a) && (!q || (idOf(x.email) + " " + x.action + " " + (x.detail || "")).toLowerCase().indexOf(q) >= 0));
+                $("l-cnt").textContent = (L.length === LOGS.length ? "최근 " + LOGS.length + "건" : LOGS.length + "건 중 " + L.length + "건") + " · 한국 시간";
+                let day = "", out = "";
+                L.forEach((x) => {
+                    const d = dayOf(x.at);
+                    if (d !== day) { day = d; out += '<tr class="day"><td colspan="5">' + esc(d) + "</td></tr>"; }
+                    const ua = x.ua || "", br = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : /Firefox\//.test(ua) ? "Firefox" : (ua ? "기타" : "—");
+                    const os = /Windows/.test(ua) ? "Windows" : /iPhone|iPad/.test(ua) ? "iOS" : /Android/.test(ua) ? "Android" : /Mac OS/.test(ua) ? "macOS" : "";
+                    out += '<tr><td title="' + esc(kst(x.at)) + '"><b>' + esc(hm(x.at)) + '</b> <span class="anote">' + esc(rel(x.at)) + "</span></td><td>" + esc(idOf(x.email)) + '</td><td><span class="pill ' + (ACT_PILL[x.action] || "n") + '">' + esc(x.action) + '</span></td><td class="wrap">' + esc(x.detail || "") + '</td><td title="' + esc(ua) + '">' + esc(br + (os ? " · " + os : "")) + "</td></tr>";
+                });
+                $("log-tb").innerHTML = out || '<tr><td colspan="5">' + (LOGS.length ? "맞는 기록이 없습니다" : "기록 없음") + "</td></tr>";
+            }
             async function loadLogs() {
                 try {
-                    const L = await rest("hub_access_log?select=at,email,action,detail,ua&order=at.desc&limit=300");
-                    $("log-tb").innerHTML = (L || []).map((x) => {
-                        const ua = x.ua || "", br = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : /Firefox\//.test(ua) ? "Firefox" : (ua ? "기타" : "—");
-                        const os = /Windows/.test(ua) ? "Windows" : /iPhone|iPad/.test(ua) ? "iOS" : /Android/.test(ua) ? "Android" : /Mac OS/.test(ua) ? "macOS" : "";
-                        return "<tr><td>" + kst(x.at) + "</td><td>" + esc(idOf(x.email)) + "</td><td>" + esc(x.action) + '</td><td class="wrap">' + esc(x.detail || "") + '</td><td title="' + esc(ua) + '">' + esc(br + (os ? " · " + os : "")) + "</td></tr>";
-                    }).join("") || '<tr><td colspan="5">기록 없음</td></tr>';
+                    LOGS = (await rest("hub_access_log?select=at,email,action,detail,ua&order=at.desc&limit=300")) || [];
+                    fillSel("lf-who", [...new Set(LOGS.map((x) => idOf(x.email)))].sort());
+                    fillSel("lf-act", [...new Set(LOGS.map((x) => x.action))].sort());
+                    renderLogs();
                 } catch (e) { $("log-tb").innerHTML = '<tr><td colspan="5">읽지 못했습니다 (' + esc(e.message) + ")</td></tr>"; }
             }
             $("b-log").addEventListener("click", loadLogs);
+            ["lf-who", "lf-act"].forEach((i) => $(i).addEventListener("change", renderLogs));
+            $("lf-q").addEventListener("input", renderLogs);
 
             async function loadVersions() {
                 try {
                     const V = await rest("hub_versions?select=at,sha256,bytes,raw_bytes,uploaded_by,note&order=at.desc&limit=20");
                     const mb = (n) => n ? (n / 1048576).toFixed(1) + "MB" : "—";
-                    $("ver-tb").innerHTML = (V || []).map((v, i) => "<tr><td>" + kst(v.at) + (i === 0 ? ' <span class="pill on">현재</span>' : "") + '</td><td class="mono" title="' + esc(v.sha256) + '">' + esc(v.sha256.slice(0, 16)) + "…</td><td>" + mb(v.bytes) + " / " + mb(v.raw_bytes) + "</td><td>" + esc(idOf(v.uploaded_by)) + '</td><td class="wrap">' + esc(v.note || "") + "</td></tr>").join("") || '<tr><td colspan="5">아직 올린 판이 없습니다</td></tr>';
-                } catch (e) { $("ver-tb").innerHTML = '<tr><td colspan="5">읽지 못했습니다 (' + esc(e.message) + ")</td></tr>"; }
+                    $("ver-tb").innerHTML = (V || []).map((v, i) => '<div class="vcard' + (i === 0 ? " cur" : "") + '"><div class="vt"><b>' + esc(v.note || "(메모 없음)") + "</b>" + (i === 0 ? ' <span class="pill on">지금 열리는 판</span>' : "") + "</div>"
+                        + '<div class="vm"><span title="' + esc(kst(v.at)) + '">' + esc(kst(v.at)) + " · " + esc(rel(v.at)) + "</span><span>" + esc(idOf(v.uploaded_by)) + '</span><span>압축 ' + mb(v.bytes) + " / 원본 " + mb(v.raw_bytes) + '</span><span class="mono" title="' + esc(v.sha256) + '">지문 ' + esc(v.sha256.slice(0, 16)) + "</span></div></div>").join("") || '<div class="anote">아직 올린 판이 없습니다</div>';
+                } catch (e) { $("ver-tb").innerHTML = '<div class="gmsg has">판 기록을 읽지 못했습니다 (' + esc(e.message) + ")</div>"; }
             }
+            // 올릴 파일: 끌어다 놓기 · 고르면 이름과 크기 표시
+            function showPick() { const f = $("up-f").files[0]; $("up-fn").textContent = f ? f.name : "academy.html 을 여기로 끌어다 놓거나 눌러서 고르기"; $("up-fs").textContent = f ? (f.size / 1048576).toFixed(1) + "MB · 다른 파일을 놓으면 바뀝니다" : ".html 또는 .gz"; $("up-drop").classList.toggle("has", !!f); }
+            $("up-f").addEventListener("change", showPick);
+            ["dragenter", "dragover"].forEach((k) => $("up-drop").addEventListener(k, (e) => { e.preventDefault(); $("up-drop").classList.add("over"); }));
+            ["dragleave", "drop"].forEach((k) => $("up-drop").addEventListener(k, () => $("up-drop").classList.remove("over")));
+            $("up-drop").addEventListener("drop", (e) => { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files.length) { $("up-f").files = e.dataTransfer.files; showPick(); } });
             async function putObject(path, body) {
                 const r = await api("/storage/v1/object/" + BUCKET + "/" + path, { method: "POST", headers: { "Content-Type": "application/gzip", "x-upsert": "true", "cache-control": "no-cache" }, body });
                 if (!r.ok) { const t = await r.text(); throw new Error("저장소 " + r.status + " " + t.slice(0, 160)); }
@@ -1381,7 +1509,7 @@
                     $("up-bar").style.width = "100%";
                     logEvent("허브 올림", "2·3군 · " + fp.slice(0, 16) + (note ? " · " + note : ""));
                     msg("m-up", "올렸습니다. 지문 " + fp.slice(0, 16) + " (원본 " + (raw.length / 1048576).toFixed(1) + "MB → 압축 " + (gz.length / 1048576).toFixed(1) + "MB)", true);
-                    $("up-f").value = ""; $("up-n").value = ""; loadVersions();
+                    $("up-f").value = ""; $("up-n").value = ""; showPick(); loadVersions();
                 } catch (e) { msg("m-up", "올리지 못했습니다. " + e.message); $("up-bar").style.width = "0"; }
                 finally { $("b-up").disabled = false; }
             });
