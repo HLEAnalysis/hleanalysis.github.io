@@ -26,3 +26,6 @@ en_*.html
 index_en.html
 *_오프라인_*.html
 *_offline_*.html
+
+# 긴급 차단 실행 파일(이 PC 전용 · 사이트에 올리지 않음)
+긴급차단*.cmd
