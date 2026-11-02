@@ -386,7 +386,7 @@
                         <span class="field-label">이름 · 소속</span>
                         <div class="field"><input id="j-nm" type="text" maxlength="40" placeholder="예: 2군 코치 홍길동" required /></div>
                         <span class="field-label">볼 허브</span>
-                        <div class="field"><select id="j-tier"><option value="team1">1군 허브</option><option value="academy">2·3군 허브</option></select></div>
+                        <div class="field"><select id="j-tier"><option value="team1">1군 허브</option><option value="academy">2·3군 허브</option><option value="both">1군 + 2·3군 허브</option></select></div>
                         <span class="field-label">관리자에게 남길 말 (선택)</span>
                         <div class="field"><input id="j-nt" type="text" maxlength="200" /></div>
                         <div class="gmsg" id="m-join"></div>
@@ -527,7 +527,8 @@
             const kst = (t) => { if (!t) return "—"; const d = new Date(t); if (isNaN(d)) return "—"; return new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "2-digit", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(d); };
             const toEmail = (v) => { v = String(v || "").trim().toLowerCase(); return v.indexOf("@") >= 0 ? v : (v ? v + "@" + ID_DOMAIN : ""); };
             const idOf = (email) => { email = String(email || ""); const sfx = "@" + ID_DOMAIN; return email.endsWith(sfx) ? email.slice(0, -sfx.length) : email; };
-            const TIER = { admin: "관리자", team1: "1군", academy: "2·3군" };
+            const TIER = { admin: "관리자", team1: "1군", academy: "2·3군", both: "1군 + 2·3군" };
+            const MULTI = (t) => t === "admin" || t === "both";   // 허브를 둘 다 보는 권한 = 고르는 화면 · 허브 선택 · 뒤로가기
             // 홈 화면 앱(PWA)으로 실행 중인가 — 아이폰 앱은 닫으면 sessionStorage 가 지워진다
             const STANDALONE = (() => { try { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch (e) { return false; } })();
             const PHONE = (() => { try { return matchMedia("(pointer: coarse)").matches; } catch (e) { return false; } })();
@@ -625,7 +626,7 @@
             // 관리자: 허브 · 관리 화면에서 브라우저 뒤로가기 → 고르는 화면
             // 고르는 화면 자리에 표식을 남기고 한 칸 쌓는다. 허브 안 쪽 이동(#)은 표식이 없어 무시된다.
             function pushHub() {
-                if (!ST || ST.tier !== "admin") return;
+                if (!ST || !MULTI(ST.tier)) return;
                 try {
                     if (history.state && history.state.hleGate === "hub") return;
                     history.replaceState({ hleGate: "choose" }, "", location.pathname);
@@ -637,7 +638,7 @@
                 if ($("v-choose")) { show("v-choose"); prefetchTeam1(); }
                 else location.replace(location.pathname);   // 허브를 그린 뒤에는 출입문을 다시 띄운다
             }
-            function onBack(e) { if (e.state && e.state.hleGate === "choose" && ST && ST.tier === "admin") backToChoose(); }
+            function onBack(e) { if (e.state && e.state.hleGate === "choose" && ST && MULTI(ST.tier)) backToChoose(); }
             window.addEventListener("popstate", onBack);
             const isAuthErr = (e) => /^(expired|nosession)$/.test(String(e && e.message));
 
@@ -656,17 +657,19 @@
                     stop("사용이 중지된 계정입니다. 관리자에게 문의하세요."); return;
                 }
                 if (ST.must_change) { clearHubCache(); openPw(false); return; }
-                if (ST.tier !== "team1" && ST.tier !== "admin") { try { sessionStorage.removeItem("hlehub_sk"); } catch (e) {} }
+                if (!ST.tier || (ST.tier !== "team1" && !MULTI(ST.tier))) { try { sessionStorage.removeItem("hlehub_sk"); } catch (e) {} }
                 S.tier = ST.tier; save();
                 if (ST.tier === "team1") return openTeam1();
                 if (ST.tier === "academy") return openAcademy();
-                if (ST.tier === "admin") {
-                    $("who").innerHTML = "<b>" + esc(ST.name || idOf(S.email)) + "</b> · 관리자";
-                    if (location.hash === "#admin") return openAdmin();
+                if (MULTI(ST.tier)) {
+                    const adm = ST.tier === "admin";
+                    $("who").innerHTML = "<b>" + esc(ST.name || idOf(S.email)) + "</b> · " + (adm ? "관리자" : TIER.both);
+                    $("b-admin").classList.toggle("hidden", !adm);   // 1군 + 2·3군 권한은 관리 화면 없음
+                    if (adm && location.hash === "#admin") return openAdmin();
                     let last = null; try { last = sessionStorage.getItem("hle-gate-open"); } catch (e) {}
                     if (last === "team1") return openTeam1();
                     if (last === "academy") return openAcademy();
-                    show("v-choose"); prefetchTeam1(); countPending(); return;
+                    show("v-choose"); prefetchTeam1(); if (adm) countPending(); return;
                 }
                 stop("이 계정의 권한(" + ST.tier + ")을 알 수 없습니다. 관리자에게 문의하세요.");
             }
@@ -876,7 +879,7 @@
                     const x = document.createElement("button"); x.className = "x"; x.textContent = "로그아웃";
                     x.addEventListener("click", logout);
                     m.appendChild(t);
-                    if (ST && ST.tier === "admin") {
+                    if (ST && MULTI(ST.tier)) {
                         const c = document.createElement("button"); c.className = "c"; c.textContent = "허브 선택";
                         c.addEventListener("click", backToChoose);
                         m.appendChild(c);
@@ -934,8 +937,8 @@
                 if (!key) {
                     let k;
                     try { k = await rpc("hub_key", { p_hub: "team1" }); }
-                    catch (e) { if (isAuthErr(e)) { show("v-login"); msg("m-login", "로그인이 만료됐습니다. 다시 로그인하세요."); return; } stop("서버에 연결하지 못했습니다. (" + e.message + ")", ST && ST.tier === "admin"); return; }
-                    if (!k || !k.k) { stop("1군 허브를 열 권한이 없거나, 1군 열쇠가 아직 서버에 등록되지 않았습니다.\n관리자에게 문의하세요.", ST && ST.tier === "admin"); return; }
+                    catch (e) { if (isAuthErr(e)) { show("v-login"); msg("m-login", "로그인이 만료됐습니다. 다시 로그인하세요."); return; } stop("서버에 연결하지 못했습니다. (" + e.message + ")", ST && MULTI(ST.tier)); return; }
+                    if (!k || !k.k) { stop("1군 허브를 열 권한이 없거나, 1군 열쇠가 아직 서버에 등록되지 않았습니다.\n관리자에게 문의하세요.", ST && MULTI(ST.tier)); return; }
                     kid = k.kid || "";
                     key = await crypto.subtle.importKey("raw", b64ToBuf(k.k), { name: "AES-GCM" }, true, ["decrypt"]);
                 }
@@ -973,7 +976,7 @@
                 pushHub();
                 // 1군과 같이: 오프닝을 바로 띄우고 받기 · 풀기는 그 뒤에서 → 허브가 오프닝을 이어받아 한 번에 열린다
                 // (예전: 어두운 「불러오는 중 · 압축을 푸는 중」 카드 → 25MB 한 번에 쓰며 멈춤 → 허브 오프닝이 처음부터 다시)
-                msg("m-load", ""); $("l-retry").classList.add("hidden"); $("b-choose2").hidden = !(ST && ST.tier === "admin"); $("l-bar").style.width = "0"; $("l-title").textContent = "2·3군 허브를 불러오는 중…";
+                msg("m-load", ""); $("l-retry").classList.add("hidden"); $("b-choose2").hidden = !(ST && MULTI(ST.tier)); $("l-bar").style.width = "0"; $("l-title").textContent = "2·3군 허브를 불러오는 중…";
                 showIntro(true);
                 try {
                     let v = await rest("hub_versions?select=sha256,bytes,raw_bytes,at,note&order=at.desc&limit=1");
@@ -1028,11 +1031,11 @@
                     $("pend-box").classList.toggle("hidden", !P.length);
                     $("pend-n").textContent = P.length + "건";
                     $("pend-tb").innerHTML = P.map((m) => '<tr data-e="' + esc(m.email) + '"><td title="' + esc(m.email) + '">' + esc(idOf(m.email)) + '</td><td class="wrap">' + esc(m.name || "") + "</td>"
-                        + '<td><select data-p="tier"><option value="team1"' + (m.tier === "team1" ? " selected" : "") + '>1군</option><option value="academy"' + (m.tier === "academy" ? " selected" : "") + ">2·3군</option></select></td>"
+                        + '<td><select data-p="tier"><option value="team1"' + (m.tier === "team1" ? " selected" : "") + '>1군</option><option value="academy"' + (m.tier === "academy" ? " selected" : "") + '>2·3군</option><option value="both"' + (m.tier === "both" ? " selected" : "") + ">1군 + 2·3군</option></select></td>"
                         + '<td class="wrap">' + esc(m.note || "") + "</td><td>" + kst(m.requested_at) + "</td>"
                         + '<td><button class="abtn sm" data-p="ok">승인</button> <button class="abtn sm ghost" data-p="no">거절</button></td></tr>').join("");
                     const cnt = (t) => M.filter((m) => m.tier === t && m.active).length;
-                    $("mem-n").textContent = M.length + "명 · 사용 중 1군 " + cnt("team1") + " · 2·3군 " + cnt("academy") + " · 관리자 " + cnt("admin");
+                    $("mem-n").textContent = M.length + "명 · 사용 중 1군 " + cnt("team1") + " · 2·3군 " + cnt("academy") + " · 1군+2·3군 " + cnt("both") + " · 관리자 " + cnt("admin");
                     $("mem-tb").innerHTML = M.map((m) => {
                         const me = m.email === S.email;
                         const sel = '<select data-a="tier"' + (me ? " disabled" : "") + ">" + Object.keys(TIER).map((t) => '<option value="' + t + '"' + (m.tier === t ? " selected" : "") + ">" + TIER[t] + "</option>").join("") + "</select>";
@@ -1190,7 +1193,7 @@
                 }
                 S = loadSession();
                 if (S) {
-                    if (S.tier === "team1" || S.tier === "admin") prefetchTeam1();   // 지난번 권한이 1군이면 조각을 미리 받아 둔다
+                    if (S.tier === "team1" || MULTI(S.tier)) prefetchTeam1();   // 지난번 권한이 1군이면 조각을 미리 받아 둔다
                     route();
                 } else { show("v-login"); $("g-id").focus(); }
             })();
