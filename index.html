@@ -6,11 +6,6 @@
         <meta name="referrer" content="no-referrer" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="robots" content="noindex, nofollow, noarchive" />
-        <!-- 보안 정책(CSP): 허브가 받거나 보낼 수 있는 곳을 이 사이트 · 출입 서버(Supabase) · 챔피언 그림 사이트로만 묶는다.
-             출입문이 document.open 으로 허브를 같은 문서에 그리므로 1군 · 2·3군 허브와 그 안 문서(iframe)에도 그대로 적용된다.
-             허브 원본(Cowork)이 인라인 스크립트 · new Function 을 써서 'unsafe-inline' · 'unsafe-eval' 은 둔다 — 대신 바깥 스크립트 · 바깥 전송을 막는다.
-             허브에 새 그림 · 데이터 사이트가 생기면 여기에 더해야 보인다(브라우저 콘솔에 「Content Security Policy」 경고가 뜬다). -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://ddragon.leagueoflegends.com https://static.wikia.nocookie.net https://wiki.leagueoflegends.com https://i.ytimg.com https://gol.gg; font-src 'self' data:; connect-src 'self' https://amjpgeknlnvmzocpvshc.supabase.co https://ddragon.leagueoflegends.com; frame-src 'self' blob: data:; media-src 'self' data: blob:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
 
         <!-- 휴대폰 앱(PWA): 홈 화면에 추가 → 아이콘 · 전체 화면 실행 -->
         <link rel="manifest" href="/manifest.webmanifest" />
