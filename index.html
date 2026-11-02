@@ -6,6 +6,11 @@
         <meta name="referrer" content="no-referrer" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="robots" content="noindex, nofollow, noarchive" />
+        <!-- 보안 정책(CSP): 허브가 받거나 보낼 수 있는 곳을 이 사이트 · 출입 서버(Supabase) · 챔피언 그림 사이트로만 묶는다.
+             출입문이 document.open 으로 허브를 같은 문서에 그리므로 1군 · 2·3군 허브와 그 안 문서(iframe)에도 그대로 적용된다.
+             허브 원본(Cowork)이 인라인 스크립트 · new Function 을 써서 'unsafe-inline' · 'unsafe-eval' 은 둔다 — 대신 바깥 스크립트 · 바깥 전송을 막는다.
+             허브에 새 그림 · 데이터 사이트가 생기면 여기에 더해야 보인다(브라우저 콘솔에 「Content Security Policy」 경고가 뜬다). -->
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://ddragon.leagueoflegends.com https://static.wikia.nocookie.net https://wiki.leagueoflegends.com https://i.ytimg.com https://gol.gg; font-src 'self' data:; connect-src 'self' https://amjpgeknlnvmzocpvshc.supabase.co https://ddragon.leagueoflegends.com; frame-src 'self' blob: data:; media-src 'self' data: blob:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
 
         <!-- 휴대폰 앱(PWA): 홈 화면에 추가 → 아이콘 · 전체 화면 실행 -->
         <link rel="manifest" href="/manifest.webmanifest" />
@@ -454,17 +459,9 @@
                     <div class="anote">본인이 직접 만든 계정입니다. 아는 사람인지 확인한 뒤 승인하세요. 권한은 승인 전에 바꿀 수 있습니다. 거절한 아이디는 다시 신청할 수 없고, 명단에서 빼면 다시 신청할 수 있습니다.</div>
                 </div>
                 <div class="acard">
-                    <b>계정 직접 추가</b> <span class="anote">— 보통은 본인이 로그인 화면의 「출입 신청」으로 만들고, 위 대기 목록에서 승인하면 됩니다.</span>
-                    <div class="anote">① Supabase 화면 → Authentication → Users → <b>Add user → Create new user</b>에서 계정을 만듭니다(이메일 칸에 아래 「로그인 이메일」 · 임시 비밀번호 · <b>Auto Confirm User</b> 체크). ② 같은 아이디를 여기 넣고 권한을 고릅니다. ③ 임시 비밀번호는 직접 전달하고, 받은 사람은 첫 로그인 때 새 비밀번호로 바꿉니다.</div>
-                    <div class="agrid">
-                        <div class="field"><label for="ad-id">아이디 또는 이메일</label><input type="text" id="ad-id" autocapitalize="off" spellcheck="false" placeholder="예: zeus"></div>
-                        <div class="field"><label for="ad-tier">권한</label><select id="ad-tier"><option value="team1">1군</option><option value="academy" selected>2·3군</option><option value="admin">관리자</option></select></div>
-                        <div class="field"><label for="ad-nm">이름 · 역할</label><input type="text" id="ad-nm" maxlength="40" placeholder="예: 2군 코치 홍길동"></div>
-                        <div class="field"><label for="ad-nt">메모</label><input type="text" id="ad-nt" maxlength="120"></div>
-                    </div>
-                    <div class="anote" id="ad-email"></div>
-                    <button class="abtn" id="b-add" style="margin-top:10px">명단에 넣기</button>
-                    <div class="gmsg" id="m-add"></div>
+                    <b>새 사람 들이기</b>
+                    <div class="anote">본인이 로그인 화면의 <b>「계정이 없나요? 출입 신청」</b>으로 아이디를 만들면 위 「출입 신청 대기」에 뜹니다. 아는 사람인지 확인하고 권한을 골라 승인하세요. 관리자 권한이 필요한 사람은 승인한 뒤 아래 명단에서 권한을 「관리자」로 바꿉니다.</div>
+                    <div class="anote">명단은 그 사람이 직접 만든 계정에 묶입니다(11/2 보안 검토). 그래서 명단에 아이디를 먼저 적어 두는 「직접 추가」는 없앴습니다 — 같은 아이디를 다른 사람이 먼저 가입해 그 줄을 가로채는 일을 막기 위해서입니다.</div>
                 </div>
                 <h3 style="margin:18px 0 8px;font-size:15px">명단 <small class="anote" id="mem-n"></small></h3>
                 <div class="tw"><table><thead><tr><th>아이디</th><th>이름 · 역할</th><th>권한</th><th>사용</th><th>비밀번호</th><th>마지막 열람</th><th>메모</th><th></th></tr></thead><tbody id="mem-tb"></tbody></table></div>
@@ -575,11 +572,23 @@
                 const j = await r.json().catch(() => ({}));
                 return { ok: r.ok, status: r.status, j };
             }
-            async function refresh() {
-                if (!S || !S.rt) throw new Error("nosession");
-                const r = await authPost("token?grant_type=refresh_token", { refresh_token: S.rt });
-                if (!r.ok) { S = null; save(); throw new Error("expired"); }
-                setSession(r.j);
+            // 이 탭에 남은 1군 열쇠 · 마지막 허브 — 세션이 끝나거나 다른 계정이 들어오면 지운다(공용 PC 대비)
+            function clearHubCache() { try { sessionStorage.removeItem("hlehub_sk"); sessionStorage.removeItem("hle-gate-open"); } catch (e) {} }
+            // 갱신은 한 번에 하나만(같은 refresh token 을 동시에 쓰면 세션이 취소될 수 있음) · 일시 오류로는 로그아웃시키지 않는다
+            let refreshing = null;
+            function refresh() {
+                if (!S || !S.rt) return Promise.reject(new Error("nosession"));
+                if (refreshing) return refreshing;
+                refreshing = (async () => {
+                    const r = await authPost("token?grant_type=refresh_token", { refresh_token: S.rt });
+                    if (!r.ok) {
+                        if (r.status === 400 || r.status === 401 || r.status === 403) { S = null; save(); clearHubCache(); throw new Error("expired"); }
+                        throw new Error("refresh " + r.status);
+                    }
+                    setSession(r.j);
+                })();
+                refreshing.then(() => { refreshing = null; }, () => { refreshing = null; });
+                return refreshing;
             }
             async function api(path, opt, retried) {
                 opt = opt || {};
@@ -603,9 +612,14 @@
             }
             const logEvent = (action, detail) => rpc("hub_log", { p_action: action, p_detail: detail || null, p_ua: (navigator.userAgent || "").slice(0, 300) }).catch(() => {});
             async function logout() {
-                try { if (S) await fetch(SB + "/auth/v1/logout", { method: "POST", headers: { apikey: SBKEY, Authorization: "Bearer " + S.at } }); } catch (e) {}
+                try {
+                    if (S) {
+                        if (S.exp - 30 < Date.now() / 1000) await refresh().catch(() => {});   // 만료된 토큰으로는 서버 세션이 안 끊긴다
+                        if (S) await fetch(SB + "/auth/v1/logout", { method: "POST", headers: { apikey: SBKEY, Authorization: "Bearer " + S.at } });
+                    }
+                } catch (e) {}
                 S = null; save();
-                try { sessionStorage.removeItem("hlehub_sk"); sessionStorage.removeItem("hle-gate-open"); } catch (e) {}
+                clearHubCache();
                 location.replace(location.pathname);
             }
             // 관리자: 허브 · 관리 화면에서 브라우저 뒤로가기 → 고르는 화면
@@ -634,13 +648,15 @@
                     if (isAuthErr(e)) { show("v-login"); return; }
                     stop("서버에 연결하지 못했습니다. 잠시 뒤 다시 시도하세요.\n(" + e.message + ")"); return;
                 }
+                if (!ST.member || !ST.active) clearHubCache();
                 if (!ST.member) { stop("이 계정(" + idOf(S.email) + ")은 아직 출입 신청을 하지 않았습니다.\n아래에서 신청하면 관리자 승인 뒤 열립니다.", false, { req: true }); return; }
                 if (!ST.active) {
                     if (ST.status === "pending") { stop("출입 신청을 받았습니다 (" + idOf(S.email) + " · " + (TIER[ST.tier] || "") + ").\n관리자가 승인하면 같은 아이디로 들어올 수 있습니다.\n신청 " + kst(ST.requested_at), true, { backLabel: "승인됐는지 다시 확인" }); return; }
                     if (ST.status === "rejected") { stop("출입 신청이 승인되지 않았습니다. 관리자에게 문의하세요."); return; }
                     stop("사용이 중지된 계정입니다. 관리자에게 문의하세요."); return;
                 }
-                if (ST.must_change) { openPw(false); return; }
+                if (ST.must_change) { clearHubCache(); openPw(false); return; }
+                if (ST.tier !== "team1" && ST.tier !== "admin") { try { sessionStorage.removeItem("hlehub_sk"); } catch (e) {} }
                 S.tier = ST.tier; save();
                 if (ST.tier === "team1") return openTeam1();
                 if (ST.tier === "academy") return openAcademy();
@@ -667,7 +683,7 @@
                         const card = $("login-card"); card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
                         $("password").select(); return;
                     }
-                    $("password").value = ""; S = null; setSession(r.j, $("remember").checked);
+                    $("password").value = ""; S = null; clearHubCache(); setSession(r.j, $("remember").checked);
                     await route();
                 } catch (e) { msg("m-login", "서버에 연결하지 못했습니다."); }
                 finally { btn.disabled = false; btn.textContent = "접속하기"; }
@@ -710,12 +726,13 @@
                             if (!t.ok) { msg("m-join", (/user_already_exists/.test(code) || r.ok) ? "이미 쓰고 있는 아이디입니다. 다른 아이디를 정해 주세요." : "신청하지 못했습니다. (" + ((r.j && (r.j.msg || r.j.message)) || r.status) + ")"); return; }
                             r = t;
                         }
-                        $("j-p1").value = ""; $("j-p2").value = ""; S = null; setSession(r.j, false);
+                        $("j-p1").value = ""; $("j-p2").value = ""; S = null; clearHubCache(); setSession(r.j, false);
                     }
                     const q = await rpc("hub_request", { p_name: nm, p_tier: tier, p_note: note || null });
                     if (!q || !q.ok) {
                         const why = q && q.why;
                         if (why === "approved" || why === "rejected") { await route(); return; }
+                        if (why === "taken") { msg("m-join", "이 아이디는 명단에서 다른 계정 몫으로 잡혀 있습니다. 다른 아이디로 신청하거나 관리자에게 문의하세요."); return; }
                         msg("m-join", "신청하지 못했습니다. (" + (why || "알 수 없음") + ")"); return;
                     }
                     $("j-nm").value = ""; $("j-nt").value = "";
@@ -909,11 +926,11 @@
                 d.appendChild(s); d.appendChild(r); d.appendChild(q); document.body.appendChild(d);
             }
 
-            async function openTeam1() {
+            async function openTeam1(retried) {
                 pushHub(); prefetchTeam1();
-                let key = null, kid = "";
+                let key = null, kid = "", cached = false;
                 // 같은 탭에서 언어 전환 등으로 다시 열 때는 세션 키를 그대로 쓴다(허브 안 지연 로더도 이 키를 씀)
-                try { const sk = sessionStorage.getItem("hlehub_sk"); if (sk) key = await crypto.subtle.importKey("raw", b64ToBuf(sk), { name: "AES-GCM" }, true, ["decrypt"]); } catch (e) { key = null; }
+                try { const sk = sessionStorage.getItem("hlehub_sk"); if (sk) { key = await crypto.subtle.importKey("raw", b64ToBuf(sk), { name: "AES-GCM" }, true, ["decrypt"]); cached = true; } } catch (e) { key = null; }
                 if (!key) {
                     let k;
                     try { k = await rpc("hub_key", { p_hub: "team1" }); }
@@ -942,8 +959,9 @@
                     badge("열람 " + who);
                 } catch (e) {
                     try { sessionStorage.removeItem("hlehub_sk"); } catch (_) {}
+                    if (cached && !retried) { hideIntro(); return openTeam1(true); }   // 이 탭에 남은 열쇠가 예전 것(열쇠 교체 뒤) → 서버에서 새로 받아 한 번 더
                     hideIntro(); $("content").classList.remove("hidden");
-                    stop("1군 허브를 열지 못했습니다. 서버 열쇠" + (kid ? "(" + kid + ")" : "") + "가 지금 올라간 판과 맞지 않거나 파일을 받지 못했습니다.\n잠시 뒤 다시 시도하고, 계속되면 관리자에게 알려 주세요.", ST && ST.tier === "admin");
+                    stop("1군 허브를 열지 못했습니다. 서버 열쇠" + (kid ? "(" + kid + ")" : "") + "가 지금 올라간 판과 맞지 않거나 파일을 받지 못했습니다.\n잠시 뒤 다시 시도하고, 계속되면 관리자에게 알려 주세요.", true, { backLabel: "다시 시도" });
                 }
             }
 
@@ -1062,21 +1080,6 @@
                     catch (e) { msg("m-mem", "빼지 못했습니다. (" + e.message + ")"); b.disabled = false; }
                 }
             });
-            $("ad-id").addEventListener("input", () => { const e = toEmail($("ad-id").value); $("ad-email").textContent = e ? "로그인 이메일(Supabase 계정에 넣을 값): " + e : ""; });
-            $("b-add").addEventListener("click", async () => {
-                const em = toEmail($("ad-id").value); msg("m-add", "");
-                if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { msg("m-add", "아이디(영문 · 숫자) 또는 이메일 형식으로 넣어 주세요."); return; }
-                const tier = $("ad-tier").value;
-                $("b-add").disabled = true;
-                try {
-                    await rest("hub_members", { method: "POST", headers: { "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify({ email: em, name: $("ad-nm").value.trim() || null, note: $("ad-nt").value.trim() || null, tier, active: true, must_change: true }) });
-                    logEvent("명단 변경", em + " · 추가(" + TIER[tier] + ")");
-                    msg("m-add", idOf(em) + " 을(를) " + TIER[tier] + " 권한으로 넣었습니다. Supabase 화면에서 " + em + " 계정을 만들었는지 확인하세요.", true);
-                    $("ad-id").value = ""; $("ad-nm").value = ""; $("ad-nt").value = ""; $("ad-email").textContent = ""; loadMembers();
-                } catch (e) { msg("m-add", e.status === 409 ? "이미 명단에 있는 아이디입니다." : "넣지 못했습니다. (" + e.message + ")"); }
-                finally { $("b-add").disabled = false; }
-            });
-
             async function loadLogs() {
                 try {
                     const L = await rest("hub_access_log?select=at,email,action,detail,ua&order=at.desc&limit=300");
@@ -1129,7 +1132,7 @@
 
             /* ── 단추 ── */
             document.querySelectorAll("[data-out]").forEach((b) => b.addEventListener("click", logout));
-            $("b-team1").addEventListener("click", openTeam1); $("a-team1").addEventListener("click", openTeam1);
+            $("b-team1").addEventListener("click", () => openTeam1()); $("a-team1").addEventListener("click", () => openTeam1());
             $("b-academy").addEventListener("click", openAcademy); $("a-academy").addEventListener("click", openAcademy);
             $("b-admin").addEventListener("click", openAdmin);
             $("b-retry").addEventListener("click", openAcademy);
