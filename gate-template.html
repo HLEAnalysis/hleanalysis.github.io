@@ -280,6 +280,17 @@
             .ghost-button { width: 100%; margin-top: 10px; background: transparent; border: 1px solid var(--border); border-radius: 10px; color: var(--ink-2);
                 font-family: inherit; font-size: 14px; font-weight: 600; padding: 11px; cursor: pointer; }
             .ghost-button:hover { border-color: rgba(255,255,255,.3); color: #fff; }
+            /* 앱으로 설치(휴대폰 · 설치 창을 띄울 수 있는 브라우저) */
+            .appinst { margin-top: 14px; text-align: center; }
+            .appinst button { background: none; border: 0; color: var(--brand); font: inherit; font-size: 13.5px; font-weight: 600; padding: 8px 10px; cursor: pointer; }
+            .appinst .how { margin-top: 6px; text-align: left; font-size: 13px; color: var(--ink-2); background: var(--page); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; line-height: 1.6; }
+            .appinst .how b { color: #fff; }
+            /* 휴대폰 · 태블릿: 아이폰은 16px보다 작은 입력칸을 누르면 화면을 확대한다 · 누르는 자리 넓히기 */
+            @media (pointer: coarse) {
+                input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea { font-size: 16px !important; }
+                label.remember { padding: 8px 0; margin-bottom: 10px; }
+                .remember input[type="checkbox"] { width: 20px; height: 20px; }
+            }
             .who { font-size: 12.5px; color: var(--ink-muted); margin-bottom: 16px; }
             .who b { color: var(--ink-2); font-weight: 600; }
             .hubpick { display: grid; gap: 10px; }
@@ -349,6 +360,10 @@
                         <button type="submit" class="decrypt-button" id="b-login">접속하기</button>
                     </form>
                     <button class="ghost-button" id="b-join">계정이 없나요? 출입 신청</button>
+                    <div class="appinst hidden" id="app-inst">
+                        <button type="button" id="b-inst">📱 앱으로 설치하기</button>
+                        <div class="how hidden" id="inst-how"></div>
+                    </div>
                 </section>
 
                 <!-- 출입 신청(본인이 아이디를 만들고 관리자 승인을 기다림) -->
@@ -516,6 +531,10 @@
             const toEmail = (v) => { v = String(v || "").trim().toLowerCase(); return v.indexOf("@") >= 0 ? v : (v ? v + "@" + ID_DOMAIN : ""); };
             const idOf = (email) => { email = String(email || ""); const sfx = "@" + ID_DOMAIN; return email.endsWith(sfx) ? email.slice(0, -sfx.length) : email; };
             const TIER = { admin: "관리자", team1: "1군", academy: "2·3군" };
+            // 홈 화면 앱(PWA)으로 실행 중인가 — 아이폰 앱은 닫으면 sessionStorage 가 지워진다
+            const STANDALONE = (() => { try { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch (e) { return false; } })();
+            const PHONE = (() => { try { return matchMedia("(pointer: coarse)").matches; } catch (e) { return false; } })();
+            const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
             /* ── 화면 전환 ── */
             const VIEWS = ["v-login", "v-join", "v-pw", "v-choose", "v-load", "v-stop"];
@@ -812,25 +831,82 @@
             function hideIntro() { introT0 = 0; const o = $("hubIntro"); o.classList.add("hidden"); o.classList.remove("in"); }
 
             // 허브 위에 열람 계정 표시 + 로그아웃(화면 유출 억제 · 공용 PC 대비)
+            // PC = 왼쪽 아래 알약 그대로 · 좁은 화면(휴대폰) = 오른쪽 아래 둥근 단추 → 눌러 펼침
+            //   (휴대폰에서 허브 셸은 왼쪽 아래에 LOG, 오른쪽 아래 12px 에 「맨 위로」를 둔다 → 둘 다 피해 맨 위로 단추 위에 놓는다)
+            const GATE_CSS = "#hle-gate-badge{position:fixed;left:8px;bottom:8px;z-index:2147483646;background:rgba(13,13,13,.82);color:#c3c2b7;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:3px 4px 3px 10px;font:11.5px/1.4 system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;display:flex;gap:6px;align-items:center;max-width:calc(100vw - 16px)}"
+                + "#hle-gate-badge .m{display:contents}#hle-gate-badge .k{display:none}"
+                + "#hle-gate-badge .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+                + "#hle-gate-badge button{font:inherit;cursor:pointer;flex:none;border-radius:999px}"
+                + "#hle-gate-badge .c{background:transparent;color:#c3c2b7;border:1px solid rgba(255,255,255,.25);padding:1px 8px}"
+                + "#hle-gate-badge .x{background:#f37321;color:#fff;border:0;padding:2px 9px;font-weight:700}"
+                + "@media (max-width:760px){#hle-gate-badge{left:auto;right:12px;bottom:calc(58px + env(safe-area-inset-bottom,0px));padding:0;background:none;border:0;flex-direction:column-reverse;align-items:flex-end;gap:8px;font-size:14px}"
+                + "#hle-gate-badge .k{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;padding:0;background:rgba(26,26,25,.94);border:1px solid rgba(255,255,255,.18);color:#c3c2b7;box-shadow:0 6px 18px rgba(0,0,0,.45)}"
+                + "#hle-gate-badge .m{display:none;flex-direction:column;align-items:stretch;gap:8px;min-width:190px;background:rgba(13,13,13,.96);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.6)}"
+                + "#hle-gate-badge.open .m{display:flex}#hle-gate-badge.open .k{color:#f37321;border-color:#f37321}"
+                + "#hle-gate-badge .t{padding:0 2px 4px}#hle-gate-badge .m button{min-height:42px;padding:0 14px;border-radius:10px}#hle-gate-badge .c{color:#fff}}"
+                + "#hle-gate-new{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:2147483647;display:flex;gap:8px;align-items:center;background:#1a1a19;color:#fff;border:1px solid #f37321;border-radius:12px;padding:8px 8px 8px 14px;font:14px/1.4 system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.6);width:max-content;max-width:calc(100vw - 24px)}"
+                + "#hle-gate-new button{font:inherit;cursor:pointer;border-radius:9px;min-height:36px;flex:none}#hle-gate-new .r{background:#f37321;color:#fff;border:0;padding:0 14px;font-weight:700}#hle-gate-new .q{background:none;color:#898781;border:0;padding:0 8px}";
             function badge(label) {
                 const put = () => {
                     if (!document.body || document.getElementById("hle-gate-badge")) return;
+                    if (!document.getElementById("hle-gate-style")) { const st = document.createElement("style"); st.id = "hle-gate-style"; st.textContent = GATE_CSS; (document.head || document.body).appendChild(st); }
                     const b = document.createElement("div"); b.id = "hle-gate-badge";
-                    b.setAttribute("style", "position:fixed;left:8px;bottom:8px;z-index:2147483646;background:rgba(13,13,13,.82);color:#c3c2b7;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:3px 4px 3px 10px;font:11.5px/1.4 system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;display:flex;gap:6px;align-items:center;max-width:calc(100vw - 16px)");
-                    const t = document.createElement("span"); t.textContent = label; t.setAttribute("style", "white-space:nowrap;overflow:hidden;text-overflow:ellipsis");
-                    const x = document.createElement("button"); x.textContent = "로그아웃"; x.setAttribute("style", "background:#f37321;color:#fff;border:0;border-radius:999px;padding:2px 9px;font:inherit;font-weight:700;cursor:pointer;flex:none");
+                    const k = document.createElement("button"); k.className = "k"; k.setAttribute("aria-label", "계정");
+                    k.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>';
+                    k.addEventListener("click", () => b.classList.toggle("open"));
+                    const m = document.createElement("div"); m.className = "m";
+                    const t = document.createElement("span"); t.className = "t"; t.textContent = label;
+                    const x = document.createElement("button"); x.className = "x"; x.textContent = "로그아웃";
                     x.addEventListener("click", logout);
-                    b.appendChild(t);
+                    m.appendChild(t);
                     if (ST && ST.tier === "admin") {
-                        const c = document.createElement("button"); c.textContent = "허브 선택"; c.setAttribute("style", "background:transparent;color:#c3c2b7;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:1px 8px;font:inherit;cursor:pointer;flex:none");
+                        const c = document.createElement("button"); c.className = "c"; c.textContent = "허브 선택";
                         c.addEventListener("click", backToChoose);
-                        b.appendChild(c);
+                        m.appendChild(c);
                     }
-                    b.appendChild(x); document.body.appendChild(b);
+                    m.appendChild(x); b.appendChild(k); b.appendChild(m); document.body.appendChild(b);
+                    // 펼친 메뉴는 바깥(허브 문서 iframe 포함)을 누르면 닫는다
+                    document.addEventListener("click", (e) => { if (!b.contains(e.target)) b.classList.remove("open"); }, true);
+                    window.addEventListener("blur", () => b.classList.remove("open"));
                 };
                 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", put); else put();
                 window.addEventListener("load", put);
                 window.addEventListener("popstate", onBack);   // document.open 이 지운 듣기를 새 허브 위에 다시 단다
+                watchVersion();
+            }
+
+            // 새 판 알림: 허브를 켜 둔 채(특히 휴대폰 앱) 최신화가 배포되면 알려 준다 — 다시 화면에 왔을 때(2분 간격) · 10분마다
+            // 1군 = 출입문(index.html)에 적힌 조각 목록이 지금 연 것과 다른가 · 2·3군 = 서버 최신 판 지문이 연 것과 다른가
+            let OPENED = null;   // { kind: "team1" } | { kind: "academy", sha }
+            const team1Fp = (pk, pe, a, b) => JSON.stringify([pk, pe, a, b]);
+            async function hasNewer() {
+                if (OPENED.kind === "academy") {
+                    const v = await rest("hub_versions?select=sha256&order=at.desc&limit=1");
+                    return !!(v && v[0] && v[0].sha256 !== OPENED.sha);
+                }
+                const t = await (await fetch(location.pathname + "?v=" + Date.now(), { cache: "no-store" })).text();
+                const m1 = t.match(/const PAYLOAD_KO = ("[^"]*"), PAYLOAD_EN = ("[^"]*");/), m2 = t.match(/const PARTS_KO = (.*?), PARTS_EN = (.*?);\r?\n/);
+                if (!m1 || !m2) return false;
+                return team1Fp(JSON.parse(m1[1]), JSON.parse(m1[2]), JSON.parse(m2[1]), JSON.parse(m2[2])) !== team1Fp(PAYLOAD_KO, PAYLOAD_EN, PARTS_KO, PARTS_EN);
+            }
+            function watchVersion() {
+                if (!OPENED) return;
+                let last = Date.now(), shown = false;
+                const check = async (force) => {
+                    if (shown || document.visibilityState !== "visible" || (!force && Date.now() - last < 120000)) return;
+                    last = Date.now();
+                    try { if (await hasNewer()) { shown = true; newVersionToast(); } } catch (e) {}
+                };
+                document.addEventListener("visibilitychange", () => check(false));
+                setInterval(() => check(true), 600000);
+            }
+            function newVersionToast() {
+                if (!document.body || document.getElementById("hle-gate-new")) return;
+                const d = document.createElement("div"); d.id = "hle-gate-new"; d.setAttribute("role", "status");
+                const s = document.createElement("span"); s.textContent = "새 판이 올라왔습니다";
+                const r = document.createElement("button"); r.className = "r"; r.textContent = "새로 고침"; r.addEventListener("click", () => location.reload());
+                const q = document.createElement("button"); q.className = "q"; q.textContent = "✕"; q.setAttribute("aria-label", "닫기"); q.addEventListener("click", () => d.remove());
+                d.appendChild(s); d.appendChild(r); d.appendChild(q); document.body.appendChild(d);
             }
 
             async function openTeam1() {
@@ -859,6 +935,7 @@
                     const full = await spliceStartDoc(html, key);
                     try { if (introT0) sessionStorage.setItem("hle-intro-t0", String(introT0)); sessionStorage.setItem("hle-gate-open", "team1"); } catch (e) {}
                     const who = idOf(S.email);
+                    OPENED = { kind: "team1" };
                     document.open();
                     await writeChunked(full);
                     document.close();
@@ -898,6 +975,7 @@
                     // 2·3군 허브 안 스카우팅 메모 · 테스트 기록 · 솔랭 추세가 쓰는 통로(194차 · 이 탭의 로그인으로만)
                     try { if (introT0) sessionStorage.setItem("hle-intro-t0", String(introT0)); sessionStorage.setItem("hle-gate-open", "academy"); } catch (e) {}
                     window.HLE2GATE = { email: who, rest: (path, opt) => rest(path, opt), rpc: (name, args) => rpc(name, args) };
+                    OPENED = { kind: "academy", sha: v.sha256 };
                     document.open();
                     await writeChunked(html);   // 나눠 쓰며 쉬어 오프닝이 멈추지 않게
                     document.close();
@@ -1065,6 +1143,26 @@
             $("b-join-back").addEventListener("click", () => { if (S) logout(); else { show("v-login"); $("g-id").focus(); } });
             const toggleIcon = $("toggle-password"), eyeClosed = toggleIcon.src, eyeOpened = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzYgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNS4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjQgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZD0iTTI4OCAzMmMtODAuOCAwLTE0NS41IDM2LjgtMTkyLjYgODAuNkM0OC42IDE1NiAxNy4zIDIwOCAyLjUgMjQzLjdjLTMuMyA3LjktMy4zIDE2LjcgMCAyNC42QzE3LjMgMzA0IDQ4LjYgMzU2IDk1LjQgMzk5LjRDMTQyLjUgNDQzLjIgMjA3LjIgNDgwIDI4OCA0ODBzMTQ1LjUtMzYuOCAxOTIuNi04MC42YzQ2LjgtNDMuNSA3OC4xLTk1LjQgOTMtMTMxLjFjMy4zLTcuOSAzLjMtMTYuNyAwLTI0LjZjLTE0LjktMzUuNy00Ni4yLTg3LjctOTMtMTMxLjFDNDMzLjUgNjguOCAzNjguOCAzMiAyODggMzJ6TTE0NCAyNTZhMTQ0IDE0NCAwIDEgMSAyODggMCAxNDQgMTQ0IDAgMSAxIC0yODggMHptMTQ0LTY0YzAgMzUuMy0yOC43IDY0LTY0IDY0Yy03LjEgMC0xMy45LTEuMi0yMC4zLTMuM2MtNS41LTEuOC0xMS45IDEuNi0xMS43IDcuNGMuMyA2LjkgMS4zIDEzLjggMy4yIDIwLjdjMTMuNyA1MS4yIDY2LjQgODEuNiAxMTcuNiA2Ny45czgxLjYtNjYuNCA2Ny45LTExNy42Yy0xMS4xLTQxLjUtNDcuOC02OS40LTg4LjYtNzEuMWMtNS44LS4yLTkuMiA2LjEtNy40IDExLjdjMi4xIDYuNCAzLjMgMTMuMiAzLjMgMjAuM3oiLz48L3N2Zz4=";
             toggleIcon.addEventListener("click", () => { const i = $("password"); const t = i.type === "password"; i.type = t ? "text" : "password"; toggleIcon.src = t ? eyeOpened : eyeClosed; });
+
+            /* ── 앱으로 설치: 안드로이드 · PC 크롬은 설치 창, 아이폰은 방법 안내 ── */
+            let installEvt = null;
+            function showInst() { if (!STANDALONE) $("app-inst").classList.remove("hidden"); }
+            window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; showInst(); });
+            window.addEventListener("appinstalled", () => { installEvt = null; $("app-inst").classList.add("hidden"); });
+            $("b-inst").addEventListener("click", async () => {
+                if (installEvt) {
+                    const e = installEvt; installEvt = null;
+                    try { await e.prompt(); const c = await e.userChoice; if (c && c.outcome === "accepted") $("app-inst").classList.add("hidden"); } catch (_) {}
+                    return;
+                }
+                const how = $("inst-how");
+                how.innerHTML = IOS
+                    ? "① <b>Safari</b>로 이 주소를 엽니다.<br>② 아래쪽 <b>공유 단추</b>(네모에 위 화살표)를 누릅니다.<br>③ <b>「홈 화면에 추가」</b> → <b>「추가」</b>.<br>홈 화면의 HLE 아이콘으로 열면 전체 화면 앱으로 실행됩니다."
+                    : "① 브라우저 오른쪽 위 <b>메뉴(⋮)</b>를 누릅니다.<br>② <b>「앱 설치」</b> 또는 <b>「홈 화면에 추가」</b>를 고릅니다.<br>홈 화면의 HLE 아이콘으로 열면 전체 화면 앱으로 실행됩니다.";
+                how.classList.toggle("hidden");
+            });
+            if (PHONE) showInst();
+            if (STANDALONE) $("remember").checked = true;   // 앱에서는 로그인 유지가 기본(직접 끌 수 있음)
 
             /* ── 시작 ── */
             (function init() {
