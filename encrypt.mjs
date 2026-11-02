@@ -338,9 +338,19 @@ async function buildLang(srcPath, shellOut, lang, otherLang, label, title) {
 
     // 셸이 시작 문서를 고정하는지 감지한다 (Cowork 125차~: 항상 분석 개요로 시작).
     // 저장된 탭(hle-hub-tab)을 읽지 않고 `var start = '<id>'`만 있으면 고정, 읽으면 기억형.
-    const fixedM = shell.match(/var start = '([a-z0-9-]+)';/);
+    // 295차~: `var start = 'scout';` 줄은 로더 계약으로 남기고 바로 뒤에서 `start = 'db';` 로 덮어쓴다 → 덮어쓴 값을 쓴다.
+    // CHANGELOG 주석에도 같은 문구가 나오므로 셸 맨 뒤(실제 코드)의 것을 잡는다.
+    const fixedAll = [...shell.matchAll(/var start = '([a-z0-9-]+)';/g)];
+    const fixedM = fixedAll.length ? fixedAll[fixedAll.length - 1] : null;
+    let fixedId = fixedM ? fixedM[1] : null;
+    if (fixedM) {
+        const tail = shell.slice(fixedM.index + fixedM[0].length, fixedM.index + fixedM[0].length + 1500);
+        const cut = tail.search(/show\(start\)/);
+        const over = [...(cut >= 0 ? tail.slice(0, cut) : tail).matchAll(/(?:^|[;\s])start = '([a-z0-9-]+)';/g)].pop();
+        if (over) fixedId = over[1];
+    }
     const readsLast = /getItem\(\s*['"]hle-hub-tab['"]\s*\)/.test(shell);
-    const fixedStart = (fixedM && !readsLast) ? fixedM[1] : null;
+    const fixedStart = (fixedId && !readsLast) ? fixedId : null;
     console.log("  시작 문서: " + (fixedStart ? fixedStart + " (셸 고정)" : "마지막으로 본 탭"));
 
     const manifest = { lang, parts: {} };

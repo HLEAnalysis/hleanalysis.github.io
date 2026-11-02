@@ -497,13 +497,13 @@
             const SK = "hle-gate-session";   // 로그인 유지 = localStorage · 아니면 sessionStorage(이 탭만)
 
             // 1군 허브 조각(빌드 때 채움)
-            const PAYLOAD_KO = "payload.bin?v=6bcbfe683b", PAYLOAD_EN = "payload_en.bin?v=4eddbbae6b";
-            const PARTS_KO = {"scout":"p/ko-scout-1cefd9a9a6.bin","blg":"p/ko-blg-96b07197d0.bin","g2":"p/ko-g2-b31925d2bb.bin","db":"p/ko-db-5315e6d023.bin","planner":"p/ko-planner-a3ce1739f7.bin","lab":"p/ko-lab-c8e4b981e1.bin","wscout":"p/ko-wscout-3d0e1fa679.bin","wz":"p/ko-wz-c0bca436e3.bin","old":"p/ko-old-7826163468.bin"}, PARTS_EN = {"scout":"p/en-scout-e75831de6a.bin","db":"p/en-db-c3e97fcea5.bin","planner":"p/en-planner-4b5048b58a.bin","lab":"p/en-lab-25c45edf3f.bin","wscout":"p/en-wscout-bb4bcda562.bin","wz":"p/en-wz-00b79f8b9f.bin","old":"p/en-old-654460dcc4.bin"};
+            const PAYLOAD_KO = "payload.bin?v=33d6a1fc83", PAYLOAD_EN = "payload_en.bin?v=4eddbbae6b";
+            const PARTS_KO = {"scout":"p/ko-scout-1cefd9a9a6.bin","blg":"p/ko-blg-96b07197d0.bin","g2":"p/ko-g2-b31925d2bb.bin","db":"p/ko-db-5315e6d023.bin","planner":"p/ko-planner-a3ce1739f7.bin","lab":"p/ko-lab-c8e4b981e1.bin","wscout":"p/ko-wscout-3d0e1fa679.bin","wz":"p/ko-wz-c0bca436e3.bin","old":"p/ko-old-c1863426ef.bin"}, PARTS_EN = {"scout":"p/en-scout-e75831de6a.bin","db":"p/en-db-c3e97fcea5.bin","planner":"p/en-planner-4b5048b58a.bin","lab":"p/en-lab-25c45edf3f.bin","wscout":"p/en-wscout-bb4bcda562.bin","wz":"p/en-wz-00b79f8b9f.bin","old":"p/en-old-654460dcc4.bin"};
             let LANG = "ko";
             try { if (PAYLOAD_EN && localStorage.getItem("hlehub_lang") === "en") LANG = "en"; } catch (e) {}
             const PAYLOAD_URL = LANG === "en" ? PAYLOAD_EN : PAYLOAD_KO;
             const PARTS = (LANG === "en" ? PARTS_EN : PARTS_KO) || {};
-            const FIXED_START = (LANG === "en" ? null : "scout");
+            const FIXED_START = (LANG === "en" ? null : "db");
             let START_DOC = (FIXED_START && PARTS[FIXED_START]) ? FIXED_START : null;
             if (!START_DOC) { try { const v = localStorage.getItem("hle-hub-tab"); if (v && PARTS[v]) START_DOC = v; } catch (e) {} }
             if (!START_DOC) START_DOC = PARTS.scout ? "scout" : (Object.keys(PARTS)[0] || null);
