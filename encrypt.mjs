@@ -5,7 +5,8 @@
 //      · 셸    → payload.bin / payload_en.bin
 //      · 문서  → p/<lang>-<id>-<hash>.bin   (탭을 열 때 그때 내려받음)
 //   ③ 로그인 화면(index.html) 생성
-// 사용: node encrypt.mjs   (비밀번호는 비밀번호.txt에서 읽음)
+// 사용: node encrypt.mjs [--out <폴더>]   (2026-11-02~ 기본 = 통합 출입문: 계정 로그인 · 열쇠는 _work/gate/team1.key → Supabase)
+//       node encrypt.mjs --password      (예전 공용 비밀번호 방식 · 비밀번호는 비밀번호.txt에서 읽음)
 //
 // 분할하는 이유: 셸은 0.5MB인데 내장문서 6개가 22MB다. 예전에는 탭 하나를 보려고
 // 22.5MB를 전부 내려받아 파싱했다. 이제 첫 화면은 셸 + 보고 있던 문서 하나만 받는다.
@@ -20,8 +21,23 @@ import { webcrypto as crypto, randomBytes, createHash } from "node:crypto";
 const ITER = 600_000;
 const PART_DIR = "p";
 
-const password = readFileSync("비밀번호.txt", "utf8").trim();
-if (password.length < 14) {
+// 기본(출입문): 비밀번호 대신 무작위 열쇠(_work/gate/team1.key)로 잠그고, 출입문(gate-template.html)을 쓴다.
+//         열쇠는 Supabase private.hub_keys 에도 넣어 두고, 1군 · 관리자 계정이 로그인하면 hub_key() 로 받는다.
+//         열쇠 파일이 없으면 비밀번호 방식으로 넘어가지 않고 멈춘다(실수로 예전 방식이 배포되지 않게).
+// --password: 예전 공용 비밀번호 방식(login-template.html). --gate 는 예전 호환용으로 그냥 받아 둔다.
+// --out:  결과(index.html · payload*.bin · p/)를 다른 폴더에 쓴다(미리보기용 · 저장소 파일은 그대로).
+const GATE = !process.argv.includes("--password");
+if (GATE && !existsSync("_work/gate/team1.key")) {
+    console.error("오류: _work/gate/team1.key(1군 허브 열쇠)가 없습니다. 이 PC에서 처음 배포한다면 열쇠 파일을 옮겨 오세요.");
+    process.exit(1);
+}
+const oi = process.argv.indexOf("--out");
+const OUT = oi > 0 && process.argv[oi + 1] ? process.argv[oi + 1].replace(/[\\/]+$/, "") : ".";
+const P = (f) => OUT === "." ? f : OUT + "/" + f;
+if (OUT !== ".") mkdirSync(OUT, { recursive: true });
+
+const password = GATE ? "" : readFileSync("비밀번호.txt", "utf8").trim();
+if (!GATE && password.length < 14) {
     console.error("오류: 비밀번호는 14자 이상이어야 합니다 (현재 " + password.length + "자)");
     process.exit(1);
 }
@@ -36,11 +52,19 @@ if (existsSync("salt.txt")) {
     console.log("salt.txt 신규 생성");
 }
 
-const keyMat = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
-const key = await crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations: ITER, hash: "SHA-256" },
-    keyMat, { name: "AES-GCM", length: 256 }, false, ["encrypt"]
-);
+let key;
+if (GATE) {
+    const raw = Buffer.from(readFileSync("_work/gate/team1.key", "utf8").trim(), "base64");
+    if (raw.length !== 32) { console.error("오류: _work/gate/team1.key 가 32바이트 열쇠가 아닙니다"); process.exit(1); }
+    key = await crypto.subtle.importKey("raw", raw, { name: "AES-GCM" }, false, ["encrypt"]);
+    console.log("출입문 방식: 열쇠 " + createHash("sha256").update(raw).digest("hex").slice(0, 8) + (OUT !== "." ? " · 결과 → " + OUT : ""));
+} else {
+    const keyMat = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+    key = await crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt, iterations: ITER, hash: "SHA-256" },
+        keyMat, { name: "AES-GCM", length: 256 }, false, ["encrypt"]
+    );
+}
 
 const imgMap = existsSync("img-map.json") ? JSON.parse(readFileSync("img-map.json", "utf8")) : null;
 
@@ -305,7 +329,7 @@ ${E}`;
 }
 
 // ── p/ 디렉터리 ──
-if (!existsSync(PART_DIR)) mkdirSync(PART_DIR);
+if (!existsSync(P(PART_DIR))) mkdirSync(P(PART_DIR));
 const keepFiles = new Set();
 
 async function buildLang(srcPath, shellOut, lang, otherLang, label, title) {
@@ -325,7 +349,7 @@ async function buildLang(srcPath, shellOut, lang, otherLang, label, title) {
         const { payload, hash } = await seal(p.body, lang + "-" + p.id);
         const file = PART_DIR + "/" + lang + "-" + p.id + "-" + hash + ".bin";
         // 내용이 그대로면 파일도 그대로 — 굳이 다시 쓰지 않는다
-        if (!existsSync(file)) writeFileSync(file, payload);
+        if (!existsSync(P(file))) writeFileSync(P(file), payload);
         keepFiles.add(file.slice(PART_DIR.length + 1));
         manifest.parts[p.id] = file;
         partBytes += payload.length;
@@ -363,7 +387,7 @@ async function buildLang(srcPath, shellOut, lang, otherLang, label, title) {
     const shellFinal = i === -1 ? shellIn + runtime : shellIn.slice(0, i) + runtime + shellIn.slice(i);
 
     const { payload, hash } = await seal(shellFinal, lang + "-shell");
-    writeFileSync(shellOut, payload);
+    writeFileSync(P(shellOut), payload);
     console.log("  " + shellOut + " (셸): " + (payload.length / 1048576).toFixed(2) + "MB"
         + "  · 문서 " + parts.length + "개 합계 " + (partBytes / 1048576).toFixed(1) + "MB");
     // 130차~: 셸 오프닝이 로그인 화면 오프닝을 이어받는지(hle-intro-t0 신호를 읽는지)
@@ -384,12 +408,12 @@ if (existsSync("src/index_en.html")) {
 
 // 더 이상 쓰이지 않는 조각 파일 정리
 let pruned = 0;
-for (const f of readdirSync(PART_DIR)) {
-    if (f.endsWith(".bin") && !keepFiles.has(f)) { unlinkSync(PART_DIR + "/" + f); pruned++; }
+for (const f of readdirSync(P(PART_DIR))) {
+    if (f.endsWith(".bin") && !keepFiles.has(f)) { unlinkSync(P(PART_DIR + "/" + f)); pruned++; }
 }
 if (pruned) console.log("사용하지 않는 조각 " + pruned + "개 삭제");
 
-const template = readFileSync("login-template.html", "utf8");
+const template = readFileSync(GATE ? "gate-template.html" : "login-template.html", "utf8");
 const out = template
     .replace("__SALT_B64__", salt.toString("base64"))
     .replace("__ITER__", String(ITER))
@@ -402,5 +426,5 @@ const out = template
     .replace("__INTRO_KO__", JSON.stringify(!!ko.introOk))
     .replace("__INTRO_EN__", JSON.stringify(!!(en && en.introOk)));
 
-writeFileSync("index.html", out);
-console.log("완료: index.html " + (out.length / 1024).toFixed(0) + "KB · 한국어" + (en ? " + 영어" : " 단독"));
+writeFileSync(P("index.html"), out);
+console.log("완료: " + P("index.html") + " " + (out.length / 1024).toFixed(0) + "KB · 한국어" + (en ? " + 영어" : " 단독"));

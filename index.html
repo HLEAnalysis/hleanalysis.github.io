@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <title>HLE 통합 분석 허브</title>
+        <meta name="referrer" content="no-referrer" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="robots" content="noindex, nofollow, noarchive" />
 
@@ -253,6 +254,54 @@
             @keyframes hiFade{from{opacity:0}to{opacity:1}}
             #hubIntro.hidden{display:none}
             @media (prefers-reduced-motion:reduce){#hubIntro .lg,#hubIntro .tt,#hubIntro .ln,#hubIntro .sb{opacity:1!important;animation:none!important}}
+            /* ── 2027 통합 출입문 (계정 로그인 · 권한별 허브) ── */
+            .login-card .view + .view { margin-top: 0; }
+            .field { margin-bottom: 14px; }
+            .field input[type="text"], .field input[type="password"], .field input[type="email"], .field select, .field input[type="file"] {
+                width: 100%; background: var(--page); border: 1px solid var(--border); border-radius: 9px; color: var(--ink-1);
+                font-size: 15px; font-family: inherit; padding: 11px 14px; outline: 0; transition: border-color .15s, box-shadow .15s;
+            }
+            .field input:focus, .field select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(243,115,33,.18); }
+            .gmsg { min-height: 20px; font-size: 12.5px; color: var(--crit); margin: 2px 0 10px; white-space: pre-line; }
+            .gmsg.ok { color: #5fd18b; }
+            .ghost-button { width: 100%; margin-top: 10px; background: transparent; border: 1px solid var(--border); border-radius: 10px; color: var(--ink-2);
+                font-family: inherit; font-size: 14px; font-weight: 600; padding: 11px; cursor: pointer; }
+            .ghost-button:hover { border-color: rgba(255,255,255,.3); color: #fff; }
+            .who { font-size: 12.5px; color: var(--ink-muted); margin-bottom: 16px; }
+            .who b { color: var(--ink-2); font-weight: 600; }
+            .hubpick { display: grid; gap: 10px; }
+            .hubpick button { text-align: left; background: var(--page); border: 1px solid var(--border); border-radius: 11px; color: #fff; padding: 14px 16px; cursor: pointer; font-family: inherit; }
+            .hubpick button:hover { border-color: var(--brand); }
+            .hubpick button b { display: block; font-size: 15px; }
+            .hubpick button span { font-size: 12px; color: var(--ink-muted); }
+            .gbar { height: 7px; background: var(--grid); border-radius: 99px; overflow: hidden; margin: 14px 0 8px; }
+            .gbar i { display: block; height: 100%; width: 0; background: var(--brand); transition: width .2s; }
+            /* 관리 화면 — 로그인 카드보다 넓게, 확대 없이 */
+            .admin { width: min(1120px, 100%); margin: 0 auto; padding: 22px 16px 40px; font-size: 13.5px; }
+            .admin h2 { font-size: 18px; margin-bottom: 4px; }
+            .admin h2 .hle { color: var(--brand); }
+            .arow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+            .abtn { background: var(--brand); color: #fff; border: 0; border-radius: 8px; padding: 7px 13px; font: inherit; font-weight: 700; cursor: pointer; }
+            .abtn.ghost { background: transparent; border: 1px solid var(--border); color: var(--ink-2); font-weight: 600; }
+            .abtn.sm { padding: 4px 9px; font-size: 12px; border-radius: 7px; }
+            .abtn:disabled { opacity: .5; cursor: default; }
+            .atabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 12px; }
+            .atabs button { background: var(--surface-1); color: var(--ink-2); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; font: inherit; font-weight: 700; cursor: pointer; }
+            .atabs button.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+            .acard { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+            .agrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 10px; margin-top: 8px; }
+            .agrid .field { margin: 0; }
+            .agrid label, .acard > label { display: block; font-size: 12px; color: var(--ink-muted); margin-bottom: 5px; }
+            .anote { font-size: 12px; color: var(--ink-muted); margin-top: 8px; }
+            .tw { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-1); }
+            .tw table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+            .tw th, .tw td { padding: 7px 9px; border-bottom: 1px solid rgba(255,255,255,.07); text-align: left; white-space: nowrap; vertical-align: middle; }
+            .tw th { background: #202020; color: var(--ink-2); }
+            .tw td.wrap { white-space: normal; min-width: 150px; }
+            .tw select { background: var(--page); color: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px; font: inherit; }
+            .pill { display: inline-block; border-radius: 999px; padding: 1px 8px; font-size: 11.5px; font-weight: 700; }
+            .pill.on { background: rgba(95,209,139,.15); color: #5fd18b; } .pill.off { background: rgba(208,59,59,.18); color: #ff7b7b; } .pill.warn { background: rgba(243,115,33,.15); color: var(--brand); }
+            .mono { font-family: Consolas, "Courier New", monospace; font-size: 12px; }
         </style>
     </head>
 
@@ -271,301 +320,730 @@
                 </div>
                 <span class="badge"><b>TEAM ONLY</b> · 내부 전용</span>
 
-                <p class="instructions">한화생명e스포츠 내부 전용 페이지입니다. 디스코드에 공유된 비밀번호를 입력하세요.</p>
+                <!-- 로그인 -->
+                <section class="view" id="v-login">
+                    <p class="instructions">한화생명e스포츠 내부 전용 페이지입니다. 승인된 계정으로 로그인하세요. 계정 권한에 맞는 허브가 열립니다.</p>
+                    <form id="f-login" action="#" method="post" autocomplete="on">
+                        <span class="field-label">ID</span>
+                        <div class="field"><input id="g-id" type="text" name="username" placeholder="아이디 또는 이메일" autocomplete="username" autocapitalize="off" spellcheck="false" required /></div>
+                        <span class="field-label">Password</span>
+                        <div class="password-container">
+                            <input id="password" type="password" name="password" placeholder="비밀번호 입력" autocomplete="current-password" required />
+                            <img class="toggle-password" id="toggle-password" alt="비밀번호 표시" title="비밀번호 표시" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNS4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjQgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZD0iTTM4LjggNS4xQzI4LjQtMy4xIDEzLjMtMS4yIDUuMSA5LjJTLTEuMiAzNC43IDkuMiA0Mi45bDU5MiA0NjRjMTAuNCA4LjIgMjUuNSA2LjMgMzMuNy00LjFzNi4zLTI1LjUtNC4xLTMzLjdMNTI1LjYgMzg2LjdjMzkuNi00MC42IDY2LjQtODYuMSA3OS45LTExOC40YzMuMy03LjkgMy4zLTE2LjcgMC0yNC42Yy0xNC45LTM1LjctNDYuMi04Ny43LTkzLTEzMS4xQzQ2NS41IDY4LjggNDAwLjggMzIgMzIwIDMyYy02OC4yIDAtMTI1IDI2LjMtMTY5LjMgNjAuOEwzOC44IDUuMXpNMjIzLjEgMTQ5LjVDMjQ4LjYgMTI2LjIgMjgyLjcgMTEyIDMyMCAxMTJjNzkuNSAwIDE0NCA2NC41IDE0NCAxNDRjMCAyNC45LTYuMyA0OC4zLTE3LjQgNjguN0w0MDggMjk0LjVjOC40LTE5LjMgMTAuNi00MS40IDQuOC02My4zYy0xMS4xLTQxLjUtNDcuOC02OS40LTg4LjYtNzEuMWMtNS44LS4yLTkuMiA2LjEtNy40IDExLjdjMi4xIDYuNCAzLjMgMTMuMiAzLjMgMjAuM2MwIDEwLjItMi40IDE5LjgtNi42IDI4LjNsLTkwLjMtNzAuOHpNMzczIDM4OS45Yy0xNi40IDYuNS0zNC4zIDEwLjEtNTMgMTAuMWMtNzkuNSAwLTE0NC02NC41LTE0NC0xNDRjMC02LjkgLjUtMTMuNiAxLjQtMjAuMkw4My4xIDE2MS41QzYwLjMgMTkxLjIgNDQgMjIwLjggMzQuNSAyNDMuN2MtMy4zIDcuOS0zLjMgMTYuNyAwIDI0LjZjMTQuOSAzNS43IDQ2LjIgODcuNyA5MyAxMzEuMUMxNzQuNSA0NDMuMiAyMzkuMiA0ODAgMzIwIDQ4MGM0Ny44IDAgODkuOS0xMi45IDEyNi4yLTMyLjVMMzczIDM4OS45eiIvPjwvc3ZnPg==" />
+                        </div>
+                        <div class="gmsg" id="m-login"></div>
+                        <label class="remember"><input id="remember" type="checkbox" /> 이 기기에서 로그인 유지</label>
+                        <button type="submit" class="decrypt-button" id="b-login">접속하기</button>
+                    </form>
+                    <button class="ghost-button" id="b-join">계정이 없나요? 출입 신청</button>
+                </section>
 
-                <form id="login-form" action="#" method="post">
-                    <span class="field-label">Password</span>
-                    <div class="password-container">
-                        <input id="password" type="password" name="password" placeholder="비밀번호 입력" autofocus autocomplete="current-password" />
-                        <img class="toggle-password" id="toggle-password" alt="비밀번호 표시" title="비밀번호 표시"
-                            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNS4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjQgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZD0iTTM4LjggNS4xQzI4LjQtMy4xIDEzLjMtMS4yIDUuMSA5LjJTLTEuMiAzNC43IDkuMiA0Mi45bDU5MiA0NjRjMTAuNCA4LjIgMjUuNSA2LjMgMzMuNy00LjFzNi4zLTI1LjUtNC4xLTMzLjdMNTI1LjYgMzg2LjdjMzkuNi00MC42IDY2LjQtODYuMSA3OS45LTExOC40YzMuMy03LjkgMy4zLTE2LjcgMC0yNC42Yy0xNC45LTM1LjctNDYuMi04Ny43LTkzLTEzMS4xQzQ2NS41IDY4LjggNDAwLjggMzIgMzIwIDMyYy02OC4yIDAtMTI1IDI2LjMtMTY5LjMgNjAuOEwzOC44IDUuMXpNMjIzLjEgMTQ5LjVDMjQ4LjYgMTI2LjIgMjgyLjcgMTEyIDMyMCAxMTJjNzkuNSAwIDE0NCA2NC41IDE0NCAxNDRjMCAyNC45LTYuMyA0OC4zLTE3LjQgNjguN0w0MDggMjk0LjVjOC40LTE5LjMgMTAuNi00MS40IDQuOC02My4zYy0xMS4xLTQxLjUtNDcuOC02OS40LTg4LjYtNzEuMWMtNS44LS4yLTkuMiA2LjEtNy40IDExLjdjMi4xIDYuNCAzLjMgMTMuMiAzLjMgMjAuM2MwIDEwLjItMi40IDE5LjgtNi42IDI4LjNsLTkwLjMtNzAuOHpNMzczIDM4OS45Yy0xNi40IDYuNS0zNC4zIDEwLjEtNTMgMTAuMWMtNzkuNSAwLTE0NC02NC41LTE0NC0xNDRjMC02LjkgLjUtMTMuNiAxLjQtMjAuMkw4My4xIDE2MS41QzYwLjMgMTkxLjIgNDQgMjIwLjggMzQuNSAyNDMuN2MtMy4zIDcuOS0zLjMgMTYuNyAwIDI0LjZjMTQuOSAzNS43IDQ2LjIgODcuNyA5MyAxMzEuMUMxNzQuNSA0NDMuMiAyMzkuMiA0ODAgMzIwIDQ4MGM0Ny44IDAgODkuOS0xMi45IDEyNi4yLTMyLjVMMzczIDM4OS45eiIvPjwvc3ZnPg==" />
+                <!-- 출입 신청(본인이 아이디를 만들고 관리자 승인을 기다림) -->
+                <section class="view hidden" id="v-join">
+                    <p class="instructions">아이디와 비밀번호를 직접 정해 신청하세요. 관리자가 승인하면 그때부터 같은 아이디로 로그인해 허브를 볼 수 있습니다.</p>
+                    <form id="f-join" action="#" method="post" autocomplete="on">
+                        <div id="j-cred">
+                            <span class="field-label">아이디 (영문 소문자 · 숫자 · . _ - · 3~20자)</span>
+                            <div class="field"><input id="j-id" type="text" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" maxlength="20" placeholder="예: kim.analyst" /></div>
+                            <span class="field-label">비밀번호 (12자 이상 · 영문과 숫자)</span>
+                            <div class="field"><input id="j-p1" type="password" autocomplete="new-password" minlength="12" /></div>
+                            <span class="field-label">비밀번호 확인</span>
+                            <div class="field"><input id="j-p2" type="password" autocomplete="new-password" minlength="12" /></div>
+                        </div>
+                        <span class="field-label">이름 · 소속</span>
+                        <div class="field"><input id="j-nm" type="text" maxlength="40" placeholder="예: 2군 코치 홍길동" required /></div>
+                        <span class="field-label">볼 허브</span>
+                        <div class="field"><select id="j-tier"><option value="team1">1군 허브</option><option value="academy">2·3군 허브</option></select></div>
+                        <span class="field-label">관리자에게 남길 말 (선택)</span>
+                        <div class="field"><input id="j-nt" type="text" maxlength="200" /></div>
+                        <div class="gmsg" id="m-join"></div>
+                        <button type="submit" class="decrypt-button" id="b-join-go">신청하기</button>
+                    </form>
+                    <button class="ghost-button" id="b-join-back">로그인으로 돌아가기</button>
+                </section>
+
+                <!-- 새 비밀번호 -->
+                <section class="view hidden" id="v-pw">
+                    <p class="instructions">처음 로그인했거나 관리자가 재설정을 요청했습니다. 본인만 아는 새 비밀번호로 바꿔야 허브가 열립니다.</p>
+                    <form id="f-pw" action="#" method="post" autocomplete="on">
+                        <input type="text" id="pw-user" name="username" autocomplete="username" hidden />
+                        <span class="field-label">새 비밀번호 (12자 이상 · 영문과 숫자)</span>
+                        <div class="field"><input id="np1" type="password" autocomplete="new-password" minlength="12" required /></div>
+                        <span class="field-label">새 비밀번호 확인</span>
+                        <div class="field"><input id="np2" type="password" autocomplete="new-password" minlength="12" required /></div>
+                        <div class="gmsg" id="m-pw"></div>
+                        <button type="submit" class="decrypt-button" id="b-pw">바꾸고 들어가기</button>
+                    </form>
+                    <button class="ghost-button" data-out>로그아웃</button>
+                </section>
+
+                <!-- 관리자: 허브 고르기 -->
+                <section class="view hidden" id="v-choose">
+                    <div class="who" id="who"></div>
+                    <div class="hubpick">
+                        <button id="b-team1"><b>1군 허브</b><span>LCK · 국제전 · 상대 분석 · 밴픽</span></button>
+                        <button id="b-academy"><b>2·3군 허브</b><span>LCK CL · 아카데미 · 스카우팅</span></button>
+                        <button id="b-admin"><b>관리 <span class="pill warn hidden" id="c-pend"></span></b><span>계정 · 권한 · 출입 신청 승인 · 접속 기록 · 2·3군 허브 올리기</span></button>
                     </div>
+                    <button class="ghost-button" data-out>로그아웃</button>
+                </section>
 
-                    <div class="error-msg" id="error-msg">비밀번호가 올바르지 않습니다 — 다시 확인해주세요.</div>
+                <!-- 2·3군 허브 받는 중 -->
+                <section class="view hidden" id="v-load">
+                    <p class="instructions" id="l-title" style="margin-bottom:0;padding-bottom:0;border:0">허브를 불러오는 중…</p>
+                    <div class="gbar"><i id="l-bar"></i></div>
+                    <div class="who" id="l-note"></div>
+                    <div class="gmsg" id="m-load"></div>
+                    <div id="l-retry" class="hidden"><button class="decrypt-button" id="b-retry">다시 시도</button><button class="ghost-button" id="b-choose2" hidden>허브 선택</button><button class="ghost-button" data-out>로그아웃</button></div>
+                </section>
 
-                    <label class="remember">
-                        <input id="remember" type="checkbox" name="remember" />
-                        이 기기에서 30일간 기억
-                    </label>
-
-                    <button type="submit" class="decrypt-button" id="submit-btn">접속하기</button>
-                </form>
+                <!-- 멈춤(명단 없음 · 중지 · 오류) -->
+                <section class="view hidden" id="v-stop">
+                    <div class="gmsg" id="m-stop" style="margin-top:0"></div>
+                    <button class="decrypt-button" id="b-req" hidden>출입 신청하기</button>
+                    <button class="ghost-button" id="b-back" hidden>처음으로</button>
+                    <button class="ghost-button" data-out>로그아웃</button>
+                </section>
 
                 <div class="foot">HANWHA LIFE ESPORTS <span class="dot">·</span> ANALYSIS HUB</div>
             </div>
         </div>
 
+        <!-- 관리 화면 -->
+        <div id="v-admin" class="admin hidden">
+            <div class="arow">
+                <div><h2><span class="hle">HLE</span> 허브 관리</h2><div class="anote" id="a-who" style="margin:0"></div></div>
+                <div class="arow"><button class="abtn sm" id="a-team1">1군 허브</button><button class="abtn sm" id="a-academy">2·3군 허브</button><button class="abtn sm ghost" data-out>로그아웃</button></div>
+            </div>
+            <div class="atabs" id="a-tabs"><button data-t="mem" class="on">계정 · 권한</button><button data-t="log">접속 기록</button><button data-t="up">2·3군 허브 올리기</button></div>
+
+            <div id="t-mem">
+                <div id="pend-box" class="hidden" style="margin-bottom:14px">
+                    <h3 style="margin:0 0 8px;font-size:15px">출입 신청 대기 <small class="anote" id="pend-n"></small></h3>
+                    <div class="tw"><table><thead><tr><th>아이디</th><th>이름 · 소속</th><th>줄 권한</th><th>남긴 말</th><th>신청 시각</th><th></th></tr></thead><tbody id="pend-tb"></tbody></table></div>
+                    <div class="anote">본인이 직접 만든 계정입니다. 아는 사람인지 확인한 뒤 승인하세요. 권한은 승인 전에 바꿀 수 있습니다. 거절한 아이디는 다시 신청할 수 없고, 명단에서 빼면 다시 신청할 수 있습니다.</div>
+                </div>
+                <div class="acard">
+                    <b>계정 직접 추가</b> <span class="anote">— 보통은 본인이 로그인 화면의 「출입 신청」으로 만들고, 위 대기 목록에서 승인하면 됩니다.</span>
+                    <div class="anote">① Supabase 화면 → Authentication → Users → <b>Add user → Create new user</b>에서 계정을 만듭니다(이메일 칸에 아래 「로그인 이메일」 · 임시 비밀번호 · <b>Auto Confirm User</b> 체크). ② 같은 아이디를 여기 넣고 권한을 고릅니다. ③ 임시 비밀번호는 직접 전달하고, 받은 사람은 첫 로그인 때 새 비밀번호로 바꿉니다.</div>
+                    <div class="agrid">
+                        <div class="field"><label for="ad-id">아이디 또는 이메일</label><input type="text" id="ad-id" autocapitalize="off" spellcheck="false" placeholder="예: zeus"></div>
+                        <div class="field"><label for="ad-tier">권한</label><select id="ad-tier"><option value="team1">1군</option><option value="academy" selected>2·3군</option><option value="admin">관리자</option></select></div>
+                        <div class="field"><label for="ad-nm">이름 · 역할</label><input type="text" id="ad-nm" maxlength="40" placeholder="예: 2군 코치 홍길동"></div>
+                        <div class="field"><label for="ad-nt">메모</label><input type="text" id="ad-nt" maxlength="120"></div>
+                    </div>
+                    <div class="anote" id="ad-email"></div>
+                    <button class="abtn" id="b-add" style="margin-top:10px">명단에 넣기</button>
+                    <div class="gmsg" id="m-add"></div>
+                </div>
+                <h3 style="margin:18px 0 8px;font-size:15px">명단 <small class="anote" id="mem-n"></small></h3>
+                <div class="tw"><table><thead><tr><th>아이디</th><th>이름 · 역할</th><th>권한</th><th>사용</th><th>비밀번호</th><th>마지막 열람</th><th>메모</th><th></th></tr></thead><tbody id="mem-tb"></tbody></table></div>
+                <div class="anote">권한 · 사용 끄기는 바로 적용됩니다(다음 요청부터 허브를 열 수 없음). 「재설정 요구」를 누르면 다음 로그인 때 새 비밀번호를 정해야 합니다 — 비밀번호를 잊은 경우에는 Supabase 화면에서 그 계정의 비밀번호를 새 임시 비밀번호로 바꾼 뒤 누르세요. 1군 허브를 이미 연 사람은 그 탭을 닫을 때까지 볼 수 있으니, 퇴단 등으로 확실히 끊어야 하면 1군 열쇠 교체를 요청하세요.</div>
+                <div class="gmsg" id="m-mem"></div>
+            </div>
+
+            <div id="t-log" class="hidden">
+                <div class="arow" style="justify-content:flex-start;margin-bottom:8px"><button class="abtn sm ghost" id="b-log">새로 고침</button><span class="anote" style="margin:0">최근 300건 · 한국 시간</span></div>
+                <div class="tw"><table><thead><tr><th>시각</th><th>아이디</th><th>동작</th><th>내용</th><th>브라우저</th></tr></thead><tbody id="log-tb"></tbody></table></div>
+                <div class="anote">로그인 실패 · 잠금 같은 인증 기록은 Supabase 화면 → Authentication → Logs 에 남습니다.</div>
+            </div>
+
+            <div id="t-up" class="hidden">
+                <div class="acard">
+                    <b>2·3군 허브 파일 올리기</b>
+                    <div class="anote">PC의 <span class="mono">분석관 백업파일\2군허브\academy.html</span>(또는 .gz)을 고르면 이 브라우저에서 압축해 비공개 저장소에 올립니다. 1군 허브는 여기가 아니라 배포(GitHub Pages)로 올라갑니다.</div>
+                    <div class="field" style="margin-top:10px"><input type="file" id="up-f" accept=".html,.gz,text/html,application/gzip"></div>
+                    <div class="field"><input type="text" id="up-n" maxlength="200" placeholder="메모(판 설명) — 예: 2·3군 24차"></div>
+                    <button class="abtn" id="b-up">올리기</button>
+                    <div class="gbar"><i id="up-bar"></i></div>
+                    <div class="gmsg" id="m-up"></div>
+                </div>
+                <h3 style="margin:18px 0 8px;font-size:15px">판 기록</h3>
+                <div class="tw"><table><thead><tr><th>올린 시각</th><th>지문(SHA-256)</th><th>크기(압축 / 원본)</th><th>올린 사람</th><th>메모</th></tr></thead><tbody id="ver-tb"></tbody></table></div>
+            </div>
+        </div>
+
         <script>
             "use strict";
-            /* ── HLE Hub 암호화 로더 ──
-               페이로드: 별도 파일(payload.bin) — gzip 압축 후 AES-256-GCM 암호화.
-               로그인 화면은 즉시 뜨고, 페이로드는 백그라운드로 미리 다운로드.
-               키 유도: PBKDF2-SHA256 (반복수 아래 ITER).
-               기억하기: 유도된 키(비밀번호 아님)를 localStorage에 저장. */
-            const SALT_B64 = "I6VXmBI+icvnDwHICLVTVQ==";
-            const ITER = 600000;
-            const REMEMBER_DAYS = 30;
-            const LS_KEY = "hlehub_k", LS_EXP = "hlehub_exp";
-            // 언어 선택 (허브 안의 EN/KO 버튼이 hlehub_lang을 기록)
-            const PAYLOAD_KO = "payload.bin?v=4dadda9fec", PAYLOAD_EN = "payload_en.bin?v=d3bf2c20f3";
-            // 내장문서 조각 목록 — payload.bin 은 이제 셸(0.5MB)만 담고 문서는 따로 받는다
-            const PARTS_KO = {"scout":"p/ko-scout-b912b44477.bin","blg":"p/ko-blg-3e8872cb30.bin","g2":"p/ko-g2-f0a17d878e.bin","db":"p/ko-db-1576c2c06f.bin","planner":"p/ko-planner-757e287278.bin","lab":"p/ko-lab-8976e4904c.bin","wscout":"p/ko-wscout-dc7e408157.bin","wz":"p/ko-wz-2a098e90c6.bin","old":"p/ko-old-b3941a637e.bin"}, PARTS_EN = {"scout":"p/en-scout-983be254e9.bin","db":"p/en-db-605bafd6c9.bin","planner":"p/en-planner-a783423edf.bin","lab":"p/en-lab-1964ce3574.bin","wscout":"p/en-wscout-f2a2b4401c.bin","wz":"p/en-wz-4866b73ffe.bin","old":"p/en-old-e642997722.bin"};
+            /* ── HLE 통합 출입문 (2027~) ──
+               로그인: Supabase Auth(아이디 → 「아이디@ID_DOMAIN」 이메일 · 비밀번호). 계정은 본인이 「출입 신청」으로 만들고(사용 꺼진 채 명단에 들어감) 관리자가 승인한다.
+               권한(hub_members.tier): admin = 1군 · 2·3군 · 관리 / team1 = 1군 허브 / academy = 2·3군 허브.
+               1군 허브: 암호화 조각은 이 저장소(GitHub Pages) 그대로 — 여는 열쇠만 서버 hub_key('team1')가 1군 · 관리자에게 내준다.
+               2·3군 허브: Supabase 비공개 저장소(academy-hub)에서 받는다(2·3군 · 관리자만 · 서버 규칙 RLS).
+               이 파일의 주소 · 키(publishable)는 공개용 값이다. 비밀번호 · 서비스 키 · 허브 열쇠는 들어 있지 않다. */
+            if (window.top !== window.self) { document.documentElement.innerHTML = ""; throw new Error("framed"); }   // 다른 사이트 안에 끼워 넣기 막음
+            const SB = "https://amjpgeknlnvmzocpvshc.supabase.co";
+            const SBKEY = "sb_publishable_JjTX69jdUMZh6p2Vp96PhA_xcQjmZWp";   // 공개용 키 — 권한은 서버 규칙이 막음
+            const ID_DOMAIN = "hleanalysis.github.io";   // 「zeus」 → zeus@hleanalysis.github.io (메일은 보내지 않음)
+            const BUCKET = "academy-hub", CUR = "hub/academy.html.gz";
+            const SK = "hle-gate-session";   // 로그인 유지 = localStorage · 아니면 sessionStorage(이 탭만)
+
+            // 1군 허브 조각(빌드 때 채움)
+            const PAYLOAD_KO = "payload.bin?v=b22fc03732", PAYLOAD_EN = "payload_en.bin?v=4eddbbae6b";
+            const PARTS_KO = {"scout":"p/ko-scout-d1d3015f1c.bin","blg":"p/ko-blg-96b07197d0.bin","g2":"p/ko-g2-b31925d2bb.bin","db":"p/ko-db-5315e6d023.bin","planner":"p/ko-planner-a3ce1739f7.bin","lab":"p/ko-lab-c8e4b981e1.bin","wscout":"p/ko-wscout-3d0e1fa679.bin","wz":"p/ko-wz-c0bca436e3.bin","old":"p/ko-old-7826163468.bin"}, PARTS_EN = {"scout":"p/en-scout-e75831de6a.bin","db":"p/en-db-c3e97fcea5.bin","planner":"p/en-planner-4b5048b58a.bin","lab":"p/en-lab-25c45edf3f.bin","wscout":"p/en-wscout-bb4bcda562.bin","wz":"p/en-wz-00b79f8b9f.bin","old":"p/en-old-654460dcc4.bin"};
             let LANG = "ko";
             try { if (PAYLOAD_EN && localStorage.getItem("hlehub_lang") === "en") LANG = "en"; } catch (e) {}
             const PAYLOAD_URL = LANG === "en" ? PAYLOAD_EN : PAYLOAD_KO;
             const PARTS = (LANG === "en" ? PARTS_EN : PARTS_KO) || {};
-            // 첫 화면에 필요한 문서 하나만 셸과 함께 받는다.
-            // 셸이 시작 문서를 고정하면(빌드 때 감지) 그 문서를, 아니면 지난번에 보던 탭을 받는다.
             const FIXED_START = (LANG === "en" ? null : "scout");
             let START_DOC = (FIXED_START && PARTS[FIXED_START]) ? FIXED_START : null;
             if (!START_DOC) { try { const v = localStorage.getItem("hle-hub-tab"); if (v && PARTS[v]) START_DOC = v; } catch (e) {} }
             if (!START_DOC) START_DOC = PARTS.scout ? "scout" : (Object.keys(PARTS)[0] || null);
+            const INTRO_OK = (LANG === "en" ? false : true);
+
+            // 예전 공용 비밀번호 방식의 「30일 기억」 키는 더 쓰지 않는다 — 남아 있으면 지운다
+            try { localStorage.removeItem("hlehub_k"); localStorage.removeItem("hlehub_exp"); } catch (e) {}
 
             const $ = (id) => document.getElementById(id);
             const b64ToBuf = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+            const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+            const kst = (t) => { if (!t) return "—"; const d = new Date(t); if (isNaN(d)) return "—"; return new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "2-digit", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(d); };
+            const toEmail = (v) => { v = String(v || "").trim().toLowerCase(); return v.indexOf("@") >= 0 ? v : (v ? v + "@" + ID_DOMAIN : ""); };
+            const idOf = (email) => { email = String(email || ""); const sfx = "@" + ID_DOMAIN; return email.endsWith(sfx) ? email.slice(0, -sfx.length) : email; };
+            const TIER = { admin: "관리자", team1: "1군", academy: "2·3군" };
 
-            // ── 페이로드 백그라운드 다운로드 (페이지 열리자마자 시작) ──
-            let dlProgress = 0; // 0~100
-            const payloadPromise = (async () => {
-                const res = await fetch(PAYLOAD_URL);
-                if (!res.ok) throw new Error("payload fetch failed: " + res.status);
-                // content-length는 전송(압축) 크기라 실제 바이트 수와 다를 수 있음 — 진행률 추정에만 사용
-                const total = Number(res.headers.get("content-length") || 0);
-                if (!res.body) { dlProgress = 100; return new Uint8Array(await res.arrayBuffer()); }
-                const reader = res.body.getReader();
-                const chunks = [];
-                let got = 0;
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    chunks.push(value);
-                    got += value.length;
-                    if (total) dlProgress = Math.min(99, Math.round((got / total) * 100));
-                }
-                const buf = new Uint8Array(got);
-                let off = 0;
-                for (const c of chunks) { buf.set(c, off); off += c.length; }
-                dlProgress = 100;
-                return buf;
-            })();
-
-            // 시작 문서 조각도 로그인 화면이 뜨는 즉시 함께 받아 둔다
-            const startPartPromise = START_DOC
-                ? fetch(PARTS[START_DOC])
-                      .then((r) => { if (!r.ok) throw new Error("part fetch failed: " + r.status); return r.arrayBuffer(); })
-                      .then((b) => new Uint8Array(b))
-                : Promise.resolve(null);
-            startPartPromise.catch(() => {}); // 실패해도 허브는 열린다 (안에서 다시 받는다)
-
-            async function deriveKey(password) {
-                const mat = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
-                return crypto.subtle.deriveKey(
-                    { name: "PBKDF2", salt: b64ToBuf(SALT_B64), iterations: ITER, hash: "SHA-256" },
-                    mat, { name: "AES-GCM", length: 256 }, true, ["decrypt"]
-                );
+            /* ── 화면 전환 ── */
+            const VIEWS = ["v-login", "v-join", "v-pw", "v-choose", "v-load", "v-stop"];
+            function show(id) {
+                $("loading").classList.add("hidden");
+                const adm = id === "v-admin";
+                $("v-admin").classList.toggle("hidden", !adm);
+                $("content").classList.toggle("hidden", adm);
+                VIEWS.forEach((v) => $(v).classList.toggle("hidden", v !== id));
+            }
+            function msg(id, t, ok) { const e = $(id); e.textContent = t || ""; e.classList.toggle("ok", !!ok); }
+            function stop(t, back, opt) {
+                opt = opt || {};
+                show("v-stop"); msg("m-stop", t);
+                $("b-back").hidden = !back; $("b-back").textContent = opt.backLabel || "처음으로";
+                $("b-req").hidden = !opt.req;
             }
 
-            /* ── 점진 렌더링용 양보 ──
-               setTimeout 은 비활성(백그라운드) 탭에서 최소 1초로 클램프된다.
-               25MB를 256KB씩 78조각으로 쓰면 조각당 1초 × 78 = 80초가 대기로만 날아간다
-               (실측: 파싱 0.16초 / 대기 28.9초).
-               MessageChannel 은 타이머가 아니라 태스크 큐라 클램프를 받지 않으면서도
-               태스크 경계를 만들어 주므로 헤더 선(先) 렌더는 그대로 유지된다.
-               포트가 죽는 환경을 대비해 setTimeout 안전장치를 함께 건다. */
+            /* ── 로그인 세션(Supabase Auth REST) ── */
+            let S = null, ST = null;
+            function store() { try { return S && S.keep ? localStorage : sessionStorage; } catch (e) { return null; } }
+            function save() {
+                try {
+                    localStorage.removeItem(SK); sessionStorage.removeItem(SK);
+                    if (S) store().setItem(SK, JSON.stringify(S));
+                } catch (e) {}
+            }
+            function loadSession() {
+                try { return JSON.parse(sessionStorage.getItem(SK) || localStorage.getItem(SK) || "null"); } catch (e) { return null; }
+            }
+            function setSession(j, keep) {
+                S = { at: j.access_token, rt: j.refresh_token, exp: j.expires_at || (Math.floor(Date.now() / 1000) + (j.expires_in || 3600)),
+                      email: ((j.user && j.user.email) || (S && S.email) || "").toLowerCase(), keep: keep == null ? !!(S && S.keep) : !!keep, tier: S && S.tier };
+                save();
+            }
+            async function authPost(path, body) {
+                const r = await fetch(SB + "/auth/v1/" + path, { method: "POST", headers: { apikey: SBKEY, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                const j = await r.json().catch(() => ({}));
+                return { ok: r.ok, status: r.status, j };
+            }
+            async function refresh() {
+                if (!S || !S.rt) throw new Error("nosession");
+                const r = await authPost("token?grant_type=refresh_token", { refresh_token: S.rt });
+                if (!r.ok) { S = null; save(); throw new Error("expired"); }
+                setSession(r.j);
+            }
+            async function api(path, opt, retried) {
+                opt = opt || {};
+                if (!S) throw new Error("nosession");
+                if (S.exp - 60 < Date.now() / 1000) await refresh();
+                const h = Object.assign({ apikey: SBKEY, Authorization: "Bearer " + S.at }, opt.headers || {});
+                const r = await fetch(SB + path, Object.assign({}, opt, { headers: h }));
+                if (r.status === 401 && !retried) { await refresh(); return api(path, opt, true); }
+                return r;
+            }
+            async function rpc(name, args) {
+                const r = await api("/rest/v1/rpc/" + name, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(args || {}) });
+                if (!r.ok) throw new Error("rpc " + name + " " + r.status);
+                return r.json();
+            }
+            async function rest(path, opt) {
+                const r = await api("/rest/v1/" + path, opt);
+                const t = await r.text(); let j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {}
+                if (!r.ok) { const e2 = new Error((j && (j.message || j.hint)) || ("HTTP " + r.status)); e2.status = r.status; throw e2; }
+                return j;
+            }
+            const logEvent = (action, detail) => rpc("hub_log", { p_action: action, p_detail: detail || null, p_ua: (navigator.userAgent || "").slice(0, 300) }).catch(() => {});
+            async function logout() {
+                try { if (S) await fetch(SB + "/auth/v1/logout", { method: "POST", headers: { apikey: SBKEY, Authorization: "Bearer " + S.at } }); } catch (e) {}
+                S = null; save();
+                try { sessionStorage.removeItem("hlehub_sk"); sessionStorage.removeItem("hle-gate-open"); } catch (e) {}
+                location.replace(location.pathname);
+            }
+            // 관리자: 허브 · 관리 화면에서 브라우저 뒤로가기 → 고르는 화면
+            // 고르는 화면 자리에 표식을 남기고 한 칸 쌓는다. 허브 안 쪽 이동(#)은 표식이 없어 무시된다.
+            function pushHub() {
+                if (!ST || ST.tier !== "admin") return;
+                try {
+                    if (history.state && history.state.hleGate === "hub") return;
+                    history.replaceState({ hleGate: "choose" }, "", location.pathname);
+                    history.pushState({ hleGate: "hub" }, "", location.pathname);
+                } catch (e) {}
+            }
+            function backToChoose() {
+                try { sessionStorage.removeItem("hle-gate-open"); } catch (e) {}
+                if ($("v-choose")) { show("v-choose"); prefetchTeam1(); }
+                else location.replace(location.pathname);   // 허브를 그린 뒤에는 출입문을 다시 띄운다
+            }
+            function onBack(e) { if (e.state && e.state.hleGate === "choose" && ST && ST.tier === "admin") backToChoose(); }
+            window.addEventListener("popstate", onBack);
+            const isAuthErr = (e) => /^(expired|nosession)$/.test(String(e && e.message));
+
+            /* ── 로그인 뒤 갈 곳: 명단 · 권한 ── */
+            async function route() {
+                try { ST = await rpc("hub_status"); }
+                catch (e) {
+                    if (isAuthErr(e)) { show("v-login"); return; }
+                    stop("서버에 연결하지 못했습니다. 잠시 뒤 다시 시도하세요.\n(" + e.message + ")"); return;
+                }
+                if (!ST.member) { stop("이 계정(" + idOf(S.email) + ")은 아직 출입 신청을 하지 않았습니다.\n아래에서 신청하면 관리자 승인 뒤 열립니다.", false, { req: true }); return; }
+                if (!ST.active) {
+                    if (ST.status === "pending") { stop("출입 신청을 받았습니다 (" + idOf(S.email) + " · " + (TIER[ST.tier] || "") + ").\n관리자가 승인하면 같은 아이디로 들어올 수 있습니다.\n신청 " + kst(ST.requested_at), true, { backLabel: "승인됐는지 다시 확인" }); return; }
+                    if (ST.status === "rejected") { stop("출입 신청이 승인되지 않았습니다. 관리자에게 문의하세요."); return; }
+                    stop("사용이 중지된 계정입니다. 관리자에게 문의하세요."); return;
+                }
+                if (ST.must_change) { $("pw-user").value = S.email; show("v-pw"); $("np1").focus(); return; }
+                S.tier = ST.tier; save();
+                if (ST.tier === "team1") return openTeam1();
+                if (ST.tier === "academy") return openAcademy();
+                if (ST.tier === "admin") {
+                    $("who").innerHTML = "<b>" + esc(ST.name || idOf(S.email)) + "</b> · 관리자";
+                    if (location.hash === "#admin") return openAdmin();
+                    let last = null; try { last = sessionStorage.getItem("hle-gate-open"); } catch (e) {}
+                    if (last === "team1") return openTeam1();
+                    if (last === "academy") return openAcademy();
+                    show("v-choose"); prefetchTeam1(); countPending(); return;
+                }
+                stop("이 계정의 권한(" + ST.tier + ")을 알 수 없습니다. 관리자에게 문의하세요.");
+            }
+
+            $("f-login").addEventListener("submit", async (ev) => {
+                ev.preventDefault(); msg("m-login", "");
+                const email = toEmail($("g-id").value);
+                if (!email) return;
+                const btn = $("b-login"); btn.disabled = true; btn.textContent = "확인 중…";
+                try {
+                    const r = await authPost("token?grant_type=password", { email, password: $("password").value });
+                    if (!r.ok) {
+                        msg("m-login", r.status === 429 ? "시도가 너무 많습니다. 잠시 뒤 다시 시도하세요." : "아이디 또는 비밀번호가 맞지 않습니다.");
+                        const card = $("login-card"); card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+                        $("password").select(); return;
+                    }
+                    $("password").value = ""; S = null; setSession(r.j, $("remember").checked);
+                    await route();
+                } catch (e) { msg("m-login", "서버에 연결하지 못했습니다."); }
+                finally { btn.disabled = false; btn.textContent = "접속하기"; }
+            });
+
+            /* ── 출입 신청: 가입(Supabase Auth) → hub_request(사용 꺼진 채 명단에 들어감) → 관리자 승인 ── */
+            const pwProblem = (a, b, id) => {
+                if (a !== b) return "두 칸이 같지 않습니다.";
+                if (a.length < 12 || !/[A-Za-z]/.test(a) || !/[0-9]/.test(a)) return "12자 이상 · 영문과 숫자를 모두 넣어 주세요.";
+                if (id && a.toLowerCase().indexOf(id) >= 0) return "아이디가 들어간 비밀번호는 쓸 수 없습니다.";
+                return "";
+            };
+            function openJoin(signedIn) {
+                msg("m-join", "");
+                $("j-cred").classList.toggle("hidden", !!signedIn);
+                if (!signedIn) { $("j-id").value = ($("g-id").value.indexOf("@") < 0 ? $("g-id").value.trim().toLowerCase() : ""); }
+                show("v-join"); (signedIn ? $("j-nm") : $("j-id")).focus();
+            }
+            $("f-join").addEventListener("submit", async (ev) => {
+                ev.preventDefault(); msg("m-join", "");
+                const signedIn = $("j-cred").classList.contains("hidden");
+                const nm = $("j-nm").value.trim(), tier = $("j-tier").value, note = $("j-nt").value.trim();
+                if (nm.length < 2) { msg("m-join", "이름 · 소속을 적어 주세요 — 관리자가 누구인지 알아볼 수 있어야 승인합니다."); return; }
+                const btn = $("b-join-go"); btn.disabled = true; btn.textContent = "신청 중…";
+                try {
+                    if (!signedIn) {
+                        const id = $("j-id").value.trim().toLowerCase(), a = $("j-p1").value;
+                        if (!/^[a-z0-9][a-z0-9._-]{2,19}$/.test(id)) { msg("m-join", "아이디는 영문 소문자 · 숫자로 시작하고 . _ - 를 섞어 3~20자로 정해 주세요."); return; }
+                        const bad = pwProblem(a, $("j-p2").value, id); if (bad) { msg("m-join", bad); return; }
+                        const email = id + "@" + ID_DOMAIN;
+                        let r = await authPost("signup", { email, password: a, data: { name: nm } });
+                        const code = (r.j && (r.j.error_code || r.j.code)) || "";
+                        if (!r.ok && /signup_disabled/.test(code)) { msg("m-join", "지금은 출입 신청을 받지 않습니다. 관리자에게 문의하세요."); return; }
+                        if (!r.ok && /weak_password/.test(code)) { msg("m-join", "비밀번호가 너무 약합니다. 더 길고 흔하지 않게 정해 주세요."); return; }
+                        if (!r.ok && r.status === 429) { msg("m-join", "신청이 너무 많습니다. 잠시 뒤 다시 시도하세요."); return; }
+                        if (!r.ok || !r.j.access_token) {
+                            // 이미 있는 아이디 — 비밀번호가 맞으면(지난번 신청이 끊긴 경우) 그 계정으로 이어서 신청
+                            const t = await authPost("token?grant_type=password", { email, password: a });
+                            if (!t.ok && /email_not_confirmed/.test((t.j && (t.j.error_code || t.j.code)) || "")) { msg("m-join", "서버에 「메일 확인」이 켜져 있어 신청을 마칠 수 없습니다. 관리자에게 알려 주세요."); return; }
+                            if (!t.ok) { msg("m-join", (/user_already_exists/.test(code) || r.ok) ? "이미 쓰고 있는 아이디입니다. 다른 아이디를 정해 주세요." : "신청하지 못했습니다. (" + ((r.j && (r.j.msg || r.j.message)) || r.status) + ")"); return; }
+                            r = t;
+                        }
+                        $("j-p1").value = ""; $("j-p2").value = ""; S = null; setSession(r.j, false);
+                    }
+                    const q = await rpc("hub_request", { p_name: nm, p_tier: tier, p_note: note || null });
+                    if (!q || !q.ok) {
+                        const why = q && q.why;
+                        if (why === "approved" || why === "rejected") { await route(); return; }
+                        msg("m-join", "신청하지 못했습니다. (" + (why || "알 수 없음") + ")"); return;
+                    }
+                    $("j-nm").value = ""; $("j-nt").value = "";
+                    await route();
+                } catch (e) { msg("m-join", isAuthErr(e) ? "로그인이 끊겼습니다. 다시 시도하세요." : "서버에 연결하지 못했습니다."); }
+                finally { btn.disabled = false; btn.textContent = "신청하기"; }
+            });
+
+            $("f-pw").addEventListener("submit", async (ev) => {
+                ev.preventDefault(); msg("m-pw", "");
+                const a = $("np1").value, b = $("np2").value;
+                const bad = pwProblem(a, b, S.email ? idOf(S.email).split("@")[0] : ""); if (bad) { msg("m-pw", bad); return; }
+                $("b-pw").disabled = true;
+                try {
+                    const r = await api("/auth/v1/user", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: a }) });
+                    const j = await r.json().catch(() => ({}));
+                    if (!r.ok) {
+                        const c = j.error_code || j.code || "";
+                        msg("m-pw", c === "same_password" ? "지금 비밀번호와 다른 비밀번호를 정해 주세요." : c === "weak_password" ? "비밀번호가 너무 약합니다. 더 길게 정해 주세요." : c === "reauthentication_needed" ? "서버 설정상 재인증이 필요합니다. 관리자에게 알려 주세요." : "바꾸지 못했습니다. (" + (j.msg || j.message || r.status) + ")");
+                        return;
+                    }
+                    $("np1").value = ""; $("np2").value = "";
+                    const ok = await rpc("hub_password_changed");
+                    if (!ok) { msg("m-pw", "변경 확인에 실패했습니다. 다시 로그인해 주세요."); return; }
+                    await route();
+                } catch (e) { msg("m-pw", isAuthErr(e) ? "로그인이 만료됐습니다. 다시 로그인하세요." : "서버에 연결하지 못했습니다."); }
+                finally { $("b-pw").disabled = false; }
+            });
+
+            /* ── 1군 허브: 서버에서 열쇠 → 이 저장소의 암호화 조각을 풀어 그리기 ── */
+            let payloadPromise = null, startPartPromise = null, dlProgress = 0;
+            function prefetchTeam1() {
+                if (payloadPromise) return;
+                payloadPromise = (async () => {
+                    const res = await fetch(PAYLOAD_URL);
+                    if (!res.ok) throw new Error("payload fetch failed: " + res.status);
+                    const total = Number(res.headers.get("content-length") || 0);
+                    if (!res.body) { dlProgress = 100; return new Uint8Array(await res.arrayBuffer()); }
+                    const reader = res.body.getReader(), chunks = []; let got = 0;
+                    for (;;) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        chunks.push(value); got += value.length;
+                        if (total) dlProgress = Math.min(99, Math.round((got / total) * 100));
+                    }
+                    const buf = new Uint8Array(got); let off = 0;
+                    for (const c of chunks) { buf.set(c, off); off += c.length; }
+                    dlProgress = 100;
+                    return buf;
+                })();
+                payloadPromise.catch(() => {});
+                startPartPromise = START_DOC
+                    ? fetch(PARTS[START_DOC]).then((r) => { if (!r.ok) throw new Error("part " + r.status); return r.arrayBuffer(); }).then((b) => new Uint8Array(b))
+                    : Promise.resolve(null);
+                startPartPromise.catch(() => {});
+            }
+
             const yieldToBrowser = (() => {
                 try {
                     const ch = new MessageChannel();
                     return () => new Promise((resolve) => {
                         let done = false;
                         const fin = () => { if (!done) { done = true; resolve(); } };
-                        ch.port1.onmessage = fin;
-                        ch.port2.postMessage(0);
-                        setTimeout(fin, 1000); // 안전장치 — 메시지가 오지 않아도 진행
+                        ch.port1.onmessage = fin; ch.port2.postMessage(0); setTimeout(fin, 1000);
                     });
-                } catch (e) {
-                    return () => new Promise((r) => setTimeout(r, 0));
-                }
+                } catch (e) { return () => new Promise((r) => setTimeout(r, 0)); }
             })();
-
-            /* 첫 조각은 작게(헤더가 먼저 그려지도록), 이후는 크게(양보 횟수를 줄이도록) */
             async function writeChunked(html) {
-                const FIRST = 131072;    // 128KB
-                const REST = 2097152;    // 2MB
+                const FIRST = 131072, REST = 2097152;
                 let i = 0, size = FIRST;
                 while (i < html.length) {
                     document.write(html.slice(i, i + size));
-                    i += size;
-                    size = REST;
+                    i += size; size = REST;
                     if (i < html.length) await yieldToBrowser();
                 }
             }
-
-            async function decryptAndShow(key, onWait) {
-                // 다운로드가 아직이면 진행률을 보여주며 대기
-                if (dlProgress < 100 && onWait) {
-                    const timer = setInterval(() => onWait(dlProgress), 150);
-                    try { await payloadPromise; } finally { clearInterval(timer); }
-                }
-                const buf = await payloadPromise;
-                // payload 앞 12바이트가 IV (배포 버전 어긋나도 항상 복호화 가능)
-                const iv = buf.slice(0, 12), cipher = buf.slice(12);
-                const plainGz = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
-                showIntro();   // 130차: 비밀번호가 맞은 게 확인된 뒤에만 오프닝을 켠다
-                // 복호화 성공 → 언어 전환 버튼이 재로그인 없이 쓸 수 있게 세션에 키 보관
-                try {
-                    const raw = await crypto.subtle.exportKey("raw", key);
-                    sessionStorage.setItem("hlehub_sk", btoa(String.fromCharCode(...new Uint8Array(raw))));
-                } catch (e) {}
-                // gzip 해제
-                const ds = new DecompressionStream("gzip");
-                const stream = new Blob([plainGz]).stream().pipeThrough(ds);
-                const html = await new Response(stream).text();
-                // 셸에는 문서 본문이 비어 있다 — 시작 문서만 여기서 채우고,
-                // 나머지는 허브 안 지연 로더가 탭을 누를 때 받는다.
-                const full = await spliceStartDoc(html, key);
-                // 130차: 셸 오프닝이 「다 모인 모습」으로 이어받도록 오프닝이 처음 보인 시각을 넘긴다
-                try { if (introT0) sessionStorage.setItem("hle-intro-t0", String(introT0)); } catch (e) {}
-                document.open();
-                await writeChunked(full);
-                document.close();
-            }
-
             async function spliceStartDoc(shellHtml, key) {
                 if (!START_DOC) return shellHtml;
                 try {
                     const buf = await startPartPromise;
                     if (!buf) return shellHtml;
                     const plainGz = await crypto.subtle.decrypt({ name: "AES-GCM", iv: buf.slice(0, 12) }, key, buf.slice(12));
-                    const ds = new DecompressionStream("gzip");
-                    const body = await new Response(new Blob([plainGz]).stream().pipeThrough(ds)).text();
+                    const body = await new Response(new Blob([plainGz]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
                     const tag = "<scr" + "ipt type=\"text/x-doc\" id=\"src-" + START_DOC + "\">";
                     const at = shellHtml.indexOf(tag);
                     if (at === -1) return shellHtml;
                     const cut = at + tag.length;
                     return shellHtml.slice(0, cut) + body + shellHtml.slice(cut);
-                } catch (e) {
-                    return shellHtml; // 조각을 못 받아도 셸은 연다
-                }
+                } catch (e) { return shellHtml; }
             }
 
-            /* 130차 — 「허브 여는 중… N%」 대신 오프닝으로 로딩 시간을 덮는다 */
             let introT0 = 0;
-            // 셸이 이어받기 신호(hle-intro-t0)를 읽는 언어에서만 오프닝을 쓴다(빌드 때 감지).
-            // 동결 영어판처럼 예전 셸이면 예전처럼 스피너 + 진행률을 보여 준다.
-            const INTRO_OK = (LANG === "en" ? false : true);
             function showIntro() {
-                if (!INTRO_OK) { $("loading-label").textContent = "허브 여는 중…"; return; }
+                if (!INTRO_OK) { $("content").classList.add("hidden"); $("loading").classList.remove("hidden"); $("loading-label").textContent = "허브 여는 중…"; return; }
                 if (introT0) return;
                 introT0 = Date.now();
                 const o = $("hubIntro");
                 o.classList.remove("hidden");
-                requestAnimationFrame(() => requestAnimationFrame(() => o.classList.add("in")));   // 보일 때 모이기 시작
-                $("loading").classList.add("hidden");   // 스피너 · 진행률 글자를 가린다
+                requestAnimationFrame(() => requestAnimationFrame(() => o.classList.add("in")));
+                $("loading").classList.add("hidden");
             }
             function hideIntro() { introT0 = 0; const o = $("hubIntro"); o.classList.add("hidden"); o.classList.remove("in"); }
 
-            function showLogin() {
-                $("loading").classList.add("hidden");
-                $("content").classList.remove("hidden");
-                $("password").focus();
+            // 허브 위에 열람 계정 표시 + 로그아웃(화면 유출 억제 · 공용 PC 대비)
+            function badge(label) {
+                const put = () => {
+                    if (!document.body || document.getElementById("hle-gate-badge")) return;
+                    const b = document.createElement("div"); b.id = "hle-gate-badge";
+                    b.setAttribute("style", "position:fixed;left:8px;bottom:8px;z-index:2147483646;background:rgba(13,13,13,.82);color:#c3c2b7;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:3px 4px 3px 10px;font:11.5px/1.4 system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;display:flex;gap:6px;align-items:center;max-width:calc(100vw - 16px)");
+                    const t = document.createElement("span"); t.textContent = label; t.setAttribute("style", "white-space:nowrap;overflow:hidden;text-overflow:ellipsis");
+                    const x = document.createElement("button"); x.textContent = "로그아웃"; x.setAttribute("style", "background:#f37321;color:#fff;border:0;border-radius:999px;padding:2px 9px;font:inherit;font-weight:700;cursor:pointer;flex:none");
+                    x.addEventListener("click", logout);
+                    b.appendChild(t);
+                    if (ST && ST.tier === "admin") {
+                        const c = document.createElement("button"); c.textContent = "허브 선택"; c.setAttribute("style", "background:transparent;color:#c3c2b7;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:1px 8px;font:inherit;cursor:pointer;flex:none");
+                        c.addEventListener("click", backToChoose);
+                        b.appendChild(c);
+                    }
+                    b.appendChild(x); document.body.appendChild(b);
+                };
+                if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", put); else put();
+                window.addEventListener("load", put);
+                window.addEventListener("popstate", onBack);   // document.open 이 지운 듣기를 새 허브 위에 다시 단다
             }
 
-            function showError() {
-                const card = $("login-card");
-                $("error-msg").classList.add("show");
-                card.classList.remove("shake");
-                void card.offsetWidth;
-                card.classList.add("shake");
-                const input = $("password");
-                input.select();
-                input.focus();
-            }
-
-            async function rememberKey(key) {
+            async function openTeam1() {
+                pushHub(); prefetchTeam1();
+                let key = null, kid = "";
+                // 같은 탭에서 언어 전환 등으로 다시 열 때는 세션 키를 그대로 쓴다(허브 안 지연 로더도 이 키를 씀)
+                try { const sk = sessionStorage.getItem("hlehub_sk"); if (sk) key = await crypto.subtle.importKey("raw", b64ToBuf(sk), { name: "AES-GCM" }, true, ["decrypt"]); } catch (e) { key = null; }
+                if (!key) {
+                    let k;
+                    try { k = await rpc("hub_key", { p_hub: "team1" }); }
+                    catch (e) { if (isAuthErr(e)) { show("v-login"); msg("m-login", "로그인이 만료됐습니다. 다시 로그인하세요."); return; } stop("서버에 연결하지 못했습니다. (" + e.message + ")", ST && ST.tier === "admin"); return; }
+                    if (!k || !k.k) { stop("1군 허브를 열 권한이 없거나, 1군 열쇠가 아직 서버에 등록되지 않았습니다.\n관리자에게 문의하세요.", ST && ST.tier === "admin"); return; }
+                    kid = k.kid || "";
+                    key = await crypto.subtle.importKey("raw", b64ToBuf(k.k), { name: "AES-GCM" }, true, ["decrypt"]);
+                }
+                showIntro();
                 try {
-                    const raw = await crypto.subtle.exportKey("raw", key);
-                    localStorage.setItem(LS_KEY, btoa(String.fromCharCode(...new Uint8Array(raw))));
-                    localStorage.setItem(LS_EXP, String(Date.now() + REMEMBER_DAYS * 864e5));
-                } catch (e) {}
-            }
-
-            /* 저장된 키 찾기
-               ① 이 탭의 세션 키 — 언어 전환은 새로고침으로 처리하므로 이게 있으면 재로그인이 없다
-               ② 「기억하기」로 localStorage 에 저장된 키 */
-            function savedKeyB64() {
-                try { const sk = sessionStorage.getItem("hlehub_sk"); if (sk) return { b64: sk, session: true }; } catch (e) {}
-                try {
-                    const b64 = localStorage.getItem(LS_KEY), exp = Number(localStorage.getItem(LS_EXP) || 0);
-                    if (b64 && Date.now() <= exp) return { b64, session: false };
-                } catch (e) {}
-                return null;
-            }
-
-            async function tryStoredKey() {
-                const saved = savedKeyB64();
-                if (!saved) return false;
-                try {
-                    const key = await crypto.subtle.importKey("raw", b64ToBuf(saved.b64), { name: "AES-GCM" }, true, ["decrypt"]);
-                    // 130차: 오프닝이 덮으므로 진행률 글자를 쓰지 않는다(예전 셸이면 예전처럼 표시)
-                    await decryptAndShow(key, (p) => { if (!INTRO_OK) $("loading-label").textContent = "허브 여는 중… " + p + "%"; });
-                    return true;
+                    if (dlProgress < 100 && !INTRO_OK) {
+                        const timer = setInterval(() => { $("loading-label").textContent = "허브 여는 중… " + dlProgress + "%"; }, 150);
+                        try { await payloadPromise; } finally { clearInterval(timer); }
+                    }
+                    const buf = await payloadPromise;
+                    const plainGz = await crypto.subtle.decrypt({ name: "AES-GCM", iv: buf.slice(0, 12) }, key, buf.slice(12));
+                    try { const raw = await crypto.subtle.exportKey("raw", key); sessionStorage.setItem("hlehub_sk", btoa(String.fromCharCode(...new Uint8Array(raw)))); } catch (e) {}
+                    const html = await new Response(new Blob([plainGz]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+                    const full = await spliceStartDoc(html, key);
+                    try { if (introT0) sessionStorage.setItem("hle-intro-t0", String(introT0)); sessionStorage.setItem("hle-gate-open", "team1"); } catch (e) {}
+                    const who = idOf(S.email);
+                    document.open();
+                    await writeChunked(full);
+                    document.close();
+                    badge("열람 " + who);
                 } catch (e) {
-                    if (saved.session) { try { sessionStorage.removeItem("hlehub_sk"); } catch (_) {} }
-                    else { try { localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_EXP); } catch (_) {} }
-                    return false;
+                    try { sessionStorage.removeItem("hlehub_sk"); } catch (_) {}
+                    hideIntro(); $("content").classList.remove("hidden");
+                    stop("1군 허브를 열지 못했습니다. 서버 열쇠" + (kid ? "(" + kid + ")" : "") + "가 지금 올라간 판과 맞지 않거나 파일을 받지 못했습니다.\n잠시 뒤 다시 시도하고, 계속되면 관리자에게 알려 주세요.", ST && ST.tier === "admin");
                 }
             }
 
-            // 초기화: 저장된 키가 있으면 자동 접속, 아니면 로그인 폼 즉시 표시
-            (async function init() {
-                if (!window.crypto || !window.crypto.subtle || typeof DecompressionStream === "undefined") {
-                    $("loading-label").textContent = "브라우저가 오래되어 열 수 없습니다. 최신 크롬/엣지로 접속해주세요.";
+            /* ── 2·3군 허브: 비공개 저장소에서 받기 → 압축 풀기 → 지문 대조 → 그리기 ── */
+            const sha256hex = async (buf) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", buf))).map((b) => b.toString(16).padStart(2, "0")).join("");
+            const gunzip = async (u8) => new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
+            const gzip = async (u8) => new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new CompressionStream("gzip"))).arrayBuffer());
+            async function openAcademy() {
+                pushHub();
+                show("v-load"); msg("m-load", ""); $("l-retry").classList.add("hidden"); $("b-choose2").hidden = !(ST && ST.tier === "admin"); $("l-bar").style.width = "0"; $("l-title").textContent = "2·3군 허브를 불러오는 중…";
+                try {
+                    let v = await rest("hub_versions?select=sha256,bytes,raw_bytes,at,note&order=at.desc&limit=1");
+                    if (!v || !v.length) throw new Error("아직 올라간 2·3군 허브 파일이 없습니다. 관리자에게 문의하세요.");
+                    v = v[0]; $("l-note").textContent = "판 " + kst(v.at) + (v.note ? " · " + v.note : "");
+                    logEvent("열람", "2·3군 · " + v.sha256.slice(0, 16));
+                    const r = await api("/storage/v1/object/authenticated/" + BUCKET + "/" + CUR);
+                    if (r.status === 400 || r.status === 403 || r.status === 404) throw new Error("허브 파일을 받을 권한이 없거나 파일이 없습니다. (" + r.status + ")");
+                    if (!r.ok) throw new Error("허브 파일을 받지 못했습니다. (" + r.status + ")");
+                    const total = +r.headers.get("content-length") || v.bytes || 0, parts = [], rd = r.body.getReader(); let got = 0;
+                    for (;;) { const x = await rd.read(); if (x.done) break; parts.push(x.value); got += x.value.length; if (total) $("l-bar").style.width = Math.min(100, got / total * 100).toFixed(0) + "%"; }
+                    let u8 = new Uint8Array(got), o = 0; parts.forEach((p) => { u8.set(p, o); o += p.length; });
+                    $("l-title").textContent = "압축을 푸는 중…";
+                    let raw = (u8[0] === 0x1f && u8[1] === 0x8b) ? await gunzip(u8) : u8;
+                    if (await sha256hex(raw) !== v.sha256) throw new Error("받은 파일이 판 기록과 다릅니다(지문 불일치). 방금 새 판이 올라갔을 수 있습니다. 다시 시도하세요.");
+                    const html = new TextDecoder("utf-8").decode(raw); raw = null; u8 = null;
+                    const who = S.email;
+                    // 2·3군 허브 안 스카우팅 메모 · 테스트 기록 · 솔랭 추세가 쓰는 통로(194차 · 이 탭의 로그인으로만)
+                    try { sessionStorage.setItem("hle-gate-open", "academy"); } catch (e) {}
+                    window.HLE2GATE = { email: who, rest: (path, opt) => rest(path, opt), rpc: (name, args) => rpc(name, args) };
+                    document.open(); document.write(html); document.close();
+                    badge("열람 " + idOf(who));
+                } catch (e) {
+                    if (isAuthErr(e)) { show("v-login"); msg("m-login", "로그인이 만료됐습니다. 다시 로그인하세요."); return; }
+                    $("l-title").textContent = "허브를 열지 못했습니다"; msg("m-load", e.message); $("l-retry").classList.remove("hidden");
+                }
+            }
+
+            /* ── 관리(관리자만 · 서버 규칙이 한 번 더 막음) ── */
+            let TAB = "mem";
+            function openAdmin() { pushHub(); $("a-who").textContent = idOf(S.email) + " · 관리자"; show("v-admin"); tab(TAB); }
+            function tab(t) {
+                TAB = t;
+                Array.prototype.forEach.call($("a-tabs").children, (b) => b.classList.toggle("on", b.dataset.t === t));
+                ["mem", "log", "up"].forEach((k) => $("t-" + k).classList.toggle("hidden", k !== t));
+                if (t === "mem") loadMembers(); if (t === "log") loadLogs(); if (t === "up") loadVersions();
+            }
+            $("a-tabs").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) tab(b.dataset.t); });
+
+            async function loadMembers() {
+                msg("m-mem", "");
+                try {
+                    const ALL = await rest("hub_members?select=email,name,note,active,must_change,tier,status,requested_at,created_at&order=tier,email");
+                    const L = await rest("hub_access_log?select=email,at&action=eq." + encodeURIComponent("열람") + "&order=at.desc&limit=1000");
+                    const last = {}; (L || []).forEach((x) => { if (!last[x.email]) last[x.email] = x.at; });
+                    const P = ALL.filter((m) => m.status === "pending").sort((a, b) => String(a.requested_at).localeCompare(String(b.requested_at)));
+                    const M = ALL.filter((m) => m.status !== "pending");
+                    showPendingCount(P.length);
+                    $("pend-box").classList.toggle("hidden", !P.length);
+                    $("pend-n").textContent = P.length + "건";
+                    $("pend-tb").innerHTML = P.map((m) => '<tr data-e="' + esc(m.email) + '"><td title="' + esc(m.email) + '">' + esc(idOf(m.email)) + '</td><td class="wrap">' + esc(m.name || "") + "</td>"
+                        + '<td><select data-p="tier"><option value="team1"' + (m.tier === "team1" ? " selected" : "") + '>1군</option><option value="academy"' + (m.tier === "academy" ? " selected" : "") + ">2·3군</option></select></td>"
+                        + '<td class="wrap">' + esc(m.note || "") + "</td><td>" + kst(m.requested_at) + "</td>"
+                        + '<td><button class="abtn sm" data-p="ok">승인</button> <button class="abtn sm ghost" data-p="no">거절</button></td></tr>').join("");
+                    const cnt = (t) => M.filter((m) => m.tier === t && m.active).length;
+                    $("mem-n").textContent = M.length + "명 · 사용 중 1군 " + cnt("team1") + " · 2·3군 " + cnt("academy") + " · 관리자 " + cnt("admin");
+                    $("mem-tb").innerHTML = M.map((m) => {
+                        const me = m.email === S.email;
+                        const sel = '<select data-a="tier"' + (me ? " disabled" : "") + ">" + Object.keys(TIER).map((t) => '<option value="' + t + '"' + (m.tier === t ? " selected" : "") + ">" + TIER[t] + "</option>").join("") + "</select>";
+                        return '<tr data-e="' + esc(m.email) + '"><td title="' + esc(m.email) + '">' + esc(idOf(m.email)) + (me ? ' <span class="pill warn">나</span>' : "") + '</td><td class="wrap">' + esc(m.name || "") + "</td>"
+                            + "<td>" + sel + "</td>"
+                            + "<td>" + (m.active ? '<span class="pill on">사용</span>' : m.status === "rejected" ? '<span class="pill off">거절</span>' : '<span class="pill off">중지</span>') + "</td>"
+                            + "<td>" + (m.must_change ? '<span class="pill warn">변경 대기</span>' : '<span class="pill on">본인 설정</span>') + "</td>"
+                            + "<td>" + kst(last[m.email]) + '</td><td class="wrap">' + esc(m.note || "") + "</td>"
+                            + "<td>" + (me ? "" : '<button class="abtn sm ghost" data-a="act">' + (m.active ? "사용 끄기" : "사용 켜기") + '</button> <button class="abtn sm ghost" data-a="pw">재설정 요구</button> <button class="abtn sm ghost" data-a="del">명단에서 빼기</button>') + "</td></tr>";
+                    }).join("") || '<tr><td colspan="8">아직 명단이 비어 있습니다</td></tr>';
+                } catch (e) { msg("m-mem", "명단을 읽지 못했습니다. (" + e.message + ")"); }
+            }
+            async function patchMember(em, body, label, el) {
+                if (el) el.disabled = true;
+                try {
+                    await rest("hub_members?email=eq." + encodeURIComponent(em), { method: "PATCH", headers: { "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(body) });
+                    logEvent("명단 변경", em + " · " + label); msg("m-mem", idOf(em) + " — " + label, true); loadMembers();
+                } catch (e) { msg("m-mem", "바꾸지 못했습니다. (" + e.message + ")"); if (el) el.disabled = false; }
+            }
+            function showPendingCount(n) { const c = $("c-pend"); c.textContent = "신청 " + n; c.classList.toggle("hidden", !n); }
+            async function countPending() {
+                try { const P = await rest("hub_members?select=email&status=eq.pending"); showPendingCount((P || []).length); } catch (e) {}
+            }
+            $("pend-tb").addEventListener("click", (ev) => {
+                const b = ev.target.closest("button[data-p]"); if (!b) return;
+                const tr = b.closest("tr"), em = tr.dataset.e, tier = tr.querySelector('select[data-p="tier"]').value;
+                if (b.dataset.p === "ok") { patchMember(em, { tier, active: true }, "출입 승인(" + TIER[tier] + ")", b); return; }
+                if (!confirm(idOf(em) + " 의 신청을 거절할까요? 거절한 아이디는 다시 신청할 수 없습니다.")) return;
+                patchMember(em, { status: "rejected" }, "출입 거절", b);
+            });
+            $("mem-tb").addEventListener("change", (ev) => {
+                const s = ev.target.closest('select[data-a="tier"]'); if (!s) return;
+                const em = s.closest("tr").dataset.e;
+                patchMember(em, { tier: s.value }, "권한 → " + TIER[s.value], s);
+            });
+            $("mem-tb").addEventListener("click", async (ev) => {
+                const b = ev.target.closest("button[data-a]"); if (!b) return;
+                const em = b.closest("tr").dataset.e, a = b.dataset.a, q = "hub_members?email=eq." + encodeURIComponent(em);
+                if (a === "act") { const row = (await rest(q + "&select=active"))[0]; if (row) patchMember(em, { active: !row.active }, row.active ? "사용 끔" : "사용 켬", b); return; }
+                if (a === "pw") { patchMember(em, { must_change: true }, "비밀번호 재설정 요구", b); return; }
+                if (a === "del") {
+                    if (prompt(idOf(em) + " 을(를) 명단에서 빼려면 아이디를 그대로 입력하세요.") !== idOf(em)) return;
+                    b.disabled = true;
+                    try { await rest(q, { method: "DELETE" }); logEvent("명단 변경", em + " · 명단에서 뺌"); msg("m-mem", idOf(em) + " — 명단에서 뺐습니다. Supabase 화면의 계정도 지우세요.", true); loadMembers(); }
+                    catch (e) { msg("m-mem", "빼지 못했습니다. (" + e.message + ")"); b.disabled = false; }
+                }
+            });
+            $("ad-id").addEventListener("input", () => { const e = toEmail($("ad-id").value); $("ad-email").textContent = e ? "로그인 이메일(Supabase 계정에 넣을 값): " + e : ""; });
+            $("b-add").addEventListener("click", async () => {
+                const em = toEmail($("ad-id").value); msg("m-add", "");
+                if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { msg("m-add", "아이디(영문 · 숫자) 또는 이메일 형식으로 넣어 주세요."); return; }
+                const tier = $("ad-tier").value;
+                $("b-add").disabled = true;
+                try {
+                    await rest("hub_members", { method: "POST", headers: { "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify({ email: em, name: $("ad-nm").value.trim() || null, note: $("ad-nt").value.trim() || null, tier, active: true, must_change: true }) });
+                    logEvent("명단 변경", em + " · 추가(" + TIER[tier] + ")");
+                    msg("m-add", idOf(em) + " 을(를) " + TIER[tier] + " 권한으로 넣었습니다. Supabase 화면에서 " + em + " 계정을 만들었는지 확인하세요.", true);
+                    $("ad-id").value = ""; $("ad-nm").value = ""; $("ad-nt").value = ""; $("ad-email").textContent = ""; loadMembers();
+                } catch (e) { msg("m-add", e.status === 409 ? "이미 명단에 있는 아이디입니다." : "넣지 못했습니다. (" + e.message + ")"); }
+                finally { $("b-add").disabled = false; }
+            });
+
+            async function loadLogs() {
+                try {
+                    const L = await rest("hub_access_log?select=at,email,action,detail,ua&order=at.desc&limit=300");
+                    $("log-tb").innerHTML = (L || []).map((x) => {
+                        const ua = x.ua || "", br = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : /Firefox\//.test(ua) ? "Firefox" : (ua ? "기타" : "—");
+                        const os = /Windows/.test(ua) ? "Windows" : /iPhone|iPad/.test(ua) ? "iOS" : /Android/.test(ua) ? "Android" : /Mac OS/.test(ua) ? "macOS" : "";
+                        return "<tr><td>" + kst(x.at) + "</td><td>" + esc(idOf(x.email)) + "</td><td>" + esc(x.action) + '</td><td class="wrap">' + esc(x.detail || "") + '</td><td title="' + esc(ua) + '">' + esc(br + (os ? " · " + os : "")) + "</td></tr>";
+                    }).join("") || '<tr><td colspan="5">기록 없음</td></tr>';
+                } catch (e) { $("log-tb").innerHTML = '<tr><td colspan="5">읽지 못했습니다 (' + esc(e.message) + ")</td></tr>"; }
+            }
+            $("b-log").addEventListener("click", loadLogs);
+
+            async function loadVersions() {
+                try {
+                    const V = await rest("hub_versions?select=at,sha256,bytes,raw_bytes,uploaded_by,note&order=at.desc&limit=20");
+                    const mb = (n) => n ? (n / 1048576).toFixed(1) + "MB" : "—";
+                    $("ver-tb").innerHTML = (V || []).map((v, i) => "<tr><td>" + kst(v.at) + (i === 0 ? ' <span class="pill on">현재</span>' : "") + '</td><td class="mono" title="' + esc(v.sha256) + '">' + esc(v.sha256.slice(0, 16)) + "…</td><td>" + mb(v.bytes) + " / " + mb(v.raw_bytes) + "</td><td>" + esc(idOf(v.uploaded_by)) + '</td><td class="wrap">' + esc(v.note || "") + "</td></tr>").join("") || '<tr><td colspan="5">아직 올린 판이 없습니다</td></tr>';
+                } catch (e) { $("ver-tb").innerHTML = '<tr><td colspan="5">읽지 못했습니다 (' + esc(e.message) + ")</td></tr>"; }
+            }
+            async function putObject(path, body) {
+                const r = await api("/storage/v1/object/" + BUCKET + "/" + path, { method: "POST", headers: { "Content-Type": "application/gzip", "x-upsert": "true", "cache-control": "no-cache" }, body });
+                if (!r.ok) { const t = await r.text(); throw new Error("저장소 " + r.status + " " + t.slice(0, 160)); }
+            }
+            $("b-up").addEventListener("click", async () => {
+                const f = $("up-f").files[0]; msg("m-up", "");
+                if (!f) { msg("m-up", "파일을 고르세요."); return; }
+                $("b-up").disabled = true; $("up-bar").style.width = "10%";
+                try {
+                    const u8 = new Uint8Array(await f.arrayBuffer()), isgz = u8[0] === 0x1f && u8[1] === 0x8b;
+                    const raw = isgz ? await gunzip(u8) : u8;
+                    const head = new TextDecoder().decode(raw.slice(0, 60000));
+                    if (!/<html/i.test(head) || !/2·3군 분석 허브/.test(head)) throw new Error("2·3군 허브 파일이 아닌 것 같습니다(제목 「HLE 2·3군 분석 허브」를 찾지 못함). 1군 허브 파일은 여기 올리지 마세요.");
+                    $("up-bar").style.width = "30%";
+                    const fp = await sha256hex(raw), gz = isgz ? u8 : await gzip(raw);
+                    $("up-bar").style.width = "55%";
+                    const d = new Date(), pad = (n) => String(n).padStart(2, "0");
+                    const stamp = d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "_" + pad(d.getHours()) + pad(d.getMinutes());
+                    await putObject("archive/academy_" + stamp + "_" + fp.slice(0, 8) + ".html.gz", gz);
+                    $("up-bar").style.width = "75%";
+                    await putObject(CUR, gz);
+                    const note = $("up-n").value.trim() || null;
+                    await rest("hub_versions", { method: "POST", headers: { "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify({ path: CUR, sha256: fp, bytes: gz.length, raw_bytes: raw.length, note, uploaded_by: S.email }) });
+                    $("up-bar").style.width = "100%";
+                    logEvent("허브 올림", "2·3군 · " + fp.slice(0, 16) + (note ? " · " + note : ""));
+                    msg("m-up", "올렸습니다. 지문 " + fp.slice(0, 16) + " (원본 " + (raw.length / 1048576).toFixed(1) + "MB → 압축 " + (gz.length / 1048576).toFixed(1) + "MB)", true);
+                    $("up-f").value = ""; $("up-n").value = ""; loadVersions();
+                } catch (e) { msg("m-up", "올리지 못했습니다. " + e.message); $("up-bar").style.width = "0"; }
+                finally { $("b-up").disabled = false; }
+            });
+
+            /* ── 단추 ── */
+            document.querySelectorAll("[data-out]").forEach((b) => b.addEventListener("click", logout));
+            $("b-team1").addEventListener("click", openTeam1); $("a-team1").addEventListener("click", openTeam1);
+            $("b-academy").addEventListener("click", openAcademy); $("a-academy").addEventListener("click", openAcademy);
+            $("b-admin").addEventListener("click", openAdmin);
+            $("b-retry").addEventListener("click", openAcademy);
+            $("b-choose2").addEventListener("click", backToChoose);
+            $("b-back").addEventListener("click", () => route());
+            $("b-req").addEventListener("click", () => openJoin(true));
+            $("b-join").addEventListener("click", () => openJoin(false));
+            $("b-join-back").addEventListener("click", () => { if (S) logout(); else { show("v-login"); $("g-id").focus(); } });
+            const toggleIcon = $("toggle-password"), eyeClosed = toggleIcon.src, eyeOpened = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzYgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNS4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjQgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZD0iTTI4OCAzMmMtODAuOCAwLTE0NS41IDM2LjgtMTkyLjYgODAuNkM0OC42IDE1NiAxNy4zIDIwOCAyLjUgMjQzLjdjLTMuMyA3LjktMy4zIDE2LjcgMCAyNC42QzE3LjMgMzA0IDQ4LjYgMzU2IDk1LjQgMzk5LjRDMTQyLjUgNDQzLjIgMjA3LjIgNDgwIDI4OCA0ODBzMTQ1LjUtMzYuOCAxOTIuNi04MC42YzQ2LjgtNDMuNSA3OC4xLTk1LjQgOTMtMTMxLjFjMy4zLTcuOSAzLjMtMTYuNyAwLTI0LjZjLTE0LjktMzUuNy00Ni4yLTg3LjctOTMtMTMxLjFDNDMzLjUgNjguOCAzNjguOCAzMiAyODggMzJ6TTE0NCAyNTZhMTQ0IDE0NCAwIDEgMSAyODggMCAxNDQgMTQ0IDAgMSAxIC0yODggMHptMTQ0LTY0YzAgMzUuMy0yOC43IDY0LTY0IDY0Yy03LjEgMC0xMy45LTEuMi0yMC4zLTMuM2MtNS41LTEuOC0xMS45IDEuNi0xMS43IDcuNGMuMyA2LjkgMS4zIDEzLjggMy4yIDIwLjdjMTMuNyA1MS4yIDY2LjQgODEuNiAxMTcuNiA2Ny45czgxLjYtNjYuNCA2Ny45LTExNy42Yy0xMS4xLTQxLjUtNDcuOC02OS40LTg4LjYtNzEuMWMtNS44LS4yLTkuMiA2LjEtNy40IDExLjdjMi4xIDYuNCAzLjMgMTMuMiAzLjMgMjAuM3oiLz48L3N2Zz4=";
+            toggleIcon.addEventListener("click", () => { const i = $("password"); const t = i.type === "password"; i.type = t ? "text" : "password"; toggleIcon.src = t ? eyeOpened : eyeClosed; });
+
+            /* ── 시작 ── */
+            (function init() {
+                if (!window.crypto || !crypto.subtle || typeof DecompressionStream === "undefined" || typeof CompressionStream === "undefined") {
+                    $("loading-label").textContent = "브라우저가 오래되어 열 수 없습니다. 최신 크롬 · 엣지 · 사파리로 접속해 주세요.";
                     return;
                 }
-                const hasStored = !!savedKeyB64();
-                if (hasStored) {
-                    showIntro();   // 130차: 저장된 키로 자동 접속 — 바로 오프닝
-                    const ok = await tryStoredKey();
-                    if (!ok) { hideIntro(); showLogin(); }
-                } else {
-                    showLogin(); // 다운로드를 기다리지 않고 즉시 표시
-                }
+                S = loadSession();
+                if (S) {
+                    if (S.tier === "team1" || S.tier === "admin") prefetchTeam1();   // 지난번 권한이 1군이면 조각을 미리 받아 둔다
+                    route();
+                } else { show("v-login"); $("g-id").focus(); }
             })();
-
-            // 비밀번호 표시 토글
-            const toggleIcon = $("toggle-password");
-            const imgSrcEyeClosed = toggleIcon.src;
-            const imgSrcEyeOpened =
-                "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzYgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNS4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjQgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZD0iTTI4OCAzMmMtODAuOCAwLTE0NS41IDM2LjgtMTkyLjYgODAuNkM0OC42IDE1NiAxNy4zIDIwOCAyLjUgMjQzLjdjLTMuMyA3LjktMy4zIDE2LjcgMCAyNC42QzE3LjMgMzA0IDQ4LjYgMzU2IDk1LjQgMzk5LjRDMTQyLjUgNDQzLjIgMjA3LjIgNDgwIDI4OCA0ODBzMTQ1LjUtMzYuOCAxOTIuNi04MC42YzQ2LjgtNDMuNSA3OC4xLTk1LjQgOTMtMTMxLjFjMy4zLTcuOSAzLjMtMTYuNyAwLTI0LjZjLTE0LjktMzUuNy00Ni4yLTg3LjctOTMtMTMxLjFDNDMzLjUgNjguOCAzNjguOCAzMiAyODggMzJ6TTE0NCAyNTZhMTQ0IDE0NCAwIDEgMSAyODggMCAxNDQgMTQ0IDAgMSAxIC0yODggMHptMTQ0LTY0YzAgMzUuMy0yOC43IDY0LTY0IDY0Yy03LjEgMC0xMy45LTEuMi0yMC4zLTMuM2MtNS41LTEuOC0xMS45IDEuNi0xMS43IDcuNGMuMyA2LjkgMS4zIDEzLjggMy4yIDIwLjdjMTMuNyA1MS4yIDY2LjQgODEuNiAxMTcuNiA2Ny45czgxLjYtNjYuNCA2Ny45LTExNy42Yy0xMS4xLTQxLjUtNDcuOC02OS40LTg4LjYtNzEuMWMtNS44LS4yLTkuMiA2LjEtNy40IDExLjdjMi4xIDYuNCAzLjMgMTMuMiAzLjMgMjAuM3oiLz48L3N2Zz4=";
-            toggleIcon.addEventListener("click", function () {
-                const input = $("password");
-                if (input.type === "password") {
-                    input.type = "text";
-                    toggleIcon.src = imgSrcEyeOpened;
-                } else {
-                    input.type = "password";
-                    toggleIcon.src = imgSrcEyeClosed;
-                }
-            });
-
-            // 로그인 제출
-            $("login-form").addEventListener("submit", async function (e) {
-                e.preventDefault();
-                const btn = $("submit-btn");
-                btn.disabled = true;
-                btn.textContent = "확인 중…";
-                try {
-                    const key = await deriveKey($("password").value);
-                    // 비밀번호 검증을 다운로드 완료 전에 하기 위해 GCM 복호화 시도 순서 유지
-                    if ($("remember").checked) await rememberKey(key);
-                    await decryptAndShow(key, (p) => { btn.textContent = "불러오는 중… " + p + "%"; });
-                } catch (err) {
-                    try { localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_EXP); } catch (_) {}
-                    btn.disabled = false;
-                    btn.textContent = "접속하기";
-                    showError();
-                }
-            });
         </script>
     </body>
 </html>
