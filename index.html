@@ -579,8 +579,8 @@
             const SK = "hle-gate-session";   // 로그인 유지 = localStorage · 아니면 sessionStorage(이 탭만)
 
             // 1군 허브 조각(빌드 때 채움)
-            const PAYLOAD_KO = "payload.bin?v=10801d8ed0", PAYLOAD_EN = "payload_en.bin?v=4eddbbae6b";
-            const PARTS_KO = {"scout":"p/ko-scout-1cefd9a9a6.bin","blg":"p/ko-blg-96b07197d0.bin","g2":"p/ko-g2-b31925d2bb.bin","db":"p/ko-db-2186eb03bd.bin","planner":"p/ko-planner-a3ce1739f7.bin","lab":"p/ko-lab-c8e4b981e1.bin","wscout":"p/ko-wscout-3d0e1fa679.bin","wz":"p/ko-wz-c0bca436e3.bin","old":"p/ko-old-c1863426ef.bin"}, PARTS_EN = {"scout":"p/en-scout-e75831de6a.bin","db":"p/en-db-c3e97fcea5.bin","planner":"p/en-planner-4b5048b58a.bin","lab":"p/en-lab-25c45edf3f.bin","wscout":"p/en-wscout-bb4bcda562.bin","wz":"p/en-wz-00b79f8b9f.bin","old":"p/en-old-654460dcc4.bin"};
+            const PAYLOAD_KO = "payload.bin?v=2d3b129f1f", PAYLOAD_EN = "payload_en.bin?v=4eddbbae6b";
+            const PARTS_KO = {"scout":"p/ko-scout-1cefd9a9a6.bin","blg":"p/ko-blg-96b07197d0.bin","g2":"p/ko-g2-b31925d2bb.bin","db":"p/ko-db-9d7f890252.bin","planner":"p/ko-planner-a3ce1739f7.bin","lab":"p/ko-lab-c8e4b981e1.bin","wscout":"p/ko-wscout-3d0e1fa679.bin","wz":"p/ko-wz-c0bca436e3.bin","old":"p/ko-old-c1863426ef.bin"}, PARTS_EN = {"scout":"p/en-scout-e75831de6a.bin","db":"p/en-db-c3e97fcea5.bin","planner":"p/en-planner-4b5048b58a.bin","lab":"p/en-lab-25c45edf3f.bin","wscout":"p/en-wscout-bb4bcda562.bin","wz":"p/en-wz-00b79f8b9f.bin","old":"p/en-old-654460dcc4.bin"};
             let LANG = "ko";
             try { if (PAYLOAD_EN && localStorage.getItem("hlehub_lang") === "en") LANG = "en"; } catch (e) {}
             const PAYLOAD_URL = LANG === "en" ? PAYLOAD_EN : PAYLOAD_KO;
@@ -948,6 +948,10 @@
             }
 
             let introT0 = 0;
+            // 허브 셸은 오프닝을 「이어받은 시각 + 2.6초」까지 붙잡는다(최소 0.7초). 출입문이 넘기는 시각을 1.9초 앞당겨
+            // 최소 0.7초로 줄인다(11/3 사용자 결정 「로딩 줄이기」) — 데이터 문서 미리 읽기가 안 끝났으면 셸이 그만큼 더 기다리는 것은 그대로
+            const INTRO_HEADSTART = 1900;
+            const introSignal = () => { try { if (introT0) sessionStorage.setItem("hle-intro-t0", String(introT0 - INTRO_HEADSTART)); } catch (e) {} };
             // academy = 2·3군 허브(오프닝 이어받기를 늘 지원 · 밝은 색 · 제목 다름)
             function showIntro(academy) {
                 if (!INTRO_OK && !academy) { $("content").classList.add("hidden"); $("loading").classList.remove("hidden"); $("loading-label").textContent = "허브 여는 중…"; return; }
@@ -1199,7 +1203,7 @@
                     try { const raw = await crypto.subtle.exportKey("raw", key); sessionStorage.setItem("hlehub_sk", btoa(String.fromCharCode(...new Uint8Array(raw)))); } catch (e) {}
                     const html = await new Response(new Blob([plainGz]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
                     const full = await spliceStartDoc(html, key);
-                    try { if (introT0) sessionStorage.setItem("hle-intro-t0", String(introT0)); sessionStorage.setItem("hle-gate-open", "team1"); } catch (e) {}
+                    introSignal(); try { sessionStorage.setItem("hle-gate-open", "team1"); } catch (e) {}
                     const who = idOf(S.email);
                     OPENED = { kind: "team1" };
                     document.open();
@@ -1240,7 +1244,7 @@
                     const html = new TextDecoder("utf-8").decode(raw); raw = null; u8 = null;
                     const who = S.email;
                     // 2·3군 허브 안 스카우팅 메모 · 테스트 기록 · 솔랭 추세가 쓰는 통로(194차 · 이 탭의 로그인으로만)
-                    try { if (introT0) sessionStorage.setItem("hle-intro-t0", String(introT0)); sessionStorage.setItem("hle-gate-open", "academy"); } catch (e) {}
+                    introSignal(); try { sessionStorage.setItem("hle-gate-open", "academy"); } catch (e) {}
                     window.HLE2GATE = { email: who, rest: (path, opt) => rest(path, opt), rpc: (name, args) => rpc(name, args) };
                     OPENED = { kind: "academy", sha: v.sha256 };
                     document.open();
@@ -1411,6 +1415,10 @@
             ["keydown", "keyup", "focusout"].forEach((k) => document.addEventListener(k, capsHint));
 
             if (STANDALONE) $("remember").checked = true;   // 앱에서는 로그인 유지가 기본(직접 끌 수 있음)
+            // 로그인을 치기 시작하면 1군 조각(셸 + 첫 문서 · 암호화된 공개 파일)을 미리 받아 둔다 — 로그인 뒤 받는 시간을 없앰(휴대폰에서 몇 초)
+            //   (아이디 칸은 처음 열 때 저절로 포커스되므로 포커스가 아니라 입력으로 · 비밀번호 칸은 누르는 순간)
+            $("g-id").addEventListener("input", prefetchTeam1, { once: true });
+            ["focus", "input"].forEach((k) => $("password").addEventListener(k, prefetchTeam1, { once: true }));
 
             /* ── 시작 ── */
             (function init() {
