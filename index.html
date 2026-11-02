@@ -7,6 +7,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="robots" content="noindex, nofollow, noarchive" />
 
+        <!-- 휴대폰 앱(PWA): 홈 화면에 추가 → 아이콘 · 전체 화면 실행 -->
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="theme-color" content="#0d0d0d" />
+        <link rel="icon" type="image/png" href="/icons/favicon-32.png" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="HLE 허브" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});</script>
+
         <!-- do not cache this page -->
         <meta http-equiv="cache-control" content="max-age=0" />
         <meta http-equiv="cache-control" content="no-cache" />

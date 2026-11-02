@@ -7,7 +7,7 @@ echo   ※ payload.bin과 index.html이 이미 준비된 경우에만 사용
 echo ============================================
 echo.
 echo [1/2] 변경사항 커밋...
-git add -A index.html payload.bin payload_en.bin p img img-map.json .gitignore
+git add -A index.html payload.bin payload_en.bin p img img-map.json .gitignore manifest.webmanifest sw.js icons
 git commit -m "허브 갱신(업로드 전용) %date% %time:~0,5%"
 if errorlevel 1 (
   echo.
