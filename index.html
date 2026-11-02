@@ -285,11 +285,6 @@
             .ghost-button { width: 100%; margin-top: 10px; background: transparent; border: 1px solid var(--border); border-radius: 10px; color: var(--ink-2);
                 font-family: inherit; font-size: 14px; font-weight: 600; padding: 11px; cursor: pointer; }
             .ghost-button:hover { border-color: rgba(255,255,255,.3); color: #fff; }
-            /* 앱으로 설치(휴대폰 · 설치 창을 띄울 수 있는 브라우저) */
-            .appinst { margin-top: 14px; text-align: center; }
-            .appinst button { background: none; border: 0; color: var(--brand); font: inherit; font-size: 13.5px; font-weight: 600; padding: 8px 10px; cursor: pointer; }
-            .appinst .how { margin-top: 6px; text-align: left; font-size: 13px; color: var(--ink-2); background: var(--page); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; line-height: 1.6; }
-            .appinst .how b { color: #fff; }
             /* 휴대폰 · 태블릿: 아이폰은 16px보다 작은 입력칸을 누르면 화면을 확대한다 · 누르는 자리 넓히기 */
             @media (pointer: coarse) {
                 input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea { font-size: 16px !important; }
@@ -365,10 +360,6 @@
                         <button type="submit" class="decrypt-button" id="b-login">접속하기</button>
                     </form>
                     <button class="ghost-button" id="b-join">계정이 없나요? 출입 신청</button>
-                    <div class="appinst hidden" id="app-inst">
-                        <button type="button" id="b-inst">📱 앱으로 설치하기</button>
-                        <div class="how hidden" id="inst-how"></div>
-                    </div>
                 </section>
 
                 <!-- 출입 신청(본인이 아이디를 만들고 관리자 승인을 기다림) -->
@@ -531,8 +522,6 @@
             const MULTI = (t) => t === "admin" || t === "both";   // 허브를 둘 다 보는 권한 = 고르는 화면 · 허브 선택 · 뒤로가기
             // 홈 화면 앱(PWA)으로 실행 중인가 — 아이폰 앱은 닫으면 sessionStorage 가 지워진다
             const STANDALONE = (() => { try { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch (e) { return false; } })();
-            const PHONE = (() => { try { return matchMedia("(pointer: coarse)").matches; } catch (e) { return false; } })();
-            const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
             /* ── 화면 전환 ── */
             const VIEWS = ["v-login", "v-join", "v-pw", "v-choose", "v-load", "v-stop"];
@@ -893,6 +882,140 @@
                 window.addEventListener("load", put);
                 window.addEventListener("popstate", onBack);   // document.open 이 지운 듣기를 새 허브 위에 다시 단다
                 watchVersion();
+                mobileFit();
+            }
+
+            /* ── 휴대폰 가독성 보정(좁은 화면 760px 이하에서만) ──
+               허브 본문은 Cowork 원본이라 고치지 않고, 그린 뒤 각 문서(셸 · iframe 문서 · 그 안 iframe)에 보정만 덧붙인다.
+               ① 작은 글씨: 11.5px 미만 글씨를 11.5~12px로(스타일 규칙은 같은 선택자를 뒤에 덧붙여 덮고, 인라인 style 은 직접 고침)
+               ② 화면 폭 넘침: 스크롤 상자 밖에서 화면보다 넓은 요소를 폭 안에 접어 넣는다
+               ③ 입력칸 16px(아이폰 확대 방지) · 작은 단추의 누르는 자리를 보이지 않게 넓힌다
+               iframe 을 새로 만들거나 옮기지 않고(지연 로더 · repairFrames), fetch · HLE2GATE 를 건드리지 않으며, #hubIntro · 출입문 단추는 제외한다.
+               SVG 안 글씨(차트)는 겹칠 수 있어 키우지 않는다. */
+            const FIT_W = 760, FIT_SKIP = /hubIntro|hle-gate|(^|[\s>+~,(])(svg|text|tspan)(?![\w-])|::?(before|after)/i;
+            const fitSize = (px) => (px < 10 ? 11.5 : 12);
+            const FIT_CSS = "@media (max-width:" + FIT_W + "px){"
+                + "html{-webkit-text-size-adjust:100%;text-size-adjust:100%}"
+                + "input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px!important;max-width:100%}"
+                + ".hle-fit-tap{position:relative}.hle-fit-tap::after{content:\"\";position:absolute;inset:-8px 0}"
+                + ".hle-fit-clip,.hle-fit-clip body{overflow-x:clip!important}"
+                + ".hle-fit-wrap{max-width:100%!important;min-width:0!important;box-sizing:border-box!important;flex-wrap:wrap!important;white-space:normal!important;overflow-wrap:anywhere}"
+                + ".hle-fit-scroll{display:block!important;max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch}}";
+            function fitRules(doc) {
+                const win = doc.defaultView, out = [];
+                const walk = (rules, ok) => {
+                    for (const r of rules) {
+                        if (r.cssRules && r.media) { let m = false; try { m = win.matchMedia(r.media.mediaText).matches; } catch (e) {} if (m) walk(r.cssRules, ok); continue; }
+                        if (r.cssRules && !r.selectorText) { try { walk(r.cssRules, ok); } catch (e) {} continue; }
+                        if (!r.selectorText || !r.style || FIT_SKIP.test(r.selectorText)) continue;
+                        const fs = r.style.fontSize; const mt = /^([\d.]+)px$/.exec(fs || "");
+                        if (!mt || +mt[1] >= 11.5 || +mt[1] < 5) continue;
+                        out.push(r.selectorText + "{font-size:" + fitSize(+mt[1]) + "px" + (r.style.getPropertyPriority("font-size") ? "!important" : "") + "}");
+                    }
+                };
+                for (const sh of doc.styleSheets) { if (sh.ownerNode && sh.ownerNode.id === "hle-fit") continue; try { walk(sh.cssRules, true); } catch (e) {} }
+                return out.join("");
+            }
+            function fitInline(root) {
+                (root.querySelectorAll ? root.querySelectorAll("[style*='font-size']") : []).forEach((el) => {
+                    if (el.closest("svg,#hubIntro,#hle-gate-badge")) return;
+                    const mt = /^([\d.]+)px$/.exec(el.style.fontSize || "");
+                    if (mt && +mt[1] < 11.5 && +mt[1] >= 5) el.style.fontSize = fitSize(+mt[1]) + "px";
+                });
+            }
+            function fitLayout(doc) {
+                const win = doc.defaultView, W = doc.documentElement.clientWidth;
+                if (!doc.body || W > FIT_W || W < 200) return;
+                // 가로 스크롤 상자 · 일부러 잘라 보이는 상자(슬라이드 등) 안은 원래 넓은 것이라 그대로 둔다
+                const inScroll = (e) => { for (let n = e.parentElement; n && n !== doc.body; n = n.parentElement) { if (/(auto|scroll|hidden|clip)/.test(win.getComputedStyle(n).overflowX)) return true; } return false; };
+                // 읽기와 고치기를 단계로 나눈다 — 섞으면 요소마다 화면 배치를 다시 계산해 몇 초씩 멈춘다
+                // 화면 옆에 접혀 있는 패널(셸의 업데이트 LOG 등 수천 줄)은 처음 크기를 읽을 때 몹시 느리다(요소마다 따로 배치 계산)
+                // → 통째로 건너뛰고, 열려서 화면에 들어오면(class 가 바뀌어 다시 보게 됨) 그때 본다
+                const away = [...doc.body.children].filter((c) => { const r = c.getBoundingClientRect(); return r.width > 0 && (r.left >= W || r.right <= 0); });
+                const els = [...doc.body.querySelectorAll("*")].filter((el) => !(el.closest("svg,#hubIntro,#hle-gate-badge,#hle-gate-new") && el.tagName !== "svg") && !away.some((a) => a.contains(el)));
+                // ① 남은 작은 글씨(부모 크기를 물려받거나 em · % 로 정한 것): 글자가 직접 든 요소만 실제 크기를 본다 — 읽기
+                const fonts = [], clips = [];
+                for (const el of els) {
+                    if (el.__hleFs || !el.offsetWidth) continue;
+                    const r = el.getBoundingClientRect();
+                    if (r.left >= W || r.right <= 0) continue;   // 좌우 화면 밖으로 밀린 것은 들어올 때 본다
+                    el.__hleFs = 1;
+                    if ([...el.childNodes].some((n) => n.nodeType === 3 && n.nodeValue.trim())) {
+                        const px = parseFloat(win.getComputedStyle(el).fontSize);
+                        if (px >= 5 && px < 11.5) fonts.push([el, fitSize(px)]);
+                        // 넘치는 글자를 잘라 내는 좁은 상자(챔피언 이름 칸 등) — 키운 글씨가 잘리는지 아래에서 본다
+                        const box = el.clientWidth > 0 ? el : el.parentElement;
+                        if (box && /(hidden|clip)/.test(win.getComputedStyle(box).overflowX)) clips.push([el, box]);
+                    }
+                }
+                for (const [el, px] of fonts) el.style.setProperty("font-size", px + "px", "important");   // 고치기
+                // 키운 탓에 잘리게 된 글자는 상자에 맞을 만큼만 되돌린다(원래 크기보다 작게는 안 함)
+                const cut = clips.filter(([el, box]) => box.scrollWidth > box.clientWidth + 1);
+                if (cut.length) {
+                    const now = cut.map(([el]) => parseFloat(win.getComputedStyle(el).fontSize));
+                    const st = doc.getElementById("hle-fit"), saved = cut.map(([el]) => [el.style.getPropertyValue("font-size"), el.style.getPropertyPriority("font-size")]);
+                    if (st) st.disabled = true; cut.forEach(([el]) => el.style.removeProperty("font-size"));
+                    const orig = cut.map(([el]) => parseFloat(win.getComputedStyle(el).fontSize));
+                    if (st) st.disabled = false; cut.forEach(([el], i) => { if (saved[i][0]) el.style.setProperty("font-size", saved[i][0], saved[i][1]); });
+                    const ratio = cut.map(([el, box]) => box.clientWidth / box.scrollWidth);
+                    cut.forEach(([el], i) => { if (now[i] > orig[i]) el.style.setProperty("font-size", Math.max(orig[i], Math.floor(now[i] * ratio[i] * 10) / 10) + "px", "important"); });
+                }
+                // ② 넘침 · ③ 작은 단추 — 글씨를 키운 뒤의 배치로 한 번에 읽는다
+                const add = [];
+                for (const el of els) {
+                    const w = el.offsetWidth;
+                    // ② 상자 자체가 화면보다 넓은 것만(자식 때문에 넓어진 부모는 자식을 고치면 따라온다)
+                    if (w > W + 1 && !el.classList.contains("hle-fit-wrap") && !el.classList.contains("hle-fit-scroll")) {
+                        const cs = win.getComputedStyle(el);
+                        if (cs.position !== "fixed" && cs.position !== "absolute" && !inScroll(el)) {
+                            if (el.tagName === "TABLE" || el.tagName === "PRE") add.push([el, "hle-fit-scroll"]);
+                            else if (![...el.children].some((c) => c.offsetWidth > W + 1)) add.push([el, "hle-fit-wrap"]);
+                        }
+                    }
+                    // ③ 보이는 크기는 그대로, 누르는 자리만 넓힌다(::after 를 이미 쓰는 단추는 건드리지 않음)
+                    if ((el.tagName === "BUTTON" || el.getAttribute("role") === "tab" || (el.tagName === "A" && el.hasAttribute("href"))) && !el.classList.contains("hle-fit-tap")) {
+                        const h = el.offsetHeight;
+                        if (h > 0 && h < 30 && win.getComputedStyle(el, "::after").content === "none") add.push([el, "hle-fit-tap"]);
+                    }
+                }
+                for (const [el, c] of add) el.classList.add(c);   // 고치기
+                // 고친 뒤에도 조금(40px 이하) 넘치면 — 자리 때문에 삐져나온 가장자리 — 좌우 흔들림만 막는다(clip 은 sticky 를 깨지 않는다)
+                const over = doc.documentElement.scrollWidth - W;
+                doc.documentElement.classList.toggle("hle-fit-clip", over > 0 && over <= 40 || doc.documentElement.classList.contains("hle-fit-clip"));
+            }
+            function fitDoc(doc) {
+                if (!doc || !doc.head || !doc.body) return;
+                if (!doc.getElementById("hle-fit")) {
+                    const st = doc.createElement("style"); st.id = "hle-fit";
+                    st.textContent = FIT_CSS + "@media (max-width:" + FIT_W + "px){" + fitRules(doc) + "}";
+                    doc.head.appendChild(st);
+                    fitInline(doc);
+                    // 탭을 누를 때 새로 그리는 표 · 카드의 인라인 글씨도 잡는다
+                    // (탭 전환은 class · style 만 바꾸는 경우가 많아 그것도 본다)
+                    try {
+                        // 글자만 바뀌는 변화(초 단위 카운트다운 등)는 무시 — 요소가 생기거나 class · style 이 바뀔 때만 다시 본다
+                        doc.__hleFitObs = new doc.defaultView.MutationObserver((ms) => { for (const m of ms) { if (m.type === "attributes") doc.__hleFitDirty = 1; m.addedNodes.forEach((n) => { if (n.nodeType === 1) { doc.__hleFitDirty = 1; fitInline(n); if (n.matches && n.matches("[style*='font-size']")) fitInline(n.parentNode); } }); } });
+                        doc.__hleFitObs.observe(doc.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style", "hidden", "open"] });
+                    } catch (e) {}
+                    doc.__hleFitDirty = 1;
+                }
+                // 숨겨 둔 문서가 보이게 되면(폭 0 → 화면 폭) 다시 본다
+                const w = doc.documentElement.clientWidth; if (w !== doc.__hleFitW) { doc.__hleFitW = w; doc.__hleFitDirty = 1; }
+                // 화면 전환 애니메이션이 도는 동안 크기를 읽으면 읽을 때마다 다시 계산해 멈칫한다 → 끝난 뒤에 본다(무한 반복 애니메이션은 무시)
+                let moving = false; try { moving = doc.getAnimations().some((a) => a.playState === "running" && isFinite(a.effect.getComputedTiming().endTime)); } catch (e) {}
+                if (doc.__hleFitDirty && !moving) {
+                    doc.__hleFitDirty = 0;
+                    try { fitLayout(doc); } catch (e) {}
+                    if (doc.__hleFitObs) doc.__hleFitObs.takeRecords();   // 보정이 바꾼 class · style 은 다시 보지 않는다
+                }
+            }
+            function mobileFit() {
+                if (window.__hleFit) return; window.__hleFit = 1;
+                const each = (doc) => { fitDoc(doc); doc.querySelectorAll("iframe").forEach((f) => { let d = null; try { d = f.contentDocument; } catch (e) {} if (d && d.readyState !== "loading") each(d); }); };
+                const tick = () => { if (document.documentElement.clientWidth <= FIT_W) { try { each(document); } catch (e) {} } };
+                // 처음엔 자주(문서가 그려지는 동안), 그 뒤엔 1.5초마다 — 바뀐 문서만 다시 본다
+                let n = 0; const fast = setInterval(() => { tick(); if (++n > 12) clearInterval(fast); }, 500);
+                setInterval(tick, 1500);
             }
 
             // 새 판 알림: 허브를 켜 둔 채(특히 휴대폰 앱) 최신화가 배포되면 알려 준다 — 다시 화면에 왔을 때(2분 간격) · 10분마다
@@ -1150,39 +1273,6 @@
             const toggleIcon = $("toggle-password"), eyeClosed = toggleIcon.src, eyeOpened = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzYgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNS4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjQgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZD0iTTI4OCAzMmMtODAuOCAwLTE0NS41IDM2LjgtMTkyLjYgODAuNkM0OC42IDE1NiAxNy4zIDIwOCAyLjUgMjQzLjdjLTMuMyA3LjktMy4zIDE2LjcgMCAyNC42QzE3LjMgMzA0IDQ4LjYgMzU2IDk1LjQgMzk5LjRDMTQyLjUgNDQzLjIgMjA3LjIgNDgwIDI4OCA0ODBzMTQ1LjUtMzYuOCAxOTIuNi04MC42YzQ2LjgtNDMuNSA3OC4xLTk1LjQgOTMtMTMxLjFjMy4zLTcuOSAzLjMtMTYuNyAwLTI0LjZjLTE0LjktMzUuNy00Ni4yLTg3LjctOTMtMTMxLjFDNDMzLjUgNjguOCAzNjguOCAzMiAyODggMzJ6TTE0NCAyNTZhMTQ0IDE0NCAwIDEgMSAyODggMCAxNDQgMTQ0IDAgMSAxIC0yODggMHptMTQ0LTY0YzAgMzUuMy0yOC43IDY0LTY0IDY0Yy03LjEgMC0xMy45LTEuMi0yMC4zLTMuM2MtNS41LTEuOC0xMS45IDEuNi0xMS43IDcuNGMuMyA2LjkgMS4zIDEzLjggMy4yIDIwLjdjMTMuNyA1MS4yIDY2LjQgODEuNiAxMTcuNiA2Ny45czgxLjYtNjYuNCA2Ny45LTExNy42Yy0xMS4xLTQxLjUtNDcuOC02OS40LTg4LjYtNzEuMWMtNS44LS4yLTkuMiA2LjEtNy40IDExLjdjMi4xIDYuNCAzLjMgMTMuMiAzLjMgMjAuM3oiLz48L3N2Zz4=";
             toggleIcon.addEventListener("click", () => { const i = $("password"); const t = i.type === "password"; i.type = t ? "text" : "password"; toggleIcon.src = t ? eyeOpened : eyeClosed; });
 
-            /* ── 앱으로 설치: 설치 창을 띄울 수 있으면 띄우고, 아니면 지금 브라우저에 맞는 방법을 안내 ──
-               카카오톡 · 네이버 · 인스타그램 등 앱 안의 간이 브라우저(그리고 다른 앱에서 링크를 열 때 뜨는 삼성 인터넷 간이 창)는
-               설치가 안 된다 → 먼저 「브라우저에서 열기」로 넘어가게 한다. 카카오톡은 단추 하나로 바깥 브라우저로 넘길 수 있다. */
-            const SITE = location.origin + "/";
-            function installHow(ua) {
-                const kakao = /KAKAOTALK/i.test(ua);
-                const inapp = kakao || /NAVER\(inapp|Instagram|FBAN|FBAV|FB_IAB|Line\/|DaumApps|everytimeApp|BAND\/|; wv\)/i.test(ua);
-                const ios = /iPhone|iPad|iPod/.test(ua) || IOS;
-                const done = "<br>홈 화면의 <b>HLE 아이콘</b>으로 열면 전체 화면 앱으로 실행됩니다.";
-                const addr = "<br><span style=\"color:var(--ink-muted)\">주소: " + esc(SITE) + "</span>";
-                if (kakao) return { open: ios ? null : "kakaotalk://web/openExternal?url=" + encodeURIComponent(SITE),
-                    html: "지금은 <b>카카오톡 안의 브라우저</b>라 설치할 수 없습니다.<br>① " + (ios ? "오른쪽 아래 <b>공유(또는 ⋯)</b> → <b>「Safari로 열기」</b>" : "바깥 브라우저로 넘어갑니다. 안 넘어가면 오른쪽 위 <b>⋮</b> → <b>「다른 브라우저로 열기」</b>") + "<br>② 열린 브라우저에서 <b>「앱으로 설치하기」</b>를 다시 누르세요." + addr };
-                if (inapp) return { html: "지금은 <b>다른 앱 안의 간이 브라우저</b>라 설치할 수 없습니다.<br>① 메뉴(⋮ 또는 ⋯)에서 " + (ios ? "<b>「Safari에서 열기」</b> 또는 <b>「브라우저에서 열기」</b>를" : "<b>「브라우저에서 열기」</b> · <b>「Chrome에서 열기」</b> · <b>「삼성 브라우저에서 열기」</b> 중 보이는 것을") + " 누릅니다.<br>② 열린 브라우저에서 <b>「앱으로 설치하기」</b>를 다시 누르세요." + addr };
-                if (ios) return { html: "① <b>Safari</b>로 이 주소를 엽니다.<br>② 아래쪽 <b>공유 단추</b>(네모에 위 화살표)를 누릅니다.<br>③ <b>「홈 화면에 추가」</b> → <b>「추가」</b>." + done };
-                if (/SamsungBrowser/i.test(ua)) return { html: "<b>삼성 인터넷</b>입니다.<br>· 메뉴에 <b>「삼성 브라우저에서 열기」</b>가 보이면(다른 앱에서 링크를 연 경우) 먼저 그것을 누르고 이 단추를 다시 누르세요.<br>① 주소창 옆 <b>설치 아이콘(↓)</b>을 누르거나,<br>② 아래쪽 <b>메뉴(≡)</b> → <b>「현재 페이지 추가」</b> → <b>「홈 화면」</b>." + done };
-                return { html: "① 오른쪽 위 <b>메뉴(⋮)</b> → <b>「앱 설치」</b> 또는 <b>「홈 화면에 추가」</b>.<br>· 메뉴에 「새로고침 · 북마크 · <b>○○에서 열기</b>」만 보이면 다른 앱 안의 간이 창입니다 — <b>「○○에서 열기」</b>를 먼저 누르고 이 단추를 다시 누르세요." + done };
-            }
-            let installEvt = null;
-            function showInst() { if (!STANDALONE) $("app-inst").classList.remove("hidden"); }
-            window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; showInst(); });
-            window.addEventListener("appinstalled", () => { installEvt = null; $("app-inst").classList.add("hidden"); });
-            $("b-inst").addEventListener("click", async () => {
-                if (installEvt) {
-                    const e = installEvt; installEvt = null;
-                    try { await e.prompt(); const c = await e.userChoice; if (c && c.outcome === "accepted") $("app-inst").classList.add("hidden"); } catch (_) {}
-                    return;
-                }
-                const how = $("inst-how"), h = installHow(navigator.userAgent);
-                how.innerHTML = h.html;
-                how.classList.remove("hidden");
-                if (h.open) location.href = h.open;   // 카카오톡: 바깥 브라우저로 넘기기
-            });
-            if (PHONE) showInst();
             if (STANDALONE) $("remember").checked = true;   // 앱에서는 로그인 유지가 기본(직접 끌 수 있음)
 
             /* ── 시작 ── */
