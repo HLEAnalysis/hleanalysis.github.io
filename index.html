@@ -1147,7 +1147,23 @@
             const toggleIcon = $("toggle-password"), eyeClosed = toggleIcon.src, eyeOpened = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzYgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNS4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjQgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZD0iTTI4OCAzMmMtODAuOCAwLTE0NS41IDM2LjgtMTkyLjYgODAuNkM0OC42IDE1NiAxNy4zIDIwOCAyLjUgMjQzLjdjLTMuMyA3LjktMy4zIDE2LjcgMCAyNC42QzE3LjMgMzA0IDQ4LjYgMzU2IDk1LjQgMzk5LjRDMTQyLjUgNDQzLjIgMjA3LjIgNDgwIDI4OCA0ODBzMTQ1LjUtMzYuOCAxOTIuNi04MC42YzQ2LjgtNDMuNSA3OC4xLTk1LjQgOTMtMTMxLjFjMy4zLTcuOSAzLjMtMTYuNyAwLTI0LjZjLTE0LjktMzUuNy00Ni4yLTg3LjctOTMtMTMxLjFDNDMzLjUgNjguOCAzNjguOCAzMiAyODggMzJ6TTE0NCAyNTZhMTQ0IDE0NCAwIDEgMSAyODggMCAxNDQgMTQ0IDAgMSAxIC0yODggMHptMTQ0LTY0YzAgMzUuMy0yOC43IDY0LTY0IDY0Yy03LjEgMC0xMy45LTEuMi0yMC4zLTMuM2MtNS41LTEuOC0xMS45IDEuNi0xMS43IDcuNGMuMyA2LjkgMS4zIDEzLjggMy4yIDIwLjdjMTMuNyA1MS4yIDY2LjQgODEuNiAxMTcuNiA2Ny45czgxLjYtNjYuNCA2Ny45LTExNy42Yy0xMS4xLTQxLjUtNDcuOC02OS40LTg4LjYtNzEuMWMtNS44LS4yLTkuMiA2LjEtNy40IDExLjdjMi4xIDYuNCAzLjMgMTMuMiAzLjMgMjAuM3oiLz48L3N2Zz4=";
             toggleIcon.addEventListener("click", () => { const i = $("password"); const t = i.type === "password"; i.type = t ? "text" : "password"; toggleIcon.src = t ? eyeOpened : eyeClosed; });
 
-            /* ── 앱으로 설치: 안드로이드 · PC 크롬은 설치 창, 아이폰은 방법 안내 ── */
+            /* ── 앱으로 설치: 설치 창을 띄울 수 있으면 띄우고, 아니면 지금 브라우저에 맞는 방법을 안내 ──
+               카카오톡 · 네이버 · 인스타그램 등 앱 안의 간이 브라우저(그리고 다른 앱에서 링크를 열 때 뜨는 삼성 인터넷 간이 창)는
+               설치가 안 된다 → 먼저 「브라우저에서 열기」로 넘어가게 한다. 카카오톡은 단추 하나로 바깥 브라우저로 넘길 수 있다. */
+            const SITE = location.origin + "/";
+            function installHow(ua) {
+                const kakao = /KAKAOTALK/i.test(ua);
+                const inapp = kakao || /NAVER\(inapp|Instagram|FBAN|FBAV|FB_IAB|Line\/|DaumApps|everytimeApp|BAND\/|; wv\)/i.test(ua);
+                const ios = /iPhone|iPad|iPod/.test(ua) || IOS;
+                const done = "<br>홈 화면의 <b>HLE 아이콘</b>으로 열면 전체 화면 앱으로 실행됩니다.";
+                const addr = "<br><span style=\"color:var(--ink-muted)\">주소: " + esc(SITE) + "</span>";
+                if (kakao) return { open: ios ? null : "kakaotalk://web/openExternal?url=" + encodeURIComponent(SITE),
+                    html: "지금은 <b>카카오톡 안의 브라우저</b>라 설치할 수 없습니다.<br>① " + (ios ? "오른쪽 아래 <b>공유(또는 ⋯)</b> → <b>「Safari로 열기」</b>" : "바깥 브라우저로 넘어갑니다. 안 넘어가면 오른쪽 위 <b>⋮</b> → <b>「다른 브라우저로 열기」</b>") + "<br>② 열린 브라우저에서 <b>「앱으로 설치하기」</b>를 다시 누르세요." + addr };
+                if (inapp) return { html: "지금은 <b>다른 앱 안의 간이 브라우저</b>라 설치할 수 없습니다.<br>① 메뉴(⋮ 또는 ⋯)에서 " + (ios ? "<b>「Safari에서 열기」</b> 또는 <b>「브라우저에서 열기」</b>를" : "<b>「브라우저에서 열기」</b> · <b>「Chrome에서 열기」</b> · <b>「삼성 브라우저에서 열기」</b> 중 보이는 것을") + " 누릅니다.<br>② 열린 브라우저에서 <b>「앱으로 설치하기」</b>를 다시 누르세요." + addr };
+                if (ios) return { html: "① <b>Safari</b>로 이 주소를 엽니다.<br>② 아래쪽 <b>공유 단추</b>(네모에 위 화살표)를 누릅니다.<br>③ <b>「홈 화면에 추가」</b> → <b>「추가」</b>." + done };
+                if (/SamsungBrowser/i.test(ua)) return { html: "<b>삼성 인터넷</b>입니다.<br>· 메뉴에 <b>「삼성 브라우저에서 열기」</b>가 보이면(다른 앱에서 링크를 연 경우) 먼저 그것을 누르고 이 단추를 다시 누르세요.<br>① 주소창 옆 <b>설치 아이콘(↓)</b>을 누르거나,<br>② 아래쪽 <b>메뉴(≡)</b> → <b>「현재 페이지 추가」</b> → <b>「홈 화면」</b>." + done };
+                return { html: "① 오른쪽 위 <b>메뉴(⋮)</b> → <b>「앱 설치」</b> 또는 <b>「홈 화면에 추가」</b>.<br>· 메뉴에 「새로고침 · 북마크 · <b>○○에서 열기</b>」만 보이면 다른 앱 안의 간이 창입니다 — <b>「○○에서 열기」</b>를 먼저 누르고 이 단추를 다시 누르세요." + done };
+            }
             let installEvt = null;
             function showInst() { if (!STANDALONE) $("app-inst").classList.remove("hidden"); }
             window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; showInst(); });
@@ -1158,11 +1174,10 @@
                     try { await e.prompt(); const c = await e.userChoice; if (c && c.outcome === "accepted") $("app-inst").classList.add("hidden"); } catch (_) {}
                     return;
                 }
-                const how = $("inst-how");
-                how.innerHTML = IOS
-                    ? "① <b>Safari</b>로 이 주소를 엽니다.<br>② 아래쪽 <b>공유 단추</b>(네모에 위 화살표)를 누릅니다.<br>③ <b>「홈 화면에 추가」</b> → <b>「추가」</b>.<br>홈 화면의 HLE 아이콘으로 열면 전체 화면 앱으로 실행됩니다."
-                    : "① 브라우저 오른쪽 위 <b>메뉴(⋮)</b>를 누릅니다.<br>② <b>「앱 설치」</b> 또는 <b>「홈 화면에 추가」</b>를 고릅니다.<br>홈 화면의 HLE 아이콘으로 열면 전체 화면 앱으로 실행됩니다.";
-                how.classList.toggle("hidden");
+                const how = $("inst-how"), h = installHow(navigator.userAgent);
+                how.innerHTML = h.html;
+                how.classList.remove("hidden");
+                if (h.open) location.href = h.open;   // 카카오톡: 바깥 브라우저로 넘기기
             });
             if (PHONE) showInst();
             if (STANDALONE) $("remember").checked = true;   // 앱에서는 로그인 유지가 기본(직접 끌 수 있음)
