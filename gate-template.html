@@ -364,7 +364,7 @@
 
                 <!-- 새 비밀번호 -->
                 <section class="view hidden" id="v-pw">
-                    <p class="instructions">처음 로그인했거나 관리자가 재설정을 요청했습니다. 본인만 아는 새 비밀번호로 바꿔야 허브가 열립니다.</p>
+                    <p class="instructions" id="pw-why">처음 로그인했거나 관리자가 재설정을 요청했습니다. 본인만 아는 새 비밀번호로 바꿔야 허브가 열립니다.</p>
                     <form id="f-pw" action="#" method="post" autocomplete="on">
                         <input type="text" id="pw-user" name="username" autocomplete="username" hidden />
                         <span class="field-label">새 비밀번호 (12자 이상 · 영문과 숫자)</span>
@@ -374,6 +374,7 @@
                         <div class="gmsg" id="m-pw"></div>
                         <button type="submit" class="decrypt-button" id="b-pw">바꾸고 들어가기</button>
                     </form>
+                    <button class="ghost-button hidden" id="b-pw-cancel">취소</button>
                     <button class="ghost-button" data-out>로그아웃</button>
                 </section>
 
@@ -385,6 +386,7 @@
                         <button id="b-academy"><b>2·3군 허브</b><span>LCK CL · 아카데미 · 스카우팅</span></button>
                         <button id="b-admin"><b>관리 <span class="pill warn hidden" id="c-pend"></span></b><span>계정 · 권한 · 출입 신청 승인 · 접속 기록 · 2·3군 허브 올리기</span></button>
                     </div>
+                    <button class="ghost-button" id="b-mypw">비밀번호 바꾸기</button>
                     <button class="ghost-button" data-out>로그아웃</button>
                 </section>
 
@@ -413,7 +415,7 @@
         <div id="v-admin" class="admin hidden">
             <div class="arow">
                 <div><h2><span class="hle">HLE</span> 허브 관리</h2><div class="anote" id="a-who" style="margin:0"></div></div>
-                <div class="arow"><button class="abtn sm" id="a-team1">1군 허브</button><button class="abtn sm" id="a-academy">2·3군 허브</button><button class="abtn sm ghost" data-out>로그아웃</button></div>
+                <div class="arow"><button class="abtn sm" id="a-team1">1군 허브</button><button class="abtn sm" id="a-academy">2·3군 허브</button><button class="abtn sm ghost" id="a-mypw">비밀번호 바꾸기</button><button class="abtn sm ghost" data-out>로그아웃</button></div>
             </div>
             <div class="atabs" id="a-tabs"><button data-t="mem" class="on">계정 · 권한</button><button data-t="log">접속 기록</button><button data-t="up">2·3군 허브 올리기</button></div>
 
@@ -606,7 +608,7 @@
                     if (ST.status === "rejected") { stop("출입 신청이 승인되지 않았습니다. 관리자에게 문의하세요."); return; }
                     stop("사용이 중지된 계정입니다. 관리자에게 문의하세요."); return;
                 }
-                if (ST.must_change) { $("pw-user").value = S.email; show("v-pw"); $("np1").focus(); return; }
+                if (ST.must_change) { openPw(false); return; }
                 S.tier = ST.tier; save();
                 if (ST.tier === "team1") return openTeam1();
                 if (ST.tier === "academy") return openAcademy();
@@ -690,6 +692,14 @@
                 finally { btn.disabled = false; btn.textContent = "신청하기"; }
             });
 
+            // 새 비밀번호 화면: 첫 로그인 · 재설정 요구(필수) 또는 본인이 스스로 바꾸기(취소 가능)
+            function openPw(voluntary) {
+                $("pw-user").value = S.email; msg("m-pw", "");
+                $("pw-why").textContent = voluntary ? "새 비밀번호를 두 번 입력하세요. 바꾸면 다음 로그인부터 새 비밀번호를 씁니다." : "처음 로그인했거나 관리자가 재설정을 요청했습니다. 본인만 아는 새 비밀번호로 바꿔야 허브가 열립니다.";
+                $("b-pw").textContent = voluntary ? "바꾸기" : "바꾸고 들어가기";
+                $("b-pw-cancel").classList.toggle("hidden", !voluntary);
+                show("v-pw"); $("np1").focus();
+            }
             $("f-pw").addEventListener("submit", async (ev) => {
                 ev.preventDefault(); msg("m-pw", "");
                 const a = $("np1").value, b = $("np2").value;
@@ -1027,6 +1037,9 @@
             $("b-choose2").addEventListener("click", backToChoose);
             $("b-back").addEventListener("click", () => route());
             $("b-req").addEventListener("click", () => openJoin(true));
+            $("b-mypw").addEventListener("click", () => openPw(true));
+            $("a-mypw").addEventListener("click", () => openPw(true));
+            $("b-pw-cancel").addEventListener("click", () => { $("np1").value = ""; $("np2").value = ""; route(); });
             $("b-join").addEventListener("click", () => openJoin(false));
             $("b-join-back").addEventListener("click", () => { if (S) logout(); else { show("v-login"); $("g-id").focus(); } });
             const toggleIcon = $("toggle-password"), eyeClosed = toggleIcon.src, eyeOpened = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NzYgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNS4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjQgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZD0iTTI4OCAzMmMtODAuOCAwLTE0NS41IDM2LjgtMTkyLjYgODAuNkM0OC42IDE1NiAxNy4zIDIwOCAyLjUgMjQzLjdjLTMuMyA3LjktMy4zIDE2LjcgMCAyNC42QzE3LjMgMzA0IDQ4LjYgMzU2IDk1LjQgMzk5LjRDMTQyLjUgNDQzLjIgMjA3LjIgNDgwIDI4OCA0ODBzMTQ1LjUtMzYuOCAxOTIuNi04MC42YzQ2LjgtNDMuNSA3OC4xLTk1LjQgOTMtMTMxLjFjMy4zLTcuOSAzLjMtMTYuNyAwLTI0LjZjLTE0LjktMzUuNy00Ni4yLTg3LjctOTMtMTMxLjFDNDMzLjUgNjguOCAzNjguOCAzMiAyODggMzJ6TTE0NCAyNTZhMTQ0IDE0NCAwIDEgMSAyODggMCAxNDQgMTQ0IDAgMSAxIC0yODggMHptMTQ0LTY0YzAgMzUuMy0yOC43IDY0LTY0IDY0Yy03LjEgMC0xMy45LTEuMi0yMC4zLTMuM2MtNS41LTEuOC0xMS45IDEuNi0xMS43IDcuNGMuMyA2LjkgMS4zIDEzLjggMy4yIDIwLjdjMTMuNyA1MS4yIDY2LjQgODEuNiAxMTcuNiA2Ny45czgxLjYtNjYuNCA2Ny45LTExNy42Yy0xMS4xLTQxLjUtNDcuOC02OS40LTg4LjYtNzEuMWMtNS44LS4yLTkuMiA2LjEtNy40IDExLjdjMi4xIDYuNCAzLjMgMTMuMiAzLjMgMjAuM3oiLz48L3N2Zz4=";
