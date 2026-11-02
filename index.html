@@ -264,6 +264,8 @@
             @keyframes hiFadeOut{to{opacity:0}}
             @keyframes hiFade{from{opacity:0}to{opacity:1}}
             #hubIntro.hidden{display:none}
+            /* 2·3군 허브는 밝은 화면 — 오프닝도 그 허브의 밝은 색으로 띄워 이어받을 때 색이 튀지 않게 */
+            #hubIntro.lite .pt,#hubIntro.lite .pb{background:#f9f9f7}#hubIntro.lite::after{background:radial-gradient(ellipse at 50% 46%,#fff1e6 0%,#f9f3ee 38%,rgba(249,249,247,0) 70%)}#hubIntro.lite .tt{color:#0b0b0b}#hubIntro.lite .tt span{color:#d85a10}
             @media (prefers-reduced-motion:reduce){#hubIntro .lg,#hubIntro .tt,#hubIntro .ln,#hubIntro .sb{opacity:1!important;animation:none!important}}
             /* ── 2027 통합 출입문 (계정 로그인 · 권한별 허브) ── */
             .login-card .view + .view { margin-top: 0; }
@@ -795,11 +797,14 @@
             }
 
             let introT0 = 0;
-            function showIntro() {
-                if (!INTRO_OK) { $("content").classList.add("hidden"); $("loading").classList.remove("hidden"); $("loading-label").textContent = "허브 여는 중…"; return; }
+            // academy = 2·3군 허브(오프닝 이어받기를 늘 지원 · 밝은 색 · 제목 다름)
+            function showIntro(academy) {
+                if (!INTRO_OK && !academy) { $("content").classList.add("hidden"); $("loading").classList.remove("hidden"); $("loading-label").textContent = "허브 여는 중…"; return; }
                 if (introT0) return;
                 introT0 = Date.now();
                 const o = $("hubIntro");
+                o.classList.toggle("lite", !!academy);
+                o.querySelector(".tt").innerHTML = "<span>HLE</span> " + (academy ? "2·3군 분석 허브" : "통합 분석 허브");
                 o.classList.remove("hidden");
                 requestAnimationFrame(() => requestAnimationFrame(() => o.classList.add("in")));
                 $("loading").classList.add("hidden");
@@ -871,7 +876,10 @@
             const gzip = async (u8) => new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new CompressionStream("gzip"))).arrayBuffer());
             async function openAcademy() {
                 pushHub();
-                show("v-load"); msg("m-load", ""); $("l-retry").classList.add("hidden"); $("b-choose2").hidden = !(ST && ST.tier === "admin"); $("l-bar").style.width = "0"; $("l-title").textContent = "2·3군 허브를 불러오는 중…";
+                // 1군과 같이: 오프닝을 바로 띄우고 받기 · 풀기는 그 뒤에서 → 허브가 오프닝을 이어받아 한 번에 열린다
+                // (예전: 어두운 「불러오는 중 · 압축을 푸는 중」 카드 → 25MB 한 번에 쓰며 멈춤 → 허브 오프닝이 처음부터 다시)
+                msg("m-load", ""); $("l-retry").classList.add("hidden"); $("b-choose2").hidden = !(ST && ST.tier === "admin"); $("l-bar").style.width = "0"; $("l-title").textContent = "2·3군 허브를 불러오는 중…";
+                showIntro(true);
                 try {
                     let v = await rest("hub_versions?select=sha256,bytes,raw_bytes,at,note&order=at.desc&limit=1");
                     if (!v || !v.length) throw new Error("아직 올라간 2·3군 허브 파일이 없습니다. 관리자에게 문의하세요.");
@@ -883,19 +891,21 @@
                     const total = +r.headers.get("content-length") || v.bytes || 0, parts = [], rd = r.body.getReader(); let got = 0;
                     for (;;) { const x = await rd.read(); if (x.done) break; parts.push(x.value); got += x.value.length; if (total) $("l-bar").style.width = Math.min(100, got / total * 100).toFixed(0) + "%"; }
                     let u8 = new Uint8Array(got), o = 0; parts.forEach((p) => { u8.set(p, o); o += p.length; });
-                    $("l-title").textContent = "압축을 푸는 중…";
                     let raw = (u8[0] === 0x1f && u8[1] === 0x8b) ? await gunzip(u8) : u8;
                     if (await sha256hex(raw) !== v.sha256) throw new Error("받은 파일이 판 기록과 다릅니다(지문 불일치). 방금 새 판이 올라갔을 수 있습니다. 다시 시도하세요.");
                     const html = new TextDecoder("utf-8").decode(raw); raw = null; u8 = null;
                     const who = S.email;
                     // 2·3군 허브 안 스카우팅 메모 · 테스트 기록 · 솔랭 추세가 쓰는 통로(194차 · 이 탭의 로그인으로만)
-                    try { sessionStorage.setItem("hle-gate-open", "academy"); } catch (e) {}
+                    try { if (introT0) sessionStorage.setItem("hle-intro-t0", String(introT0)); sessionStorage.setItem("hle-gate-open", "academy"); } catch (e) {}
                     window.HLE2GATE = { email: who, rest: (path, opt) => rest(path, opt), rpc: (name, args) => rpc(name, args) };
-                    document.open(); document.write(html); document.close();
+                    document.open();
+                    await writeChunked(html);   // 나눠 쓰며 쉬어 오프닝이 멈추지 않게
+                    document.close();
                     badge("열람 " + idOf(who));
                 } catch (e) {
+                    hideIntro();
                     if (isAuthErr(e)) { show("v-login"); msg("m-login", "로그인이 만료됐습니다. 다시 로그인하세요."); return; }
-                    $("l-title").textContent = "허브를 열지 못했습니다"; msg("m-load", e.message); $("l-retry").classList.remove("hidden");
+                    show("v-load"); $("l-title").textContent = "허브를 열지 못했습니다"; msg("m-load", e.message); $("l-retry").classList.remove("hidden");
                 }
             }
 
