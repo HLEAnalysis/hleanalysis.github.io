@@ -539,6 +539,15 @@
                     <div id="l-retry" class="hidden"><button class="decrypt-button" id="b-retry">다시 시도</button><button class="ghost-button" id="b-choose2" hidden>허브 선택</button><div class="linkrow"><button class="lk" data-out>로그아웃</button></div></div>
                 </section>
 
+                <!-- 이 기기에 아이디 없이 남은 작업 — 내 아이디로 가져올지 한 번 묻는다 -->
+                <section class="view hidden" id="v-sync">
+                    <div class="state info" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 8.5a4 4 0 0 1-.5 9.5"/><path d="M12 11v8M9 16l3 3 3-3"/></svg></div>
+                    <p class="instructions" style="margin-bottom:6px">이 컴퓨터에 남은 작업</p>
+                    <div class="gmsg note has" id="sy-t" role="status" style="white-space:pre-line"></div>
+                    <button class="decrypt-button" id="sy-yes">내 아이디로 가져오기</button>
+                    <button class="ghost-button" id="sy-no">가져오지 않기 (이 컴퓨터에 따로 둠)</button>
+                </section>
+
                 <!-- 멈춤(명단 없음 · 기다림 · 중지 · 오류) -->
                 <section class="view hidden" id="v-stop">
                     <div class="state" id="stop-ic" aria-hidden="true"></div>
@@ -623,8 +632,8 @@
             const SK = "hle-gate-session";   // 로그인 유지 = localStorage · 아니면 sessionStorage(이 탭만)
 
             // 1군 허브 조각(빌드 때 채움)
-            const PAYLOAD_KO = "payload.bin?v=f59bb8d45f", PAYLOAD_EN = "payload_en.bin?v=4eddbbae6b";
-            const PARTS_KO = {"scout":"p/ko-scout-1cefd9a9a6.bin","blg":"p/ko-blg-96b07197d0.bin","g2":"p/ko-g2-b31925d2bb.bin","db":"p/ko-db-daa54ba99a.bin","planner":"p/ko-planner-a3ce1739f7.bin","lab":"p/ko-lab-d434889035.bin","wscout":"p/ko-wscout-3d0e1fa679.bin","wz":"p/ko-wz-c0bca436e3.bin","old":"p/ko-old-a5ad40a26b.bin"}, PARTS_EN = {"scout":"p/en-scout-e75831de6a.bin","db":"p/en-db-c3e97fcea5.bin","planner":"p/en-planner-4b5048b58a.bin","lab":"p/en-lab-25c45edf3f.bin","wscout":"p/en-wscout-bb4bcda562.bin","wz":"p/en-wz-00b79f8b9f.bin","old":"p/en-old-654460dcc4.bin"};
+            const PAYLOAD_KO = "payload.bin?v=5bd3ef7579", PAYLOAD_EN = "payload_en.bin?v=4eddbbae6b";
+            const PARTS_KO = {"scout":"p/ko-scout-1cefd9a9a6.bin","blg":"p/ko-blg-96b07197d0.bin","g2":"p/ko-g2-b31925d2bb.bin","db":"p/ko-db-178f2550b1.bin","planner":"p/ko-planner-a3ce1739f7.bin","lab":"p/ko-lab-d434889035.bin","wscout":"p/ko-wscout-3d0e1fa679.bin","wz":"p/ko-wz-c0bca436e3.bin","old":"p/ko-old-a5ad40a26b.bin"}, PARTS_EN = {"scout":"p/en-scout-e75831de6a.bin","db":"p/en-db-c3e97fcea5.bin","planner":"p/en-planner-4b5048b58a.bin","lab":"p/en-lab-25c45edf3f.bin","wscout":"p/en-wscout-bb4bcda562.bin","wz":"p/en-wz-00b79f8b9f.bin","old":"p/en-old-654460dcc4.bin"};
             let LANG = "ko";
             try { if (PAYLOAD_EN && localStorage.getItem("hlehub_lang") === "en") LANG = "en"; } catch (e) {}
             const PAYLOAD_URL = LANG === "en" ? PAYLOAD_EN : PAYLOAD_KO;
@@ -650,7 +659,7 @@
             const STANDALONE = (() => { try { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch (e) { return false; } })();
 
             /* ── 화면 전환 ── */
-            const VIEWS = ["v-login", "v-join", "v-pw", "v-choose", "v-load", "v-stop"];
+            const VIEWS = ["v-login", "v-join", "v-pw", "v-choose", "v-load", "v-sync", "v-stop"];
             function show(id) {
                 $("loading").classList.add("hidden");
                 const adm = id === "v-admin";
@@ -738,7 +747,158 @@
                 return j;
             }
             const logEvent = (action, detail) => rpc("hub_log", { p_action: action, p_detail: detail || null, p_ua: (navigator.userAgent || "").slice(0, 300) }).catch(() => {});
+
+            /* ── 아이디별 작업 보관(11/3~) ──
+               허브가 브라우저에 저장하는 항목(이름이 hle- · hle2- = 밴픽 연습장 · 저장 보드 · 복기 노트 · 플래너 · 화면 설정)을 계정 서버 칸(hub_user_state)과 맞춘다.
+               로그인 뒤: 서버 목록(지문만) → 바뀐 것만 받아 이 기기에 씀(허브를 그리기 전) · 연 동안: 바뀐 항목만 2초 모아 서버로
+               로그아웃: 남은 것 보내고 이 기기에서 지운다(공용 PC). 이 기기 기록(hle-gate-sync)에 「마지막으로 맞춘 지문」을 두고
+               한쪽만 바뀌었으면 바뀐 쪽 · 양쪽 다 바뀌었으면 더 늦게 바뀐 쪽을 남긴다.
+               서버 칸이 없거나(등록 전) 5초 안에 답이 없으면 이번에는 예전처럼(이 기기에만) 둔다. */
+            const SY = { on: false, uid: "", meta: null, rows: null, seen: {}, ready: null, timer: 0, tick: 0, flushing: null, at: 0, err: "" };
+            const SYMETA = "hle-gate-sync", SYSTASH = "hle-gate-stash:";
+            const syKey = (k) => /^hle2?-[A-Za-z0-9_.:-]{1,60}$/.test(k) && !/^hle-gate/.test(k);
+            function syHash(s) {   // cyrb53 + 길이 — 같은 값인지 가리는 용도(보안 아님)
+                let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+                for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+                h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+                h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+                return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36) + "." + s.length.toString(36);
+            }
+            function syUid() { try { return JSON.parse(atob(S.at.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).sub || ""; } catch (e) { return ""; } }
+            function syLocal() { const o = {}; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (syKey(k)) o[k] = localStorage.getItem(k); } } catch (e) {} return o; }
+            function syMeta() { let m = null; try { m = JSON.parse(localStorage.getItem(SYMETA) || "null"); } catch (e) {} return Object.assign({ owner: "", base: {}, dirty: {} }, m && typeof m === "object" ? m : {}); }
+            function sySave() { try { localStorage.setItem(SYMETA, JSON.stringify(SY.meta)); } catch (e) {} }
+            // 이 기기에 남은 다른 계정(또는 주인 모를) 작업은 지우지 않고 따로 묶어 둔다 — 그 계정이 다시 들어오면 되살려 올린다
+            function syStash(owner, only) {
+                const loc = syLocal(), out = {};
+                Object.keys(loc).forEach((k) => { if (!only || only[k]) out[k] = loc[k]; });
+                Object.keys(loc).forEach((k) => { try { localStorage.removeItem(k); } catch (e) {} });
+                if (!Object.keys(out).length) return;
+                try { localStorage.setItem(SYSTASH + (owner || "unknown"), JSON.stringify({ at: Date.now(), v: out })); }
+                catch (e) { Object.keys(out).forEach((k) => { try { localStorage.setItem(k, out[k]); } catch (_) {} }); }   // 자리가 모자라면 지우지 않고 되돌림
+            }
+            const syIn = (ks) => "(" + ks.map((k) => '"' + k + '"').join(",") + ")";
+            // 이 기능 전부터 쓰던 기기: 주인 모를 작업이 남아 있으면 한 번 묻는다
+            function syAsk(n, hasServer) {
+                return new Promise((res) => {
+                    $("sy-t").textContent = "이 컴퓨터에 아이디 없이 저장된 허브 작업이 " + n + "개 있습니다.\n(밴픽 연습장 · 저장 보드 · 복기 노트 · 화면 설정 등)\n\n"
+                        + (hasServer ? "가져오면 내 아이디(" + idOf(S.email) + ")에 보관된 작업과 합칩니다. 같은 항목은 아이디에 보관된 쪽을 남깁니다."
+                                     : "가져오면 내 아이디(" + idOf(S.email) + ")에 보관되어, 다른 컴퓨터에서 로그인해도 이어서 쓸 수 있습니다.");
+                    show("v-sync");
+                    $("sy-yes").onclick = () => res(true); $("sy-no").onclick = () => res(false);
+                });
+            }
+            // ① 로그인 직후(route): 서버 목록 + 기기 주인 정리 + 필요하면 묻기 — 이것만 기다린다(작은 요청 하나)
+            async function syPrep() {
+                SY.uid = syUid(); if (!SY.uid) return;
+                const ac = new AbortController(), to = setTimeout(() => ac.abort(), 5000);
+                try { SY.rows = await rest("hub_user_state?select=k,h,updated_at", { signal: ac.signal }); }
+                catch (e) { SY.err = e.status === 404 ? "off" : String(e && e.message || e); return; }   // 등록 전 · 느림 · 끊김 → 이번엔 예전처럼
+                finally { clearTimeout(to); }
+                SY.on = true;
+                let m = syMeta();
+                if (m.owner && m.owner !== SY.uid) {   // 다른 계정이 쓰던 기기: 그 계정이 못 보낸 것만 묶어 두고 비운다
+                    const loc = syLocal(), un = {};
+                    Object.keys(loc).forEach((k) => { if (syHash(loc[k]) !== m.base[k]) un[k] = 1; });
+                    syStash(m.owner, un); m = { owner: "", base: {}, dirty: {} };
+                }
+                const n = Object.keys(syLocal()).length;
+                if (!m.owner && n) {
+                    if (await syAsk(n, SY.rows.length > 0)) Object.keys(syLocal()).forEach((k) => { m.dirty[k] = 1; });   // 가져옴: 겹치면 아이디 쪽
+                    else syStash("unknown");   // 안 가져옴: 지우지 않고 이 기기에 따로 묶어 둠
+                }
+                m.owner = SY.uid;
+                // 이 계정이 예전에 이 기기에서 못 보내고 묶여 있던 작업 → 되살린다(아래에서 서버와 견줌)
+                try {
+                    const st = JSON.parse(localStorage.getItem(SYSTASH + SY.uid) || "null");
+                    if (st && st.v) { Object.keys(st.v).forEach((k) => { if (syKey(k)) { try { localStorage.setItem(k, st.v[k]); m.dirty[k] = st.at || 1; delete m.base[k]; } catch (e) {} } }); localStorage.removeItem(SYSTASH + SY.uid); }
+                } catch (e) {}
+                SY.meta = m; sySave();
+                SY.ready = syPull().catch((e) => { SY.err = String(e && e.message || e); });
+            }
+            // ② 서버와 견줘 받을 것만 받아 이 기기에 쓴다 → 이 기기 쪽이 남는 것은 서버로
+            async function syPull() {
+                const m = SY.meta, local = syLocal(), srv = {}, want = [];
+                SY.rows.forEach((r) => { srv[r.k] = r; });
+                SY.rows.forEach((r) => {
+                    const L = local[r.k], lh = L == null ? null : syHash(L), b = m.base[r.k];
+                    if (lh === r.h) { m.base[r.k] = r.h; delete m.dirty[r.k]; return; }
+                    const srvCh = r.h !== b, locCh = L != null ? lh !== b : b == null;
+                    if (!locCh) want.push(r.k);                                                   // 이 기기는 그대로 → 서버 것
+                    else if (srvCh && (m.dirty[r.k] || 0) < Date.parse(r.updated_at)) want.push(r.k);   // 둘 다 바뀜 → 늦은 쪽
+                });                                                                               // (서버가 그대로면 이 기기 것이 남아 아래 syFlush 가 보냄)
+                Object.keys(local).forEach((k) => {   // 서버에 없는데 예전에 맞췄던 그대로 = 다른 기기에서 지운 것
+                    if (!srv[k] && m.base[k] && syHash(local[k]) === m.base[k]) { try { localStorage.removeItem(k); } catch (e) {} delete m.base[k]; delete m.dirty[k]; }
+                });
+                for (let i = 0; i < want.length; i += 20) {
+                    const got = await rest("hub_user_state?select=k,v,h&k=in." + encodeURIComponent(syIn(want.slice(i, i + 20))));
+                    (got || []).forEach((r) => { try { localStorage.setItem(r.k, r.v); m.base[r.k] = r.h; delete m.dirty[r.k]; } catch (e) {} });
+                }
+                sySave(); SY.at = Date.now(); SY.seen = syLocal();
+                await syFlush();
+            }
+            // 허브를 그리기 직전에 기다린다(6초까지만 · 그 뒤에 온 값은 다음에 열 때 보인다)
+            const syReady = () => Promise.race([SY.ready || Promise.resolve(), new Promise((r) => setTimeout(r, 6000))]);
+            // 허브가 연 동안: 바뀐 항목을 찾아 표시해 두고 2초 모아 보낸다
+            function syScan() {
+                if (!SY.on || !SY.meta) return;
+                const now = syLocal(); let ch = false;
+                Object.keys(now).forEach((k) => { if (now[k] !== SY.seen[k]) { SY.meta.dirty[k] = Date.now(); ch = true; } });
+                Object.keys(SY.seen).forEach((k) => { if (!(k in now)) { SY.meta.dirty[k] = Date.now(); ch = true; } });
+                SY.seen = now;
+                if (ch) { sySave(); clearTimeout(SY.timer); SY.timer = setTimeout(syFlush, 2000); }
+            }
+            async function syFlush() {
+                if (!SY.on || !SY.meta || !S) return true;
+                while (SY.flushing) await SY.flushing.catch(() => {});
+                SY.flushing = (async () => {
+                    const m = SY.meta, loc = syLocal(), up = [], del = [];
+                    Object.keys(loc).forEach((k) => { const h = syHash(loc[k]); if (h !== m.base[k]) up.push({ uid: SY.uid, k, v: loc[k], h }); });
+                    Object.keys(m.base).forEach((k) => { if (!(k in loc)) del.push(k); });
+                    let batch = [], size = 0;
+                    const send = async () => {
+                        if (!batch.length) return;
+                        await rest("hub_user_state?on_conflict=uid,k", { method: "POST", headers: { "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify(batch) });
+                        batch.forEach((r) => { m.base[r.k] = r.h; delete m.dirty[r.k]; }); batch = []; size = 0;
+                    };
+                    for (const r of up) { if (size && size + r.v.length > 2500000) await send(); batch.push(r); size += r.v.length; }
+                    await send();
+                    if (del.length) { await rest("hub_user_state?k=in." + encodeURIComponent(syIn(del)), { method: "DELETE", headers: { Prefer: "return=minimal" } }); del.forEach((k) => { delete m.base[k]; delete m.dirty[k]; }); }
+                    sySave(); SY.at = Date.now(); SY.err = "";
+                })();
+                try { await SY.flushing; return true; }
+                catch (e) { SY.err = String(e && e.message || e); console.warn("작업 보관 실패", e); return false; }
+                finally { SY.flushing = null; syStatus(); }
+            }
+            // 허브 위(document.open 뒤)에서 감시를 단다 — 허브 안 화면(같은 출처 iframe)이 바꾸면 storage 사건이 이 창에 온다 · 5초마다 한 번 더 훑음
+            function syWatch() {
+                if (!SY.on) return;
+                clearInterval(SY.tick); SY.tick = setInterval(syScan, 5000);
+                window.addEventListener("storage", (e) => { if (!e.key || syKey(e.key)) syScan(); });
+                document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") { syScan(); syFlush(); } });
+                window.addEventListener("pagehide", () => { syScan(); syFlush(); });
+            }
+            // 허브를 떠나기 전(허브 선택 · 비밀번호 바꾸기 · 새로 고침): 남은 것 보내고(3초까지) 이동
+            function syLeave(go) { syScan(); Promise.race([syFlush(), new Promise((r) => setTimeout(r, 3000))]).then(go, go); }
+            // 계정 메뉴의 한 줄 상태
+            function syStatus() {
+                const e = document.getElementById("hle-gate-sy"); if (!e) return;
+                if (!SY.on) { e.className = "sy off"; e.textContent = SY.err === "off" ? "작업은 이 기기에만 저장됩니다" : "작업 보관 서버에 연결하지 못함 · 이 기기에 저장 중"; return; }
+                if (SY.err) { e.className = "sy warn"; e.textContent = "작업 보관 대기 중 · 연결되면 다시 보냅니다"; return; }
+                const s = Math.round((Date.now() - SY.at) / 1000);
+                e.className = "sy"; e.textContent = "작업이 아이디에 보관됨 · " + (s < 10 ? "방금" : s < 60 ? s + "초 전" : Math.round(s / 60) + "분 전");
+            }
+            // 로그아웃: 남은 것 보내고 → 이 기기에서 지운다(못 보냈으면 남겨 둠 — 다음 사람이 들어오면 따로 묶여 이 계정이 다시 올 때 되살아남)
+            async function sySignOff() {
+                if (!SY.on || !SY.meta) return;
+                syScan();
+                if (await syFlush()) {
+                    SY.on = false; SY.meta = null; clearInterval(SY.tick); clearTimeout(SY.timer);   // 먼저 감시를 끈다 — 안 그러면 지운 것을 「사용자가 지움」으로 보고 서버에서도 지울 수 있음
+                    Object.keys(syLocal()).forEach((k) => { try { localStorage.removeItem(k); } catch (e) {} }); try { localStorage.removeItem(SYMETA); } catch (e) {}
+                }
+            }
             async function logout() {
+                try { await sySignOff(); } catch (e) {}   // 작업을 아이디에 보내고 이 기기에서 지움
                 try {
                     if (S) {
                         if (S.exp - 30 < Date.now() / 1000) await refresh().catch(() => {});   // 만료된 토큰으로는 서버 세션이 안 끊긴다
@@ -762,7 +922,7 @@
             function backToChoose() {
                 try { sessionStorage.removeItem("hle-gate-open"); } catch (e) {}
                 if ($("v-choose")) { show("v-choose"); prefetchTeam1(); }
-                else location.replace(location.pathname);   // 허브를 그린 뒤에는 출입문을 다시 띄운다
+                else syLeave(() => location.replace(location.pathname));   // 허브를 그린 뒤에는 출입문을 다시 띄운다
             }
             function onBack(e) { if (e.state && e.state.hleGate === "choose" && ST && MULTI(ST.tier)) backToChoose(); }
             window.addEventListener("popstate", onBack);
@@ -787,6 +947,7 @@
                 let next = null; try { next = sessionStorage.getItem("hle-gate-next"); sessionStorage.removeItem("hle-gate-next"); } catch (e) {}
                 if (next === "pw") { openPw(true); return; }
                 if (!ST.tier || (ST.tier !== "team1" && !MULTI(ST.tier))) { try { sessionStorage.removeItem("hlehub_sk"); } catch (e) {} }
+                await syPrep();   // 아이디에 보관된 작업 목록(작은 요청 하나) · 이 기기에 주인 모를 작업이 있으면 한 번 묻는다
                 S.tier = ST.tier; save();
                 if (ST.tier === "team1") return openTeam1();
                 if (ST.tier === "academy") return openAcademy();
@@ -1045,6 +1206,7 @@
                 + "#hle-gate-badge .hd{display:flex;align-items:center;gap:10px;padding:6px 8px 10px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08)}"
                 + "#hle-gate-badge .hd .av{width:34px;height:34px;font-size:14px}#hle-gate-badge .hd b{display:block;font-size:13.5px;color:#fff}"
                 + "#hle-gate-badge .hd i{display:inline-block;margin-top:2px;font-style:normal;font-size:11px;font-weight:700;color:#ffb27a;background:rgba(243,115,33,.14);border:1px solid rgba(243,115,33,.3);border-radius:999px;padding:0 7px}"
+                + "#hle-gate-badge .sy{margin:-2px 0 6px;padding:0 8px 8px;border-bottom:1px solid rgba(255,255,255,.08);font-size:11.5px;color:#8fd19e}#hle-gate-badge .sy.warn{color:#ffb27a}#hle-gate-badge .sy.off{color:#8d8a83}"
                 + "#hle-gate-badge .it{display:flex;align-items:center;gap:10px;width:100%;min-height:38px;padding:0 10px;border:0;border-radius:10px;background:transparent;color:#e9e6de;font:inherit;font-size:13px;text-align:left;cursor:pointer}"
                 + "#hle-gate-badge .it:hover{background:rgba(255,255,255,.07);color:#fff}#hle-gate-badge .it svg{flex:none;opacity:.75}"
                 + "#hle-gate-badge .it.x{color:#ff9a4d;font-weight:700}#hle-gate-badge .it.x:hover{background:rgba(243,115,33,.14)}"
@@ -1066,7 +1228,7 @@
                 new: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg>',
             };
             // 허브 안에서 「비밀번호 바꾸기」 — 출입문을 다시 띄우고 route() 가 바로 비밀번호 화면을 연다
-            function pwFromHub() { try { sessionStorage.setItem("hle-gate-next", "pw"); sessionStorage.removeItem("hle-gate-open"); } catch (e) {} location.replace(location.pathname); }
+            function pwFromHub() { try { sessionStorage.setItem("hle-gate-next", "pw"); sessionStorage.removeItem("hle-gate-open"); } catch (e) {} syLeave(() => location.replace(location.pathname)); }
             function badge(id) {
                 const put = () => {
                     if (!document.body || document.getElementById("hle-gate-badge")) return;
@@ -1077,10 +1239,10 @@
                     const k = el("button", "k"); k.setAttribute("aria-label", "계정 메뉴 — " + id); k.setAttribute("aria-expanded", "false");
                     k.appendChild(el("span", "av", ini)); k.appendChild(el("span", "t", "열람 " + id)); k.insertAdjacentHTML("beforeend", GI.up);
                     const toggle = (on) => { b.classList.toggle("open", on); k.setAttribute("aria-expanded", on ? "true" : "false"); };
-                    k.addEventListener("click", () => toggle(!b.classList.contains("open")));
+                    k.addEventListener("click", () => { toggle(!b.classList.contains("open")); syStatus(); });
                     const m = el("div", "m"); m.setAttribute("role", "menu");
                     const hd = el("div", "hd"), who = el("div");
-                    hd.appendChild(el("span", "av", ini)); who.appendChild(el("b", "", nm)); who.appendChild(el("i", "", (ST && TIER[ST.tier] ? TIER[ST.tier] + " · " : "") + id)); hd.appendChild(who); m.appendChild(hd);
+                    hd.appendChild(el("span", "av", ini)); who.appendChild(el("b", "", nm)); who.appendChild(el("i", "", (ST && TIER[ST.tier] ? TIER[ST.tier] + " · " : "") + id)); hd.appendChild(who); m.appendChild(hd); m.appendChild(el("div", "sy")).id = "hle-gate-sy";
                     const item = (cls, ic, txt, fn) => { const i = el("button", "it" + (cls ? " " + cls : "")); i.setAttribute("role", "menuitem"); i.innerHTML = GI[ic]; i.appendChild(el("span", "", txt)); i.addEventListener("click", fn); m.appendChild(i); };
                     if (ST && MULTI(ST.tier)) item("", "hub", "허브 선택", () => { toggle(false); backToChoose(); });
                     item("", "key", "비밀번호 바꾸기", pwFromHub);
@@ -1095,6 +1257,7 @@
                 window.addEventListener("load", put);
                 window.addEventListener("popstate", onBack);   // document.open 이 지운 듣기를 새 허브 위에 다시 단다
                 watchVersion();
+                syWatch();
                 mobileFit();
             }
 
@@ -1265,7 +1428,7 @@
                 const s1 = document.createElement("b"); s1.textContent = "새 판이 올라왔습니다";
                 const s2 = document.createElement("span"); s2.textContent = "새로 고침하면 최신 내용으로 바뀝니다";
                 s.appendChild(s1); s.appendChild(s2);
-                const r = document.createElement("button"); r.className = "r"; r.textContent = "새로 고침"; r.addEventListener("click", () => location.reload());
+                const r = document.createElement("button"); r.className = "r"; r.textContent = "새로 고침"; r.addEventListener("click", () => syLeave(() => location.reload()));
                 const q = document.createElement("button"); q.className = "q"; q.textContent = "✕"; q.setAttribute("aria-label", "닫기"); q.addEventListener("click", () => d.remove());
                 d.appendChild(ic); d.appendChild(s); d.appendChild(r); d.appendChild(q); document.body.appendChild(d);
             }
@@ -1297,6 +1460,7 @@
                     const full = await spliceStartDoc(html, key);
                     introSignal(); try { sessionStorage.setItem("hle-gate-open", "team1"); } catch (e) {}
                     const who = idOf(S.email);
+                    await syReady();   // 아이디에 보관된 작업을 이 기기에 다 쓴 뒤 허브를 그린다
                     OPENED = { kind: "team1" };
                     progStop();
                     document.open();
@@ -1344,6 +1508,7 @@
                     // 2·3군 허브 안 스카우팅 메모 · 테스트 기록 · 솔랭 추세가 쓰는 통로(194차 · 이 탭의 로그인으로만)
                     introSignal(); try { sessionStorage.setItem("hle-gate-open", "academy"); } catch (e) {}
                     window.HLE2GATE = { email: who, rest: (path, opt) => rest(path, opt), rpc: (name, args) => rpc(name, args) };
+                    await syReady();
                     OPENED = { kind: "academy", sha: v.sha256 };
                     progStop();
                     document.open();
