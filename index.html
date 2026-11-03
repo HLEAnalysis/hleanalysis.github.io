@@ -623,8 +623,8 @@
             const SK = "hle-gate-session";   // 로그인 유지 = localStorage · 아니면 sessionStorage(이 탭만)
 
             // 1군 허브 조각(빌드 때 채움)
-            const PAYLOAD_KO = "payload.bin?v=2d3b129f1f", PAYLOAD_EN = "payload_en.bin?v=4eddbbae6b";
-            const PARTS_KO = {"scout":"p/ko-scout-1cefd9a9a6.bin","blg":"p/ko-blg-96b07197d0.bin","g2":"p/ko-g2-b31925d2bb.bin","db":"p/ko-db-9d7f890252.bin","planner":"p/ko-planner-a3ce1739f7.bin","lab":"p/ko-lab-c8e4b981e1.bin","wscout":"p/ko-wscout-3d0e1fa679.bin","wz":"p/ko-wz-c0bca436e3.bin","old":"p/ko-old-c1863426ef.bin"}, PARTS_EN = {"scout":"p/en-scout-e75831de6a.bin","db":"p/en-db-c3e97fcea5.bin","planner":"p/en-planner-4b5048b58a.bin","lab":"p/en-lab-25c45edf3f.bin","wscout":"p/en-wscout-bb4bcda562.bin","wz":"p/en-wz-00b79f8b9f.bin","old":"p/en-old-654460dcc4.bin"};
+            const PAYLOAD_KO = "payload.bin?v=d15ad97fa1", PAYLOAD_EN = "payload_en.bin?v=4eddbbae6b";
+            const PARTS_KO = {"scout":"p/ko-scout-1cefd9a9a6.bin","blg":"p/ko-blg-96b07197d0.bin","g2":"p/ko-g2-b31925d2bb.bin","db":"p/ko-db-9a56bcb64e.bin","planner":"p/ko-planner-a3ce1739f7.bin","lab":"p/ko-lab-d434889035.bin","wscout":"p/ko-wscout-3d0e1fa679.bin","wz":"p/ko-wz-c0bca436e3.bin","old":"p/ko-old-a5ad40a26b.bin"}, PARTS_EN = {"scout":"p/en-scout-e75831de6a.bin","db":"p/en-db-c3e97fcea5.bin","planner":"p/en-planner-4b5048b58a.bin","lab":"p/en-lab-25c45edf3f.bin","wscout":"p/en-wscout-bb4bcda562.bin","wz":"p/en-wz-00b79f8b9f.bin","old":"p/en-old-654460dcc4.bin"};
             let LANG = "ko";
             try { if (PAYLOAD_EN && localStorage.getItem("hlehub_lang") === "en") LANG = "en"; } catch (e) {}
             const PAYLOAD_URL = LANG === "en" ? PAYLOAD_EN : PAYLOAD_KO;
@@ -1033,7 +1033,7 @@
             //   (휴대폰에서 허브 셸은 왼쪽 아래에 LOG, 오른쪽 아래 12px 에 「맨 위로」를 둔다 → 둘 다 피해 맨 위로 단추 위에 놓는다)
             // 1군(어두운 화면) · 2·3군(밝은 화면) 어디에 떠도 보이게 어두운 유리 한 가지로 둔다
             const GF = "font-family:Pretendard,system-ui,-apple-system,'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;";
-            const GATE_CSS = "#hle-gate-badge{position:fixed;left:10px;bottom:10px;z-index:2147483646;" + GF + "font-size:12.5px;line-height:1.4;color:#e9e6de;-webkit-font-smoothing:antialiased}"
+            const GATE_CSS = "#hle-gate-badge{position:fixed;left:10px;bottom:10px;z-index:2147483646;" + GF + "font-size:12.5px;line-height:1.4;color:#e9e6de;word-break:keep-all;-webkit-font-smoothing:antialiased}"
                 + "#hle-gate-badge *{box-sizing:border-box}"
                 + "#hle-gate-badge .k{display:flex;align-items:center;gap:7px;max-width:calc(100vw - 20px);padding:4px 10px 4px 4px;border-radius:999px;cursor:pointer;font:inherit;color:inherit;background:rgba(18,18,19,.74);-webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%);border:1px solid rgba(255,255,255,.14);box-shadow:0 8px 24px rgba(0,0,0,.35);transition:border-color .15s,background .15s}"
                 + "#hle-gate-badge .k:hover,#hle-gate-badge.open .k{border-color:rgba(243,115,33,.6);background:rgba(24,22,20,.86)}"
@@ -1051,7 +1051,7 @@
                 + "@media (max-width:760px){#hle-gate-badge{left:auto;right:12px;bottom:calc(58px + env(safe-area-inset-bottom,0px));font-size:14px}"
                 + "#hle-gate-badge .k{padding:3px}#hle-gate-badge .k .t,#hle-gate-badge .k svg{display:none}#hle-gate-badge .k .av{width:34px;height:34px;font-size:14px}"
                 + "#hle-gate-badge .m{left:auto;right:0;transform-origin:bottom right;min-width:min(260px,calc(100vw - 24px))}#hle-gate-badge .it{min-height:46px;font-size:15px}}"
-                + "#hle-gate-new{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:2147483647;display:flex;gap:12px;align-items:center;" + GF + "font-size:14px;line-height:1.4;color:#fff;-webkit-font-smoothing:antialiased;"
+                + "#hle-gate-new{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:2147483647;display:flex;gap:12px;align-items:center;" + GF + "font-size:14px;line-height:1.4;color:#fff;word-break:keep-all;-webkit-font-smoothing:antialiased;"
                 + "background:rgba(18,18,19,.88);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(243,115,33,.45);border-radius:16px;padding:10px 10px 10px 12px;box-shadow:0 18px 50px rgba(0,0,0,.5);width:max-content;max-width:calc(100vw - 24px);animation:hleGateDrop .45s cubic-bezier(.2,.8,.2,1) both}"
                 + "@keyframes hleGateDrop{from{opacity:0;transform:translate(-50%,-14px)}to{opacity:1;transform:translate(-50%,0)}}"
                 + "#hle-gate-new .ic{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#ffb27a;background:rgba(243,115,33,.15);border:1px solid rgba(243,115,33,.35)}"
