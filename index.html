@@ -632,8 +632,8 @@
             const SK = "hle-gate-session";   // 로그인 유지 = localStorage · 아니면 sessionStorage(이 탭만)
 
             // 1군 허브 조각(빌드 때 채움)
-            const PAYLOAD_KO = "payload.bin?v=adf794062d", PAYLOAD_EN = "payload_en.bin?v=4eddbbae6b";
-            const PARTS_KO = {"scout":"p/ko-scout-55fffe556d.bin","blg":"p/ko-blg-96b07197d0.bin","g2":"p/ko-g2-b31925d2bb.bin","db":"p/ko-db-417b1313c4.bin","planner":"p/ko-planner-a3ce1739f7.bin","lab":"p/ko-lab-d434889035.bin","wscout":"p/ko-wscout-3d0e1fa679.bin","wz":"p/ko-wz-81792432b9.bin","old":"p/ko-old-a5ad40a26b.bin"}, PARTS_EN = {"scout":"p/en-scout-e75831de6a.bin","db":"p/en-db-c3e97fcea5.bin","planner":"p/en-planner-4b5048b58a.bin","lab":"p/en-lab-25c45edf3f.bin","wscout":"p/en-wscout-bb4bcda562.bin","wz":"p/en-wz-00b79f8b9f.bin","old":"p/en-old-654460dcc4.bin"};
+            const PAYLOAD_KO = "payload.bin?v=628759a77c", PAYLOAD_EN = "payload_en.bin?v=4eddbbae6b";
+            const PARTS_KO = {"scout":"p/ko-scout-366be00498.bin","blg":"p/ko-blg-96b07197d0.bin","g2":"p/ko-g2-b31925d2bb.bin","db":"p/ko-db-9b7f7c0d70.bin","planner":"p/ko-planner-a3ce1739f7.bin","lab":"p/ko-lab-d434889035.bin","wscout":"p/ko-wscout-3d0e1fa679.bin","wz":"p/ko-wz-52e5b3a60a.bin","old":"p/ko-old-a5ad40a26b.bin"}, PARTS_EN = {"scout":"p/en-scout-e75831de6a.bin","db":"p/en-db-c3e97fcea5.bin","planner":"p/en-planner-4b5048b58a.bin","lab":"p/en-lab-25c45edf3f.bin","wscout":"p/en-wscout-bb4bcda562.bin","wz":"p/en-wz-00b79f8b9f.bin","old":"p/en-old-654460dcc4.bin"};
             let LANG = "ko";
             try { if (PAYLOAD_EN && localStorage.getItem("hlehub_lang") === "en") LANG = "en"; } catch (e) {}
             const PAYLOAD_URL = LANG === "en" ? PAYLOAD_EN : PAYLOAD_KO;
