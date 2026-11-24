@@ -24,5 +24,13 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: "."
+      # 11/24: 올린 직후 deploy 가 「No artifacts named github-pages」로 자주 실패 → 잠깐 기다리고, 실패하면 한 번 더
+      - run: sleep 20
       - id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+      - if: steps.deployment.outcome == 'failure'
+        run: sleep 45
+      - id: deployment2
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v5
